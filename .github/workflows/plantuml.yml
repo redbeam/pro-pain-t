@@ -1,0 +1,33 @@
+name: PlantUML
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "docs/use-case.puml"
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - "docs/use-case.puml"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Process diagrams
+        uses: Timmy/plantuml-action@v1
+        with:
+          args: "./docs/use-case.puml"
+      - name: Commit files
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -a -m "Render PlantUML files"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
