@@ -1,4 +1,3 @@
-```plantuml
 @startuml
 left to right direction
 
@@ -8,23 +7,34 @@ actor "Image Exporter" as EXP
 actor "Autosave Timer" as TIMER
 actor Clipboard as CB
 
-rectangle ProPaint {
-  usecase "UC-01 Create Project" as UC01
+rectangle ProPainT {
+  usecase "UC-01 Create Project/New canvas" as UC01
   usecase "UC-02 Open Project (.ppp)" as UC02
   usecase "UC-03 Save Project (.ppp)" as UC03
   usecase "UC-04 Export PNG/JPEG" as UC04
-  usecase "UC-05 Import Image as Layer" as UC05
-  usecase "UC-06 Manage Layers" as UC06
-  usecase "UC-07 Draw with Tools" as UC07
-  usecase "UC-08 Color Picker" as UC08
-  usecase "UC-09 Selection/Move" as UC09
-  usecase "UC-10 Undo/Redo" as UC10
-  usecase "UC-11 Zoom and Pan" as UC11
-  usecase "UC-13 Change Brush Size" as UC13
-  usecase "UC-15 Lock/Unlock Layer" as UC15
-  usecase "UC-16 Duplicate Layer" as UC16
-  usecase "UC-17 Clear Layer" as UC17
-  usecase "UC-18 Canvas Resize" as UC18
+  usecase "UC-05 Canvas Resize" as UC05
+  usecase "UC-06 Zoom in/out" as UC06
+  usecase "UC-07 Change Brush Size" as UC07
+  usecase "UC-08 Undo/Redo" as UC08
+  rectangle Tools {
+      usecase "UC-09 Draw with Pen" as UC09
+      usecase "UC-10 Draw with Brush" as UC10
+      usecase "UC-11 Fill with Bucket" as UC11
+      usecase "UC-12 Erase with Eraser" as UC12
+      usecase "UC-13 Color Picker" as UC13
+      usecase "UC-14 Select/Move" as UC14
+      usecase "UC-15 Pan" as UC15
+  }
+  rectangle Layers {
+      usecase "UC-16 Add Layer" as UC16
+      usecase "UC-17 Remove Layer" as UC17
+      usecase "UC-18 Duplicate Layer" as UC18
+      usecase "UC-19 Import Image as Layer" as UC19
+      usecase "UC-20 Move Layer up/down" as UC20
+      usecase "UC-21 Lock/Unlock Layer" as UC21
+      usecase "UC-22 Clear Layer" as UC22
+      usecase "UC-23 Hide/Show Layer" as UC23
+  }
 }
 
 User --> UC01
@@ -38,17 +48,23 @@ User --> UC08
 User --> UC09
 User --> UC10
 User --> UC11
+User --> UC12
 User --> UC13
+User --> UC14
 User --> UC15
 User --> UC16
 User --> UC17
 User --> UC18
+User --> UC19
+User --> UC20
+User --> UC21
+User --> UC22
+User --> UC23
 
 UC02 --> FS : read file
 UC03 --> FS : write file
 UC04 --> EXP : encode PNG/JPEG
-UC05 --> FS : import PNG/JPEG
+UC19 --> FS : import PNG/JPEG
 UC03 .. TIMER : autosave trigger
-UC09 --> CB : copy/paste
+UC14 --> CB : copy/paste
 @enduml
-```
