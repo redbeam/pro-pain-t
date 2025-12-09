@@ -1,27 +1,49 @@
+use crate::structs::{color::Color, pixel::Pixel};
+
+#[allow(dead_code, unused_variables)]
 pub struct Canvas {
     width: u32,
     height: u32,
-    content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + height
+    content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + x
     background_color: Color,
 }
 
 impl Canvas {
     pub fn new(width: u32, height: u32, background_color: Color) -> Self {
-        let retval = Canvas {
+        let mut content: Vec<Pixel> = Vec::with_capacity((width * height) as usize);
+
+        for y in 0..height {
+            for x in 0..width {
+                content.push(Pixel::new(x, y, background_color));
+            }
+        }
+
+        Self {
             width,
             height,
-            content: Vec::new(width * height),
+            content,
             background_color,
-        };
-
-        retval.content.foreach(|pixel| pixel.color = background_color);
-        
-        retval
+        }
     }
 
-    pub fn set_pixel(x: u32, y: u32) -> Result<(), string> {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: Color) -> Result<(), String> {
+        if x >= self.width || y >= self.height {
+            return Err("Pixel out of bounds".to_string());
+        }
+
+        let index = (y * self.width + x) as usize;
+        self.content[index].color = color;
+
+        Ok(())
     }
 
-    pub fn get_pixel(x: u32, y: u32) -> Pixel {
+    pub fn get_pixel(&self, x: u32, y: u32) -> Result<Pixel, String> {
+        if x >= self.width || y >= self.height {
+            return Err("Pixel out of bounds".to_string());
+        }
+
+        let index = (y * self.width + x) as usize;
+
+        Ok(self.content[index])
     }
 }
