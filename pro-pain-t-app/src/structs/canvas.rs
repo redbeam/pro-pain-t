@@ -26,13 +26,13 @@ impl Canvas {
         }
     }
 
-    pub fn set_pixel(&mut self, x: u32, y: u32, color: Color) -> Result<(), String> {
-        if x >= self.width || y >= self.height {
+    pub fn set_pixel(&mut self, pixel: Pixel) -> Result<(), String> {
+        if pixel.x >= self.width || pixel.y >= self.height {
             return Err("Pixel out of bounds".to_string());
         }
 
-        let index = (y * self.width + x) as usize;
-        self.content[index].color = color;
+        let index = (pixel.y * self.width + pixel.x) as usize;
+        self.content[index] = pixel;
 
         Ok(())
     }
