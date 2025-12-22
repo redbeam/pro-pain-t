@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Pro PainT",
+  "version": "0.1.0",
+  "identifier": "cz.muni.fi.pro_pain_t",
+  "build": {
+    "beforeBuildCommand": "cd pro-pain-t-app && trunk build --dist dist",
+    "beforeDevCommand": "cd pro-pain-t-app && trunk serve --port 1420 --open",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "pro-pain-t-app/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Pro PainT",
+        "width": 1024,
+        "height": 768,
+        "resizable": true
+      }
+    ]
+  }
+}

@@ -1,3 +1,8 @@
+use leptos::prelude::*;
+
+mod app;
+mod components;
+
 fn main() {
-    println!("Hello, world!");
+    leptos::mount::mount_to_body(|| view! { <app::App /> });
 }
