@@ -30,7 +30,7 @@ impl History {
             return Err("Undo stack is empty".to_string());
         }
 
-        let diff = self.undo.pop_front().unwrap();
+        let diff = self.undo.pop_back().unwrap();
 
         self.redo.push_back(diff.clone());
 
@@ -42,9 +42,9 @@ impl History {
             return Err("Redo stack is empty".to_string());
         }
 
-        let diff = self.undo.pop_front().unwrap();
+        let diff = self.redo.pop_back().unwrap();
 
-        self.redo.push_back(diff.clone());
+        self.undo.push_back(diff.clone());
 
         Ok(diff)
     }

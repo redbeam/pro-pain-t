@@ -37,13 +37,13 @@ impl Canvas {
         Ok(())
     }
 
-    pub fn get_pixel(&self, x: u32, y: u32) -> Result<Pixel, String> {
+    pub fn get_pixel(&self, x: u32, y: u32) -> Result<&Pixel, String> {
         if x >= self.width || y >= self.height {
             return Err("Pixel out of bounds".to_string());
         }
 
         let index = (y * self.width + x) as usize;
 
-        Ok(self.content[index])
+        Ok(&self.content[index])
     }
 }
