@@ -1,4 +1,5 @@
 use leptos::{html::Dialog, logging, prelude::*};
+use pro_pain_t_app::structs::layer::Layer;
 
 use crate::components::new_layer_window::{NewLayerWindow};
 
@@ -6,6 +7,7 @@ use crate::components::new_layer_window::{NewLayerWindow};
 pub fn LayerPanel() -> impl IntoView {
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
+    let layers: RwSignal<Vec<Layer>> = RwSignal::new(Vec::new());
 
     view! {
         <aside
@@ -106,14 +108,12 @@ pub fn LayerPanel() -> impl IntoView {
                     .collect_view()
                 }
             </div>
-            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open/>
+            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = 800 height = 600 layers = layers/>
             <button
                 on:click = move |_| {
                     logging::log!("Button clicked!");
                     new_layer_window_ref.get().unwrap().open();
-                    logging::log!("New layer opened");
                     is_new_layer_window_open.set(true);
-                    logging::log!("Is new layer window open: {}", is_new_layer_window_open.get());
                 }
                 style="
                     margin-top:0.25rem;
