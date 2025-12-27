@@ -1,5 +1,5 @@
 use leptos::{html::Dialog, logging, prelude::*};
-use pro_pain_t_app::structs::layer::Layer;
+use pro_pain_t_app::structs::layer::{Layer};
 
 use crate::components::new_layer_window::{NewLayerWindow};
 
@@ -28,8 +28,8 @@ pub fn LayerPanel() -> impl IntoView {
             <h2 style="font-size:0.85rem; margin:0 0 0.25rem 0; text-transform:uppercase; letter-spacing:0.06em;">
                 "Layers"
             </h2>
-            <div
-                style="
+
+            <div style="
                     flex:1;
                     border-radius:2px;
                     background:#1f1f1f;
@@ -39,11 +39,11 @@ pub fn LayerPanel() -> impl IntoView {
                     flex-direction:column;
                     gap:0.4rem;
                     font-size:0.8rem;
-                "
-            >
-                {move || layers.get()
-                    .into_iter()
-                    .map(|layer| {
+                ">
+                <For
+                    each=move || layers.get()
+                    key=|layer| layer.id
+                    children=move |layer: Layer| {
                         view! {
                             <div
                                 style="
@@ -65,9 +65,38 @@ pub fn LayerPanel() -> impl IntoView {
                                         color:#d0d0d0;
                                     "
                                 >
-                                    <span>"👁"</span>
-                                    <span>"🔒"</span>
-                                    <span>"🗑"</span>
+                                    <button on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(l) = layers.iter_mut().find(|l| l.id == layer.id) {
+                                                l.is_visible = !l.is_visible;
+                                                logging::log!("Layer {} visibility toggle: {}", layer.id, layer.is_visible);
+                                            }
+                                        });
+                                    }>
+                                    "👀"
+                                    </button>
+
+                                    <button on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(l) = layers.iter_mut().find(|l| l.id == layer.id) {
+                                                l.is_locked = !l.is_locked;
+                                                logging::log!("Layer {} locked toggle: {}", layer.id, layer.is_locked);
+                                            }
+                                        });
+                                    }>
+                                    "🔒"
+                                    </button>
+
+                                    <button on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers.remove(index);
+                                                logging::log!("Layer {} delete pressed", layer.id);
+                                            }
+                                        });
+                                    }>
+                                    "🗑️"
+                                    </button>
                                 </div>
                                 <div
                                     style="
@@ -100,10 +129,11 @@ pub fn LayerPanel() -> impl IntoView {
                                 </div>
                             </div>
                         }
-                    })
-                    .collect_view()
-                }
-            </div>
+                    }
+                />
+                </div>
+
+
             <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = 800 height = 600 layers = layers/>
             <button
                 on:click = move |_| {

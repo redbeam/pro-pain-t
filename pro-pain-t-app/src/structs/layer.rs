@@ -3,11 +3,11 @@ use crate::structs::{canvas::Canvas, color::Color};
 #[derive(Clone)]
 #[allow(dead_code, unused_variables)]
 pub struct Layer {
-    id: usize,
+    pub id: usize,
     pub title: String,
-    is_locked: bool,
+    pub is_locked: bool,
     canvas: Canvas,
-    is_visible: bool,
+    pub is_visible: bool,
 }
 
 impl Layer {
