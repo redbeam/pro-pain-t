@@ -8,6 +8,7 @@ pub fn LayerPanel() -> impl IntoView {
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
     let layers: RwSignal<Vec<Layer>> = RwSignal::new(Vec::new());
+    let id: RwSignal<usize> = RwSignal::new(0);
 
     view! {
         <aside
@@ -67,9 +68,9 @@ pub fn LayerPanel() -> impl IntoView {
                                 >
                                     <button on:click = move |_| {
                                         layers.update(|layers| {
-                                            if let Some(l) = layers.iter_mut().find(|l| l.id == layer.id) {
-                                                l.is_visible = !l.is_visible;
-                                                logging::log!("Layer {} visibility toggle: {}", layer.id, layer.is_visible);
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers[index].is_visible = !layers[index].is_visible;
+                                                logging::log!("Layer {} visibility toggle: {}", layers[index].id, layers[index].is_visible);
                                             }
                                         });
                                     }>
@@ -78,9 +79,9 @@ pub fn LayerPanel() -> impl IntoView {
 
                                     <button on:click = move |_| {
                                         layers.update(|layers| {
-                                            if let Some(l) = layers.iter_mut().find(|l| l.id == layer.id) {
-                                                l.is_locked = !l.is_locked;
-                                                logging::log!("Layer {} locked toggle: {}", layer.id, layer.is_locked);
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers[index].is_locked = !layers[index].is_locked;
+                                                logging::log!("Layer {} locked toggle: {}", layers[index].id, layers[index].is_locked);
                                             }
                                         });
                                     }>
@@ -134,7 +135,7 @@ pub fn LayerPanel() -> impl IntoView {
                 </div>
 
 
-            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = 800 height = 600 layers = layers/>
+            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = 800 height = 600 layers = layers id = id/>
             <button
                 on:click = move |_| {
                     logging::log!("Button clicked!");

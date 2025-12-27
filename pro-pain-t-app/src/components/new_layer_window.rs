@@ -4,18 +4,19 @@ use pro_pain_t_app::structs::layer::Layer;
 use crate::components::{color_picker::ColorPicker};
 
 #[component]
-pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, width: u32, height: u32, layers: RwSignal<Vec<pro_pain_t_app::structs::layer::Layer>>) -> impl IntoView {
+pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, width: u32, height: u32, layers: RwSignal<Vec<pro_pain_t_app::structs::layer::Layer>>, id: RwSignal<usize>) -> impl IntoView {
     let background_color = pro_pain_t_app::structs::color::Color::new(0, 0, 0, 0);
-    let id = 0;
     let (title, set_title) = signal(String::from("New layer"));
 
     let create_layer = move || {
+        let layer_id = id.get();
         let mut layers_vector = layers.get();
-        let layer = Layer::new(id, title.get(), width, height, background_color);
+        let layer = Layer::new(layer_id, title.get(), width, height, background_color);
         layers_vector.push(layer);
         let count = layers_vector.iter().count();
         layers.set(layers_vector);
-        logging::log!("new_layer: {}, {}, {}, {}, count: {}", id, width, height, title.get(), count);
+        logging::log!("new_layer: {}, {}, {}, {}, count: {}", layer_id, width, height, title.get(), count);
+        id.set(layer_id + 1);
     };
 
     view! {
