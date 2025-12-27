@@ -4,7 +4,7 @@ use crate::structs::{canvas::Canvas, color::Color};
 #[allow(dead_code, unused_variables)]
 pub struct Layer {
     id: usize,
-    title: String,
+    pub title: String,
     is_locked: bool,
     canvas: Canvas,
     is_visible: bool,

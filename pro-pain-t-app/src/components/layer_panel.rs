@@ -41,13 +41,9 @@ pub fn LayerPanel() -> impl IntoView {
                     font-size:0.8rem;
                 "
             >
-                {[
-                    "Layer 1",
-                    "Layer 2",
-                    "Layer 3",
-                ]
+                {move || layers.get()
                     .into_iter()
-                    .map(|name| {
+                    .map(|layer| {
                         view! {
                             <div
                                 style="
@@ -88,7 +84,7 @@ pub fn LayerPanel() -> impl IntoView {
                                             border-radius:2px;
                                         "
                                     ></div>
-                                    <span style="font-size:0.8rem;">{name}</span>
+                                    <span style="font-size:0.8rem;">{layer.title}</span>
                                 </div>
                                 <div
                                     style="

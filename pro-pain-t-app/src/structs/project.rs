@@ -17,7 +17,7 @@ impl Project {
             width,
             height,
             background_color,
-            layers: vec![Layer::new(0, width, height, background_color)],
+            layers: vec![Layer::new(0, "Layer 0".to_string(), width, height, background_color)],
             history: History::new(10),
             next_layer_id: 1,
         }
@@ -26,6 +26,7 @@ impl Project {
     pub fn add_new_layer(&mut self) {
         self.layers.push(Layer::new(
             self.next_layer_id,
+            self.name.clone(),
             self.width,
             self.height,
             self.background_color,
