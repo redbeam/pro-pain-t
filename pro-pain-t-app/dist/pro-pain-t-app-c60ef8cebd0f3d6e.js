@@ -607,6 +607,9 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_queueMicrotask_fca69f5bfad613a5 = function(arg0) {
         queueMicrotask(arg0);
     };
+    imports.wbg.__wbg_removeAttribute_96e791ceeb22d591 = function() { return handleError(function (arg0, arg1, arg2) {
+        arg0.removeAttribute(getStringFromWasm0(arg1, arg2));
+    }, arguments) };
     imports.wbg.__wbg_removeEventListener_565e273024b68b75 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         arg0.removeEventListener(getStringFromWasm0(arg1, arg2), arg3);
     }, arguments) };
@@ -699,8 +702,8 @@ function __wbg_get_imports() {
     imports.wbg.__wbg_warn_989bed09a6035762 = function(arg0, arg1, arg2) {
         console.warn(arg0, arg1, arg2);
     };
-    imports.wbg.__wbindgen_cast_02bc342534c14bc8 = function(arg0, arg1) {
-        // Cast intrinsic for `Closure(Closure { dtor_idx: 130, function: Function { arguments: [NamedExternref("Event")], shim_idx: 110, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    imports.wbg.__wbindgen_cast_006e4d284dc67a8f = function(arg0, arg1) {
+        // Cast intrinsic for `Closure(Closure { dtor_idx: 144, function: Function { arguments: [NamedExternref("Event")], shim_idx: 124, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
         const ret = makeMutClosure(arg0, arg1, wasm.wasm_bindgen__closure__destroy__h07c3b73fe04ab070, wasm_bindgen__convert__closures_____invoke__h4323b6d393c06e0b);
         return ret;
     };
@@ -709,8 +712,8 @@ function __wbg_get_imports() {
         const ret = getStringFromWasm0(arg0, arg1);
         return ret;
     };
-    imports.wbg.__wbindgen_cast_23f2631f59d43018 = function(arg0, arg1) {
-        // Cast intrinsic for `Closure(Closure { dtor_idx: 174, function: Function { arguments: [Externref], shim_idx: 175, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+    imports.wbg.__wbindgen_cast_dc4e189956fd8576 = function(arg0, arg1) {
+        // Cast intrinsic for `Closure(Closure { dtor_idx: 188, function: Function { arguments: [Externref], shim_idx: 189, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
         const ret = makeMutClosure(arg0, arg1, wasm.wasm_bindgen__closure__destroy__h17213a03e626de94, wasm_bindgen__convert__closures_____invoke__h3caffd1ea19ebbdd);
         return ret;
     };

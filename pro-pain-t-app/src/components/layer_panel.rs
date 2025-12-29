@@ -125,8 +125,45 @@ pub fn LayerPanel() -> impl IntoView {
                                         color:#d0d0d0;
                                     "
                                 >
-                                    <span>"▲"</span>
-                                    <span>"▼"</span>
+                                    <button
+                                    disabled = move || {
+                                        if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
+                                            index == 0
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers.swap(index, index - 1);
+                                                logging::log!("Layer {} moved up", layers[index].id);
+                                            }
+                                        });
+                                    }>
+                                    "▲"
+                                    </button>
+
+                                    <button
+                                    disabled = move || {
+                                        if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
+                                            index == layers.get().iter().count() - 1
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers.swap(index, index + 1);
+                                                logging::log!("Layer {} moved down", layer.id);
+                                            }
+                                        });
+                                    }>
+                                    "▼"
+                                    </button>
                                 </div>
                             </div>
                         }
