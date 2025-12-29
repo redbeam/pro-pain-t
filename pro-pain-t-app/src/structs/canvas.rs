@@ -1,5 +1,6 @@
 use crate::structs::{color::Color, pixel::Pixel};
 
+#[derive(Clone)]
 #[allow(dead_code, unused_variables)]
 pub struct Canvas {
     width: u32,
