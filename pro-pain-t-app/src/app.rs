@@ -28,7 +28,7 @@ pub fn App() -> impl IntoView {
             >
                 <ToolPalette />
                 <CanvasArea />
-                <LayerPanel />
+                <LayerPanel canvas_width = 800 canvas_height = 600/> // TODO: udpate based on the value set in the project! This is just a placeholder
             </div>
             <StatusBar />
         </div>

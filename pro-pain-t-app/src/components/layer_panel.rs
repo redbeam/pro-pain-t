@@ -4,7 +4,7 @@ use pro_pain_t_app::structs::layer::{Layer};
 use crate::components::new_layer_window::{NewLayerWindow};
 
 #[component]
-pub fn LayerPanel() -> impl IntoView {
+pub fn LayerPanel(canvas_width: u32, canvas_height: u32) -> impl IntoView {
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
     let layers: RwSignal<Vec<Layer>> = RwSignal::new(Vec::new());
@@ -114,7 +114,7 @@ pub fn LayerPanel() -> impl IntoView {
                                             border-radius:2px;
                                         "
                                     ></div>
-                                    <span style="font-size:0.8rem;">{layer.title}</span>
+                                    <span style="font-size:0.8rem;">{layer.title.clone()}</span>
                                 </div>
                                 <div
                                     style="
@@ -127,6 +127,21 @@ pub fn LayerPanel() -> impl IntoView {
                                 >
                                     <span>"▲"</span>
                                     <span>"▼"</span>
+                                    <button on:click = move |_| {
+                                        let mut layer_cloned = layer.clone();
+                                        layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
+                                        layer_cloned.id = id.get();
+                                        id.set(id.get() + 1);
+                                        
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers.insert(index + 1, layer_cloned);
+                                                logging::log!("Layer {} cloned", layer.id);
+                                            }
+                                        });
+                                    }>
+                                    "📄"
+                                    </button>
                                 </div>
                             </div>
                         }
@@ -135,7 +150,7 @@ pub fn LayerPanel() -> impl IntoView {
                 </div>
 
 
-            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = 800 height = 600 layers = layers id = id/>
+            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = canvas_width height = canvas_height layers = layers id = id/>
             <button
                 on:click = move |_| {
                     logging::log!("Button clicked!");
