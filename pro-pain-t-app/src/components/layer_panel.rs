@@ -128,7 +128,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            index == 0
+                                            index <= 0
                                         }
                                         else {
                                             true
@@ -137,6 +137,9 @@ pub fn LayerPanel() -> impl IntoView {
                                     on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                if index <= 0 {
+                                                    return;
+                                                }
                                                 layers.swap(index, index - 1);
                                                 logging::log!("Layer {} moved up", layers[index].id);
                                             }
@@ -148,7 +151,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            index == layers.get().iter().count() - 1
+                                            index >= layers.get().iter().count() - 1
                                         }
                                         else {
                                             true
@@ -157,6 +160,9 @@ pub fn LayerPanel() -> impl IntoView {
                                     on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                if index >= layers.len() - 1 {
+                                                    return;
+                                                }
                                                 layers.swap(index, index + 1);
                                                 logging::log!("Layer {} moved down", layer.id);
                                             }
