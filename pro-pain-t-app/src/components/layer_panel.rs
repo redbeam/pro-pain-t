@@ -65,7 +65,16 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                         color:#d0d0d0;
                                     "
                                 >
-                                    <button on:click = move |_| {
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_visible = !layers[index].is_visible;
@@ -87,7 +96,16 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     "🔒"
                                     </button>
 
-                                    <button on:click = move |_| {
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers.remove(index);
@@ -127,7 +145,8 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     <button
                                     disabled = move || {
                                         if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            index <= 0
+                                            let layers_current_state = layers.get();
+                                            index <= 0 || layers_current_state[index].is_locked || layers_current_state[index - 1].is_locked
                                         }
                                         else {
                                             true
@@ -150,7 +169,8 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     <button
                                     disabled = move || {
                                         if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= layers.get().iter().count() - 1
+                                            let layers_current_state = layers.get();
+                                            index >= layers.get().iter().count() - 1 || layers_current_state[index].is_locked || layers_current_state[index + 1].is_locked
                                         }
                                         else {
                                             true
@@ -169,7 +189,16 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     }>
                                     "▼"
                                     </button>
-                                    <button on:click = move |_| {
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         let mut layer_cloned = layer.clone();
                                         layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
                                         layer_cloned.id = layer_id.get();
