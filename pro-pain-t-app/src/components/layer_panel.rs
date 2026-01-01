@@ -124,8 +124,51 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                         color:#d0d0d0;
                                     "
                                 >
-                                    <span>"▲"</span>
-                                    <span>"▼"</span>
+                                    <button
+                                    disabled = move || {
+                                        if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
+                                            index <= 0
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                if index <= 0 {
+                                                    return;
+                                                }
+                                                layers.swap(index, index - 1);
+                                                logging::log!("Layer {} moved up", layers[index].id);
+                                            }
+                                        });
+                                    }>
+                                    "▲"
+                                    </button>
+
+                                    <button
+                                    disabled = move || {
+                                        if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
+                                            index >= layers.get().iter().count() - 1
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                if index >= layers.len() - 1 {
+                                                    return;
+                                                }
+                                                layers.swap(index, index + 1);
+                                                logging::log!("Layer {} moved down", layer.id);
+                                            }
+                                        });
+                                    }>
+                                    "▼"
+                                    </button>
                                     <button on:click = move |_| {
                                         let mut layer_cloned = layer.clone();
                                         layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
