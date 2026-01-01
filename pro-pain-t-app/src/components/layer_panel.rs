@@ -1,14 +1,13 @@
 use leptos::{html::Dialog, logging, prelude::*};
-use pro_pain_t_app::structs::layer::{Layer};
+use pro_pain_t_app::structs::layer::Layer;
 
-use crate::components::new_layer_window::{NewLayerWindow};
+use crate::components::new_layer_window::NewLayerWindow;
+
 
 #[component]
-pub fn LayerPanel() -> impl IntoView {
+pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<Layer>>, layer_id: RwSignal<usize>) -> impl IntoView {
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
-    let layers: RwSignal<Vec<Layer>> = RwSignal::new(Vec::new());
-    let id: RwSignal<usize> = RwSignal::new(0);
 
     view! {
         <aside
@@ -114,7 +113,7 @@ pub fn LayerPanel() -> impl IntoView {
                                             border-radius:2px;
                                         "
                                     ></div>
-                                    <span style="font-size:0.8rem;">{layer.title}</span>
+                                    <span style="font-size:0.8rem;">{layer.title.clone()}</span>
                                 </div>
                                 <div
                                     style="
@@ -170,6 +169,21 @@ pub fn LayerPanel() -> impl IntoView {
                                     }>
                                     "▼"
                                     </button>
+                                    <button on:click = move |_| {
+                                        let mut layer_cloned = layer.clone();
+                                        layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
+                                        layer_cloned.id = layer_id.get();
+                                        layer_id.set(layer_id.get() + 1);
+                                        
+                                        layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers.insert(index + 1, layer_cloned);
+                                                logging::log!("Layer {} cloned", layer.id);
+                                            }
+                                        });
+                                    }>
+                                    "📄"
+                                    </button>
                                 </div>
                             </div>
                         }
@@ -178,7 +192,7 @@ pub fn LayerPanel() -> impl IntoView {
                 </div>
 
 
-            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = 800 height = 600 layers = layers id = id/>
+            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = canvas_width height = canvas_height layers = layers id = layer_id/>
             <button
                 on:click = move |_| {
                     logging::log!("Button clicked!");

@@ -3,8 +3,8 @@ use crate::structs::{color::Color, pixel::Pixel};
 #[derive(Clone)]
 #[allow(dead_code, unused_variables)]
 pub struct Canvas {
-    width: u32,
-    height: u32,
+    pub width: u32,
+    pub height: u32,
     content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + x
     background_color: Color,
 }
