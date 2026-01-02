@@ -2,7 +2,6 @@ use leptos::prelude::*;
 use pro_pain_t_app::structs::color::Color;
 use pro_pain_t_app::structs::project::Project;
 
-use crate::components::toolbar::Toolbar;
 use crate::components::layer_panel::LayerPanel;
 use crate::components::tool_palette::ToolPalette;
 use crate::components::canvas_area::CanvasArea;
@@ -22,7 +21,6 @@ pub fn App() -> impl IntoView {
                 background:#111;
             "
         >
-            <Toolbar />
             <div
                 style="
                     flex:1;
