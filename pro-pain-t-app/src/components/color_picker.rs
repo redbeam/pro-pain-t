@@ -1,6 +1,7 @@
 use leptos::html::Canvas;
 use leptos::prelude::*;
 use leptos::web_sys;
+use pro_pain_t_app::structs::color::Color;
 use web_sys::{ CanvasRenderingContext2d };
 use leptos::wasm_bindgen::JsCast;
 
@@ -28,7 +29,7 @@ fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
 
 #[component]
 pub fn ColorPicker(
-    #[prop(into)] color: RwSignal<(u8, u8, u8, u8)>
+    #[prop(into)] color: RwSignal<Color>
 ) -> impl IntoView {
     let canvas_ref: NodeRef<Canvas> = NodeRef::new();
 
@@ -89,7 +90,7 @@ pub fn ColorPicker(
         sat.set(s);
 
         let (rr, gg, bb) = hsv_to_rgb(h, s, val.get() as f32 / 255.0);
-        color.set((rr, gg, bb, 255));
+        color.set(Color::new(rr, gg, bb, 255));
     };
 
     let on_value = move |ev: web_sys::Event| {
@@ -104,13 +105,13 @@ pub fn ColorPicker(
 
             <div
                 style=move || {
-                    let (r, g, b, a) = color.get();
+                    let c = color.get();
                     format!(
                         "width:28px;\
                          height:28px;\
                          border:1px solid #333;\
                          background:rgba({},{},{},{:.3});",
-                        r, g, b, a as f32 / 255.0
+                        c.r, c.g, c.b, c.alpha as f32 / 255.0
                     )
                 }
             />
