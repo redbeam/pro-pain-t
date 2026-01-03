@@ -145,8 +145,7 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     <button
                                     disabled = move || {
                                         if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            let layers_current_state = layers.get();
-                                            index <= 0 || layers_current_state[index].is_locked || layers_current_state[index - 1].is_locked
+                                            index <= 0
                                         }
                                         else {
                                             true
@@ -169,8 +168,7 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     <button
                                     disabled = move || {
                                         if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            let layers_current_state = layers.get();
-                                            index >= layers.get().iter().count() - 1 || layers_current_state[index].is_locked || layers_current_state[index + 1].is_locked
+                                            index >= layers.get().iter().count() - 1
                                         }
                                         else {
                                             true
@@ -190,22 +188,15 @@ pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<La
                                     "▼"
                                     </button>
                                     <button
-                                    disabled = move || {
-                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
-                                            layer_reactive.is_locked
-                                        }
-                                        else {
-                                            true
-                                        }
-                                    }
                                     on:click = move |_| {
-                                        let mut layer_cloned = layer.clone();
-                                        layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
-                                        layer_cloned.id = layer_id.get();
-                                        layer_id.set(layer_id.get() + 1);
-                                        
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                let original_layer = layers.get(index).unwrap();
+                                                let mut layer_cloned = original_layer.clone();
+                                                layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
+                                                layer_cloned.id = layer_id.get();
+                                                layer_id.set(layer_id.get() + 1);
+
                                                 layers.insert(index + 1, layer_cloned);
                                                 logging::log!("Layer {} cloned", layer.id);
                                             }
