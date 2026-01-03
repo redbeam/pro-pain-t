@@ -39,7 +39,7 @@ pub enum Channel {
 
 #[component]
 pub fn ColorPicker(
-    #[prop(into)] color: RwSignal<(u8, u8, u8, f32)>
+    #[prop(into)] color: RwSignal<Color>
 ) -> impl IntoView {
     let canvas_ref: NodeRef<Canvas> = NodeRef::new();
 
@@ -100,14 +100,14 @@ pub fn ColorPicker(
         sat.set(s);
 
         let (rr, gg, bb) = hsv_to_rgb(h, s, val.get());
-        color.set((rr, gg, bb, color.get().3));
+        color.set(Color::new(rr, gg, bb, color.get().alpha));
     };
 
     let on_value = move |ev: web_sys::Event| {
         let v: f32 = event_target_value(&ev).parse().unwrap();
         val.set(v);
         let (rr, gg, bb) = hsv_to_rgb(hue.get(), sat.get(), val.get());
-        color.set((rr, gg, bb, color.get().3));
+        color.set(Color::new(rr, gg, bb, color.get().alpha));
     };
     
     view! {
@@ -122,7 +122,7 @@ pub fn ColorPicker(
                          height:28px;\
                          border:1px solid #333;\
                          background:rgba({},{},{},{:.3});",
-                        c.0, c.1, c.2, c.3
+                         c.r, c.g, c.b, c.alpha
                     )
                 }
             />

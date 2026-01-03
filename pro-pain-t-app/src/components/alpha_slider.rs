@@ -1,23 +1,23 @@
-use leptos::{prelude::*, *};
+use leptos::{prelude::*};
+use pro_pain_t_app::structs::color::Color;
 
 #[component]
 pub fn AlphaSlider(
-    color: RwSignal<(u8, u8, u8, f32)>,
+    color: RwSignal<Color>,
 ) -> impl IntoView {
 
-    // Update alpha
     let on_input = move |ev| {
-        let (r, g, b, _) = color.get();
+        let c = color.get();
 
         let a: f32 = event_target_value(&ev)
             .parse()
             .unwrap_or(1.0f32)
             .clamp(0.0, 1.0) as f32;
 
-        color.set((r, g, b, a));
+        color.set(Color::new(c.r, c.g, c.b, a));
     };
 
-    let alpha = move || color.get().3;
+    let alpha = move || color.get().alpha;
 
     view! {
         <div style="display:flex; align-items:center; gap:8px; width:100%;">
@@ -28,7 +28,7 @@ pub fn AlphaSlider(
                 step="0.01"
                 prop:value=move || format!("{:.2}", alpha())
                 style="width:50px;"
-                on:input=on_input.clone()
+                on:input=on_input
             />
 
             <div style="width:12px; text-align:center;">

@@ -1,60 +1,57 @@
-use leptos::{prelude::*, *};
+use leptos::{prelude::*};
+use pro_pain_t_app::structs::color::Color;
 use crate::components::color_picker::Channel;
 
 #[component]
 pub fn RGBSlider(
     channel: Channel,
-    color: RwSignal<(u8, u8, u8, f32)>,
+    color: RwSignal<Color>,
 ) -> impl IntoView {
 
     let on_input = move |ev| {
-        let (r, g, b, a) = color.get();
+        let c = color.get();
 
         match channel {
             Channel::R => {
                 let red: u8 = event_target_value(&ev)
                     .parse::<u8>()
-                    .unwrap_or(color.get().0)
+                    .unwrap_or(color.get().r)
                     .clamp(0, 255) as u8;
 
-                color.set((red, g, b, a));
+                color.set(Color::new(red, c.g, c.b, c.alpha));
             }
 
             Channel::G => {
                 let green: u8 = event_target_value(&ev)
                     .parse::<u8>()
-                    .unwrap_or(color.get().1)
+                    .unwrap_or(color.get().g)
                     .clamp(0, 255) as u8;
 
-                color.set((r, green, b, a));
+                color.set(Color::new(c.r, green, c.b, c.alpha));
             }
 
             Channel::B => {
                 let blue: u8 = event_target_value(&ev)
                     .parse::<u8>()
-                    .unwrap_or(color.get().2)
+                    .unwrap_or(color.get().b)
                     .clamp(0, 255) as u8;
 
-                color.set((r, g, blue, a));
+                color.set(Color::new(c.r, c.g, blue, c.alpha));
             }
-
-            _ => {}
         }
     };
 
 
     let ch = move || match channel {
-        Channel::R => color.get().0,
-        Channel::G => color.get().1,
-        Channel::B => color.get().2,
-        _ => 0,
+        Channel::R => color.get().r,
+        Channel::G => color.get().g,
+        Channel::B => color.get().b,
     };
 
     let label = match channel {
         Channel::R => "R",
         Channel::G => "G",
         Channel::B => "B",
-        _ => "",
     };
         
             view! {
@@ -74,7 +71,7 @@ pub fn RGBSlider(
                         step="1"
                         prop:value=move || ch
                         style="width:50px;"
-                        on:input=on_input.clone()
+                        on:input=on_input
                     />
 
                     <div style="width:12px; text-align:center;">
