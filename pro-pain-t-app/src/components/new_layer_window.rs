@@ -7,7 +7,7 @@ use crate::components::{color_picker::ColorPicker};
 pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, width: u32, height: u32, layers: RwSignal<Vec<pro_pain_t_app::structs::layer::Layer>>, id: RwSignal<usize>) -> impl IntoView {    
     
     let (title, set_title) = signal(String::from("New layer"));
-    let color = RwSignal::new(Color::new(255, 255, 255, 255));
+    let color = RwSignal::new(Color::new(255, 255, 255, 1.0));
     
     let create_layer = move || {
         let layer_id = id.get();
