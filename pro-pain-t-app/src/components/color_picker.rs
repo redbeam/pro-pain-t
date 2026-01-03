@@ -5,6 +5,10 @@ use pro_pain_t_app::structs::color::Color;
 use web_sys::{ CanvasRenderingContext2d };
 use leptos::wasm_bindgen::JsCast;
 
+use crate::components::alpha_slider::AlphaSlider;
+use crate::components::rgb_slider::RGBSlider;
+
+
 fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
     let c = v * s;
     let x = c * (1.0 - ((h / 60.0) % 2.0 - 1.0).abs());
@@ -25,21 +29,23 @@ fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
         ((b + m) * 255.0) as u8,
     )
 }
+#[derive(Clone, Copy)]
+pub enum Channel {
+        R,
+        G,
+        B,
+    }
 
 
 #[component]
 pub fn ColorPicker(
-    #[prop(into)] color: RwSignal<Color>
+    #[prop(into)] color: RwSignal<(u8, u8, u8, f32)>
 ) -> impl IntoView {
     let canvas_ref: NodeRef<Canvas> = NodeRef::new();
 
     let hue = RwSignal::new(0.0f32);
     let sat = RwSignal::new(1.0f32);
     let val = RwSignal::new(1.0f32);
-    let alpha = RwSignal::new(1.0f32);
-    let red = RwSignal::new(255u8);
-    let green = RwSignal::new(255u8);
-    let blue = RwSignal::new(255u8);
 
     Effect::new(move |_| {
         let canvas = canvas_ref.get().unwrap();
@@ -94,50 +100,16 @@ pub fn ColorPicker(
         sat.set(s);
 
         let (rr, gg, bb) = hsv_to_rgb(h, s, val.get());
-        red.set(rr);
-        green.set(gg);
-        blue.set(bb);
-        color.set(Color::new(rr, gg, bb, color.get().alpha));
+        color.set((rr, gg, bb, color.get().3));
     };
 
     let on_value = move |ev: web_sys::Event| {
         let v: f32 = event_target_value(&ev).parse().unwrap();
         val.set(v);
         let (rr, gg, bb) = hsv_to_rgb(hue.get(), sat.get(), val.get());
-        red.set(rr);
-        green.set(gg);
-        blue.set(bb);
-        color.set(Color::new(rr, gg, bb, color.get().alpha));
+        color.set((rr, gg, bb, color.get().3));
     };
-
-    let on_alpha = move |ev: web_sys::Event| {
-        let a: f32 = event_target_value(&ev).parse().unwrap();
-        alpha.set(a.clamp(0.0, 1.0));
-        let c = color.get();
-        color.set(Color::new(c.r, c.g, c.b, a));
-    };
-
-    let on_red = move |ev: web_sys::Event| {
-        let r: u8 = event_target_value(&ev).parse().unwrap();
-        red.set(r.clamp(0, 255));
-        let c = color.get();
-        color.set(Color::new(r, c.g, c.b, c.alpha));
-    };
-
-    let on_green = move |ev: web_sys::Event| {
-        let g: u8 = event_target_value(&ev).parse().unwrap();
-        green.set(g.clamp(0, 255));
-        let c = color.get();
-        color.set(Color::new(c.r, green.get(), c.b, c.alpha));
-    };
-
-    let on_blue = move |ev: web_sys::Event| {
-        let b: u8 = event_target_value(&ev).parse().unwrap();
-        blue.set(b.clamp(0, 255));
-        let c = color.get();
-        color.set(Color::new(c.r, c.g, b, c.alpha));
-    };
-
+    
     view! {
     <div style="display:flex; gap:16px; align-items:flex-start;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
@@ -150,173 +122,16 @@ pub fn ColorPicker(
                          height:28px;\
                          border:1px solid #333;\
                          background:rgba({},{},{},{:.3});",
-                        c.r, c.g, c.b, c.alpha
+                        c.0, c.1, c.2, c.3
                     )
                 }
             />
 
-            <div
-                style="
-                    display:flex;
-                    flex-direction:row;
-                    align-items:center;
-                    gap:8px;
-                    width:100%;
-                "
-            >
-
-                <input
-                    type="number"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    prop:value=move || format!("{:.2}", red.get())
-                    style="width:50px;"
-                    on:input=move |ev| {
-                        let r: u8 = event_target_value(&ev)
-                            .parse()
-                            .unwrap_or(red.get());
-                        red.set(r.clamp(0, 255));
-                    }
-                />
-
-                <div>
-                    "R"
-                </div>
-
-                <input
-                    type="range"
-                    min="0"
-                    max="255"
-                    step="1"
-                    prop:value=red
-                    style="width:60px; flex:1;"
-                    on:input=on_red
-                />
-            </div>
-
-            <div
-                style="
-                    display:flex;
-                    flex-direction:row;
-                    align-items:center;
-                    gap:8px;
-                    width:100%;
-                "
-            >
-
-                <input
-                    type="number"
-                    min="0"
-                    max="255"
-                    step="1"
-                    prop:value=move || format!("{:.2}", green.get())
-                    style="width:50px;"
-                    on:input=move |ev| {
-                        let g: u8 = event_target_value(&ev)
-                            .parse()
-                            .unwrap_or(red.get());
-                        green.set(g.clamp(0, 255));
-                    }
-                />
-
-                <div>
-                    "G"
-                </div>
-
-                <input
-                    type="range"
-                    min="0"
-                    max="255"
-                    step="1"
-                    prop:value=green
-                    style="width:60px; flex:1;"
-                    on:input=on_green
-                />
-            </div>
-
-            <div
-                style="
-                    display:flex;
-                    flex-direction:row;
-                    align-items:center;
-                    gap:8px;
-                    width:100%;
-                "
-            >
-
-                <input
-                    type="number"
-                    min="0"
-                    max="255"
-                    step="1"
-                    prop:value=move || format!("{:.2}", blue.get())
-                    style="width:50px;"
-                    on:input=move |ev| {
-                        let b: u8 = event_target_value(&ev)
-                            .parse()
-                            .unwrap_or(blue.get());
-                        blue.set(b.clamp(0, 255));
-                    }
-                />
-
-                <div>
-                    "B"
-                </div>
-
-                <input
-                    type="range"
-                    min="0"
-                    max="255"
-                    step="1"
-                    prop:value=blue
-                    style="width:60px; flex:1;"
-                    on:input=on_blue
-                />
-            </div>
-
-            <div
-                style="
-                    display:flex;
-                    flex-direction:row;
-                    align-items:center;
-                    gap:8px;
-                    width:100%;
-                "
-            >
-
-                <input
-                    type="number"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    prop:value=move || format!("{:.2}", alpha.get())
-                    style="width:50px;"
-                    on:input=move |ev| {
-                        let a: f32 = event_target_value(&ev)
-                            .parse()
-                            .unwrap_or(alpha.get());
-                        alpha.set(a.clamp(0.0, 1.0));
-                    }
-                />
-
-                <div>
-                    "A"
-                </div>
-
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    prop:value=alpha
-                    style="width:60px; flex:1;"
-                    on:input=on_alpha
-                />
-            </div>
-
+            <RGBSlider channel=Channel::R color=color />
+            <RGBSlider channel=Channel::G color=color />
+            <RGBSlider channel=Channel::B color=color />
+            <AlphaSlider color=color />
             
-
             <canvas
                 node_ref=canvas_ref
                 width=125
