@@ -6,10 +6,6 @@ pub fn StatusBar(
     canvas_height: RwSignal<u32>,
     on_open_canvas_size: impl Fn() + 'static + Clone,
 ) -> impl IntoView {
-    let on_open = move |_| {
-        on_open_canvas_size();
-    };
-
     view! {
         <footer
             style="
@@ -27,7 +23,7 @@ pub fn StatusBar(
         >
             <div style="display:flex; gap:1.5rem; align-items:center;">
                 <button
-                    on:click=on_open
+                    on:click=move |_| on_open_canvas_size()
                     style="
                         border:none;
                         background:transparent;

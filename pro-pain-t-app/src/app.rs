@@ -18,11 +18,8 @@ pub fn App() -> impl IntoView {
 
     let is_canvas_size_open = RwSignal::new(false);
 
-    let open_canvas_size = {
-        let is_canvas_size_open = is_canvas_size_open;
-        move || {
-            is_canvas_size_open.set(true);
-        }
+    let open_canvas_size = move || {
+        is_canvas_size_open.set(true);
     };
 
     let on_resize_canvas = move |new_w: u32, new_h: u32| {

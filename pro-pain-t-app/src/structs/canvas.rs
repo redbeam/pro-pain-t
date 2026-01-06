@@ -11,7 +11,11 @@ pub struct Canvas {
 
 impl Canvas {
     pub fn new(width: u32, height: u32, background_color: Color) -> Self {
-        let mut content: Vec<Pixel> = Vec::with_capacity((width * height) as usize);
+        let capacity = width
+            .checked_mul(height)
+            .expect("canvas dimensions too large: width * height overflowed u32");
+
+        let mut content: Vec<Pixel> = Vec::with_capacity(capacity as usize);
 
         for y in 0..height {
             for x in 0..width {
@@ -53,15 +57,17 @@ impl Canvas {
             return;
         }
 
-        let mut new_content: Vec<Pixel> = Vec::with_capacity((new_width * new_height) as usize);
+        let capacity = new_width
+            .checked_mul(new_height)
+            .expect("Canvas dimensions too large: width * height overflowed u32");
+
+        let mut new_content: Vec<Pixel> = Vec::with_capacity(capacity as usize);
 
         for y in 0..new_height {
             for x in 0..new_width {
                 if x < self.width && y < self.height {
                     let old_index = (y * self.width + x) as usize;
-                    let mut pixel = self.content[old_index];
-                    pixel.x = x;
-                    pixel.y = y;
+                    let pixel = self.content[old_index];
                     new_content.push(pixel);
                 } else {
                     new_content.push(Pixel::new(x, y, self.background_color));

@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{html, prelude::*};
 
 #[component]
 pub fn CanvasSizeWindow<F>(
@@ -10,37 +10,74 @@ pub fn CanvasSizeWindow<F>(
 where
     F: Fn(u32, u32) + 'static + Clone + Send + Sync,
 {
+    let width_input_ref: NodeRef<html::Input> = NodeRef::new();
+    let ok_button_ref: NodeRef<html::Button> = NodeRef::new();
+
     let (local_width, set_local_width) = signal(canvas_width.get());
     let (local_height, set_local_height) = signal(canvas_height.get());
 
-    Effect::new(move |_| {
-        if is_open.get() {
-            set_local_width.set(canvas_width.get());
-            set_local_height.set(canvas_height.get());
-        }
-    });
+    {
+        let width_input_ref = width_input_ref.clone();
+        Effect::new(move |_| {
+            if is_open.get() {
+                set_local_width.set(canvas_width.get());
+                set_local_height.set(canvas_height.get());
+
+                if let Some(input) = width_input_ref.get() {
+                    let _ = input.focus();
+                }
+            }
+        });
+    }
 
     let on_width_input = move |ev: leptos::ev::Event| {
         let value = event_target_value(&ev);
-        if let Ok(parsed) = value.parse::<u32>() {
-            set_local_width.set(parsed);
-        }
+        let parsed = value
+            .parse::<u32>()
+            .ok()
+            .filter(|v| *v > 0)
+            .unwrap_or(1);
+        set_local_width.set(parsed);
     };
 
     let on_height_input = move |ev: leptos::ev::Event| {
         let value = event_target_value(&ev);
-        if let Ok(parsed) = value.parse::<u32>() {
-            set_local_height.set(parsed);
+        let parsed = value
+            .parse::<u32>()
+            .ok()
+            .filter(|v| *v > 0)
+            .unwrap_or(1);
+        set_local_height.set(parsed);
+    };
+
+    let on_key_down = move |ev: leptos::ev::KeyboardEvent| {
+        if ev.key() == "Escape" {
+            is_open.set(false);
+            ev.prevent_default();
+            ev.stop_propagation();
         }
     };
 
     view! {
+        <style>
+            {"
+            .canvas-dialog-button:focus-visible {
+                outline: 2px solid #ffffff;
+                outline-offset: 2px;
+            }
+            "}
+        </style>
         <div
             style=move || format!(
                 "position:fixed; inset:0; background:rgba(0,0,0,0.4); display:{}; align-items:center; justify-content:center; z-index:1000;",
                 if is_open.get() { "flex" } else { "none" }
             )
         >
+            <div tabindex="0" on:focus=move |_| {
+                if let Some(btn) = ok_button_ref.get() {
+                    let _ = btn.focus();
+                }
+            }></div>
             <div
                 style="
                     background:#2b2b2b;
@@ -51,6 +88,8 @@ where
                     font-family:system-ui, sans-serif;
                     box-shadow:0 12px 30px rgba(0,0,0,0.7);
                 "
+                tabindex="-1"
+                on:keydown=on_key_down
             >
                 <h2 style="margin:0 0 0.75rem 0; font-size:0.95rem;">"Canvas Size"</h2>
                 <table style="width:100%; font-size:0.8rem;">
@@ -58,6 +97,7 @@ where
                                 <td style="padding:0.15rem 0.5rem 0.15rem 0;">"Width (px)"</td>
                                 <td style="padding:0.15rem 0;">
                                     <input
+                                        node_ref=width_input_ref
                                         type="number"
                                         min="1"
                                         prop:value=move || local_width.get().to_string()
@@ -88,6 +128,7 @@ where
                             "
                         >
                     <button
+                        class="canvas-dialog-button"
                         on:click=move |_| {
                             is_open.set(false);
                         }
@@ -101,6 +142,8 @@ where
                             "
                         >"Cancel"</button>
                     <button
+                        class="canvas-dialog-button"
+                        node_ref=ok_button_ref
                         on:click=move |_| {
                             let w = local_width.get();
                             let h = local_height.get();
@@ -118,6 +161,11 @@ where
                         >"OK"</button>
                 </div>
             </div>
+            <div tabindex="0" on:focus=move |_| {
+                if let Some(input) = width_input_ref.get() {
+                    let _ = input.focus();
+                }
+            }></div>
         </div>
     }
 }
