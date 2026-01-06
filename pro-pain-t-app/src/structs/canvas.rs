@@ -47,4 +47,30 @@ impl Canvas {
 
         Ok(&self.content[index])
     }
+
+    pub fn resize(&mut self, new_width: u32, new_height: u32) {
+        if new_width == self.width && new_height == self.height {
+            return;
+        }
+
+        let mut new_content: Vec<Pixel> = Vec::with_capacity((new_width * new_height) as usize);
+
+        for y in 0..new_height {
+            for x in 0..new_width {
+                if x < self.width && y < self.height {
+                    let old_index = (y * self.width + x) as usize;
+                    let mut pixel = self.content[old_index];
+                    pixel.x = x;
+                    pixel.y = y;
+                    new_content.push(pixel);
+                } else {
+                    new_content.push(Pixel::new(x, y, self.background_color));
+                }
+            }
+        }
+
+        self.width = new_width;
+        self.height = new_height;
+        self.content = new_content;
+    }
 }

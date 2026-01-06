@@ -20,6 +20,8 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let edit_menu = SubmenuBuilder::new(app, "Edit")
         .text("undo", "Undo")
         .text("redo", "Redo")
+        .separator()
+        .text("canvas_size", "Canvas Size...")
         .build()?;
 
     let menu = MenuBuilder::new(app)

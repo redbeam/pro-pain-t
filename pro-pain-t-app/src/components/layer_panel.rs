@@ -5,7 +5,7 @@ use crate::components::new_layer_window::NewLayerWindow;
 
 
 #[component]
-pub fn LayerPanel(canvas_width: u32, canvas_height: u32, layers: RwSignal<Vec<Layer>>, layer_id: RwSignal<usize>) -> impl IntoView {
+pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, layers: RwSignal<Vec<Layer>>, layer_id: RwSignal<usize>) -> impl IntoView {
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
 

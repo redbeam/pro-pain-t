@@ -10,6 +10,14 @@ fn main() {
             setup_menus(app)?;
             Ok(())
         })
+        .on_menu_event(|_app, event| {
+            match event.id().as_ref() {
+                "canvas_size" => {
+                    // TODO: Bridge this menu action to the FE
+                }
+                _ => {}
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running Pro PainT Tauri application");
 }
