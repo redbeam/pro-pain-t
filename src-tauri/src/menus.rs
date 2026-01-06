@@ -1,9 +1,8 @@
-use tauri::App;
 use tauri::menu::{MenuBuilder, SubmenuBuilder};
+use tauri::App;
 
 pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let dummy_menu = SubmenuBuilder::new(app, "Pro PainT")
-        .build()?;
+    let dummy_menu = SubmenuBuilder::new(app, "Pro PainT").build()?;
 
     let file_menu = SubmenuBuilder::new(app, "File")
         .text("new_project", "New project")
