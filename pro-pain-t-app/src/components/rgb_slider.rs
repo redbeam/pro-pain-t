@@ -1,13 +1,9 @@
-use leptos::{prelude::*};
-use pro_pain_t_app::structs::color::Color;
 use crate::components::color_picker::Channel;
+use leptos::prelude::*;
+use pro_pain_t_app::structs::color::Color;
 
 #[component]
-pub fn RGBSlider(
-    channel: Channel,
-    color: RwSignal<Color>,
-) -> impl IntoView {
-
+pub fn RGBSlider(channel: Channel, color: RwSignal<Color>) -> impl IntoView {
     let on_input = move |ev| {
         let c = color.get();
 
@@ -41,7 +37,6 @@ pub fn RGBSlider(
         }
     };
 
-
     let ch = move || match channel {
         Channel::R => color.get().r,
         Channel::G => color.get().g,
@@ -53,40 +48,40 @@ pub fn RGBSlider(
         Channel::G => "G",
         Channel::B => "B",
     };
-        
-            view! {
-                <div
-                    style="
+
+    view! {
+        <div
+            style="
                         display:flex;
                         flex-direction:row;
                         align-items:center;
                         gap:8px;
                         width:100%;
                     "
-                >
-                    <input
-                        type="number"
-                        min="0"
-                        max="255"
-                        step="1"
-                        prop:value=move || ch
-                        style="width:50px;"
-                        on:input=on_input
-                    />
+        >
+            <input
+                type="number"
+                min="0"
+                max="255"
+                step="1"
+                prop:value=move || ch
+                style="width:50px;"
+                on:input=on_input
+            />
 
-                    <div style="width:12px; text-align:center;">
-                        {label}
-                    </div>
+            <div style="width:12px; text-align:center;">
+                {label}
+            </div>
 
-                    <input
-                        type="range"
-                        min="0"
-                        max="255"
-                        step="1"
-                        prop:value=ch
-                        style="width:60px; flex:1;"
-                        on:input=on_input
-                    />
-                </div>
-            }
+            <input
+                type="range"
+                min="0"
+                max="255"
+                step="1"
+                prop:value=ch
+                style="width:60px; flex:1;"
+                on:input=on_input
+            />
+        </div>
+    }
 }

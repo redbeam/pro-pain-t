@@ -1,13 +1,12 @@
 use leptos::html::Canvas;
 use leptos::prelude::*;
+use leptos::wasm_bindgen::JsCast;
 use leptos::web_sys;
 use pro_pain_t_app::structs::color::Color;
-use web_sys::{ CanvasRenderingContext2d };
-use leptos::wasm_bindgen::JsCast;
+use web_sys::CanvasRenderingContext2d;
 
 use crate::components::alpha_slider::AlphaSlider;
 use crate::components::rgb_slider::RGBSlider;
-
 
 fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
     let c = v * s;
@@ -15,12 +14,12 @@ fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
     let m = v - c;
 
     let (r, g, b) = match h {
-        h if h < 60.0  => (c, x, 0.0),
+        h if h < 60.0 => (c, x, 0.0),
         h if h < 120.0 => (x, c, 0.0),
         h if h < 180.0 => (0.0, c, x),
         h if h < 240.0 => (0.0, x, c),
         h if h < 300.0 => (x, 0.0, c),
-        _              => (c, 0.0, x),
+        _ => (c, 0.0, x),
     };
 
     (
@@ -31,16 +30,13 @@ fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
 }
 #[derive(Clone, Copy)]
 pub enum Channel {
-        R,
-        G,
-        B,
-    }
-
+    R,
+    G,
+    B,
+}
 
 #[component]
-pub fn ColorPicker(
-    #[prop(into)] color: RwSignal<Color>
-) -> impl IntoView {
+pub fn ColorPicker(#[prop(into)] color: RwSignal<Color>) -> impl IntoView {
     let canvas_ref: NodeRef<Canvas> = NodeRef::new();
 
     let hue = RwSignal::new(0.0f32);
@@ -50,8 +46,11 @@ pub fn ColorPicker(
     Effect::new(move |_| {
         let canvas = canvas_ref.get().unwrap();
         let ctx = canvas
-            .get_context("2d").unwrap().unwrap()
-            .dyn_into::<CanvasRenderingContext2d>().unwrap();
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
 
         let size = canvas.width() as f32;
         let r = size / 2.0;
@@ -109,7 +108,7 @@ pub fn ColorPicker(
         let (rr, gg, bb) = hsv_to_rgb(hue.get(), sat.get(), val.get());
         color.set(Color::new(rr, gg, bb, color.get().alpha));
     };
-    
+
     view! {
     <div style="display:flex; gap:16px; align-items:flex-start;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
@@ -131,7 +130,7 @@ pub fn ColorPicker(
             <RGBSlider channel=Channel::G color=color />
             <RGBSlider channel=Channel::B color=color />
             <AlphaSlider color=color />
-            
+
             <canvas
                 node_ref=canvas_ref
                 width=125
@@ -153,10 +152,10 @@ pub fn ColorPicker(
                 style="writing-mode: bt-lr; height:10px;"
                 on:input=on_value
             />
-    
-            
+
+
         </div>
-        
+
     </div>
     }
 }

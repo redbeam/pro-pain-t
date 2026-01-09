@@ -1,11 +1,8 @@
-use leptos::{prelude::*};
+use leptos::prelude::*;
 use pro_pain_t_app::structs::color::Color;
 
 #[component]
-pub fn AlphaSlider(
-    color: RwSignal<Color>,
-) -> impl IntoView {
-
+pub fn AlphaSlider(color: RwSignal<Color>) -> impl IntoView {
     let on_input = move |ev| {
         let c = color.get();
 
