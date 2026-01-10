@@ -1,36 +1,26 @@
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::{color::Color, layer::Layer};
-
+use pro_pain_t_app::structs::project::{Project};
 use crate::components::{color_picker::ColorPicker};
 
 #[component]
-pub fn NewLayerWindow(
-    dialog_ref: NodeRef<Dialog>,
-    is_open: RwSignal<bool>,
-    width: RwSignal<u32>,
-    height: RwSignal<u32>,
-    layers: RwSignal<Vec<pro_pain_t_app::structs::layer::Layer>>,
-    id: RwSignal<usize>,
-) -> impl IntoView {
+pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> impl IntoView {
     let (title, set_title) = signal(String::from("New layer"));
     let color = RwSignal::new(Color::default_white());
 
+    let project = use_context::<RwSignal<Project>>().unwrap().get();
+
     let create_layer = move || {
-        let layer_id = id.get();
-        let mut layers_vector = layers.get();
-        let layer = Layer::new(layer_id, title.get(), width.get(), height.get(), color.get());
+        let layer_id = project.next_layer_id.get();
+        let mut layers_vector = project.layers.get();
+
+        let layer = Layer::new(layer_id, title.get(), project.width.get(), project.height.get(), color.get());
         layers_vector.push(layer);
         let count = layers_vector.iter().count();
-        layers.set(layers_vector);
-        logging::log!(
-            "new_layer: {}, {}, {}, {}, count: {}",
-            layer_id,
-            width.get(),
-            height.get(),
-            title.get(),
-            count
-        );
-        id.set(layer_id + 1);
+        project.layers.set(layers_vector);
+        project.next_layer_id.set(layer_id + 1);
+
+        logging::log!("new_layer: {}, {}, {}, {}, count: {}", layer_id, project.width.get(), project.height.get(), title.get(), count);
     };
 
     view! {
@@ -40,24 +30,30 @@ pub fn NewLayerWindow(
                 justify-content:space-between;
                 background:#3f3f3f;
                 flex-direction:row;
-                display:{};", if is_open.get() {"block"} else {"none"})}>
-            <h1 style="color:white; text-align:center;">"New layer"</h1>
+                display:{};", if is_open.get() {"block"} else {"none"})}
+        >
+            <h1 style="color:white; text-align:center;">
+                "New layer"
+            </h1>
             <table>
                 <tr>
-                    <td style:color="white">"Title:"</td>
-                    <td >
+                    <td style:color="white">
+                        "Title:"
+                    </td>
+                    <td>
                         <input
                             type="text"
                             prop:value = move || title.get()
                             on:input = move |value| { set_title.set(event_target_value(&value)) }
                             style:color="black"
                             style:text="Title"
-                            id="new-layer-title"/>
+                            id="new-layer-title"
+                        />
                     </td>
                 </tr>
                 <tr>
                     <td style:color="white" style="vertical-align:top; padding-top:0.5rem;">"Background color:"</td>
-                    <td><ColorPicker color=color/></td>
+                    <td><ColorPicker color=color /></td>
                 </tr>
             </table>
             <div
@@ -79,7 +75,9 @@ pub fn NewLayerWindow(
                         text-align:center;
                         width:70px;
                     "
-                >"Cancel"</button>
+                >
+                    "Cancel"
+                </button>
                 <button
                     on:click = move |_| {
                         is_open.set(false);
@@ -98,7 +96,9 @@ pub fn NewLayerWindow(
                         text-align:center;
                         width:70px;
                     "
-                >"Ok"</button>
+                >
+                    "Ok"
+                </button>
             </div>
         </dialog>
     }

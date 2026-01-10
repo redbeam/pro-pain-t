@@ -1,14 +1,16 @@
 use leptos::prelude::{Get, RwSignal, Set, Update};
 
 use crate::structs::{color::Color, history::History, layer::Layer};
+
 #[allow(dead_code, unused_variables)]
+#[derive(Clone)]
 pub struct Project {
-    name: String,
+    pub name: String,
     pub width: RwSignal<u32>,
     pub height: RwSignal<u32>,
-    background_color: Color,
+    pub background_color: Color,
     pub layers: RwSignal<Vec<Layer>>,
-    history: History,
+    pub history: History,
     pub next_layer_id: RwSignal<usize>, // best approach for seriliazing ids
 }
 

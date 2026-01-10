@@ -1,27 +1,23 @@
 use leptos::{html, prelude::*};
+use pro_pain_t_app::structs::project::{Project};
 
 #[component]
-pub fn CanvasSizeWindow<F>(
-    is_open: RwSignal<bool>,
-    canvas_width: RwSignal<u32>,
-    canvas_height: RwSignal<u32>,
-    on_confirm: F,
-) -> impl IntoView
-where
-    F: Fn(u32, u32) + 'static + Clone + Send + Sync,
+pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView
 {
     let width_input_ref: NodeRef<html::Input> = NodeRef::new();
     let ok_button_ref: NodeRef<html::Button> = NodeRef::new();
 
-    let (local_width, set_local_width) = signal(canvas_width.get());
-    let (local_height, set_local_height) = signal(canvas_height.get());
+    let project = use_context::<RwSignal<Project>>().unwrap().get();
+
+    let (local_width, set_local_width) = signal(project.width.get());
+    let (local_height, set_local_height) = signal(project.height.get());
 
     {
         let width_input_ref = width_input_ref.clone();
         Effect::new(move |_| {
             if is_open.get() {
-                set_local_width.set(canvas_width.get());
-                set_local_height.set(canvas_height.get());
+                set_local_width.set(project.width.get());
+                set_local_height.set(project.height.get());
 
                 if let Some(input) = width_input_ref.get() {
                     let _ = input.focus();
@@ -29,6 +25,16 @@ where
             }
         });
     }
+
+    let on_resize_canvas = move |new_w: u32, new_h: u32| {
+        project.layers.update(|layers_vec| {
+            for layer in layers_vec.iter_mut() {
+                layer.resize_canvas(new_w, new_h);
+            }
+        });
+        project.width.set(new_w);
+        project.height.set(new_h);
+    };
 
     let on_width_input = move |ev: leptos::ev::Event| {
         let value = event_target_value(&ev);
@@ -147,7 +153,7 @@ where
                         on:click=move |_| {
                             let w = local_width.get();
                             let h = local_height.get();
-                            on_confirm(w, h);
+                            on_resize_canvas(w, h);
                             is_open.set(false);
                         }
                                 style="

@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 
 use crate::structs::pixel::Pixel;
 
+#[derive(Clone)]
 pub struct History {
     max_count: usize,
     undo: VecDeque<(Vec<Pixel>, usize)>, // pixel diff, layer id

@@ -1,11 +1,12 @@
+use crate::components::new_layer_window::NewLayerWindow;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::layer::Layer;
-
-use crate::components::new_layer_window::NewLayerWindow;
-
+use pro_pain_t_app::structs::project::Project;
 
 #[component]
-pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, layers: RwSignal<Vec<Layer>>, layer_id: RwSignal<usize>) -> impl IntoView {
+pub fn LayerPanel() -> impl IntoView {
+    let project = use_context::<RwSignal<Project>>().unwrap().get();
+
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
 
@@ -41,7 +42,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                     font-size:0.8rem;
                 ">
                 <For
-                    each=move || layers.get()
+                    each=move || project.layers.get()
                     key=|layer| layer.id
                     children=move |layer: Layer| {
                         view! {
@@ -67,7 +68,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                 >
                                     <button
                                     disabled = move || {
-                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                        if let Some(layer_reactive) = project.layers.get().iter().find(|l| l.id == layer.id) {
                                             layer_reactive.is_locked
                                         }
                                         else {
@@ -75,7 +76,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                         }
                                     }
                                     on:click = move |_| {
-                                        layers.update(|layers| {
+                                        project.layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_visible = !layers[index].is_visible;
                                                 logging::log!("Layer {} visibility toggle: {}", layers[index].id, layers[index].is_visible);
@@ -86,7 +87,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                     </button>
 
                                     <button on:click = move |_| {
-                                        layers.update(|layers| {
+                                        project.layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_locked = !layers[index].is_locked;
                                                 logging::log!("Layer {} locked toggle: {}", layers[index].id, layers[index].is_locked);
@@ -98,7 +99,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
 
                                     <button
                                     disabled = move || {
-                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                        if let Some(layer_reactive) = project.layers.get().iter().find(|l| l.id == layer.id) {
                                             layer_reactive.is_locked
                                         }
                                         else {
@@ -106,7 +107,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                         }
                                     }
                                     on:click = move |_| {
-                                        layers.update(|layers| {
+                                        project.layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers.remove(index);
                                                 logging::log!("Layer {} delete pressed", layer.id);
@@ -144,7 +145,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                 >
                                     <button
                                     disabled = move || {
-                                        if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
+                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
                                             index <= 0
                                         }
                                         else {
@@ -152,7 +153,7 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                         }
                                     }
                                     on:click = move |_| {
-                                        layers.update(|layers| {
+                                        project.layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 if index <= 0 {
                                                     return;
@@ -167,15 +168,15 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
 
                                     <button
                                     disabled = move || {
-                                        if let Some(index) = layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= layers.get().iter().count() - 1
+                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
+                                            index >= project.layers.get().iter().count() - 1
                                         }
                                         else {
                                             true
                                         }
                                     }
                                     on:click = move |_| {
-                                        layers.update(|layers| {
+                                        project.layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 if index >= layers.len() - 1 {
                                                     return;
@@ -189,13 +190,14 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                     </button>
                                     <button
                                     on:click = move |_| {
-                                        layers.update(|layers| {
+                                        project.layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 let original_layer = layers.get(index).unwrap();
                                                 let mut layer_cloned = original_layer.clone();
                                                 layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
-                                                layer_cloned.id = layer_id.get();
-                                                layer_id.set(layer_id.get() + 1);
+                                                let layer_id = project.next_layer_id.get();
+                                                layer_cloned.id = layer_id;
+                                                project.next_layer_id.set(layer_id + 1);
 
                                                 layers.insert(index + 1, layer_cloned);
                                                 logging::log!("Layer {} cloned", layer.id);
@@ -211,8 +213,10 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                 />
                 </div>
 
-
-            <NewLayerWindow dialog_ref = new_layer_window_ref is_open = is_new_layer_window_open width = canvas_width height = canvas_height layers = layers id = layer_id/>
+            <NewLayerWindow
+                dialog_ref = new_layer_window_ref
+                is_open = is_new_layer_window_open
+            />
             <button
                 on:click = move |_| {
                     logging::log!("Button clicked!");
