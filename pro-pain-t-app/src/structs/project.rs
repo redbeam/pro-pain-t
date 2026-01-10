@@ -27,6 +27,16 @@ impl Project {
         }
     }
 
+    pub fn replace_project_with_blank(&mut self, name: String, width: u32, height: u32, color: Color) {
+        self.name = name;
+        self.width.set(width);
+        self.height.set(height);
+        self.background_color = color;
+        self.layers.set(vec![Layer::new(0, "Layer 0".to_string(), width, height, color)]);
+        self.history = History::new(10);
+        self.next_layer_id.set(1);
+    }
+
     pub fn default() -> Self {
         Self::new("Unnamed project".to_string(), 300, 300, Color::default_white())
     }

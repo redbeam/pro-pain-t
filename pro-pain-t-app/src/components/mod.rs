@@ -7,3 +7,4 @@ pub mod color_picker;
 pub mod canvas_size_window;
 pub mod rgb_slider;
 pub mod alpha_slider;
+pub mod new_project_window;
