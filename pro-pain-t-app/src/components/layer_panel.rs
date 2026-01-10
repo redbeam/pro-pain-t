@@ -65,7 +65,16 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                         color:#d0d0d0;
                                     "
                                 >
-                                    <button on:click = move |_| {
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_visible = !layers[index].is_visible;
@@ -87,7 +96,16 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                     "🔒"
                                     </button>
 
-                                    <button on:click = move |_| {
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers.remove(index);
@@ -169,14 +187,16 @@ pub fn LayerPanel(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>, lay
                                     }>
                                     "▼"
                                     </button>
-                                    <button on:click = move |_| {
-                                        let mut layer_cloned = layer.clone();
-                                        layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
-                                        layer_cloned.id = layer_id.get();
-                                        layer_id.set(layer_id.get() + 1);
-                                        
+                                    <button
+                                    on:click = move |_| {
                                         layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                let original_layer = layers.get(index).unwrap();
+                                                let mut layer_cloned = original_layer.clone();
+                                                layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
+                                                layer_cloned.id = layer_id.get();
+                                                layer_id.set(layer_id.get() + 1);
+
                                                 layers.insert(index + 1, layer_cloned);
                                                 logging::log!("Layer {} cloned", layer.id);
                                             }

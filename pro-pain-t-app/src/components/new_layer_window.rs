@@ -1,5 +1,5 @@
 use leptos::{html::Dialog, logging, prelude::*};
-use pro_pain_t_app::structs::layer::Layer;
+use pro_pain_t_app::structs::{color::Color, layer::Layer};
 
 use crate::components::{color_picker::ColorPicker};
 
@@ -12,13 +12,13 @@ pub fn NewLayerWindow(
     layers: RwSignal<Vec<pro_pain_t_app::structs::layer::Layer>>,
     id: RwSignal<usize>,
 ) -> impl IntoView {
-    let background_color = pro_pain_t_app::structs::color::Color::new(0, 0, 0, 0);
     let (title, set_title) = signal(String::from("New layer"));
+    let color = RwSignal::new(Color::new(255, 255, 255, 1.0));
 
     let create_layer = move || {
         let layer_id = id.get();
         let mut layers_vector = layers.get();
-        let layer = Layer::new(layer_id, title.get(), width.get(), height.get(), background_color);
+        let layer = Layer::new(layer_id, title.get(), width.get(), height.get(), color.get());
         layers_vector.push(layer);
         let count = layers_vector.iter().count();
         layers.set(layers_vector);
@@ -56,8 +56,8 @@ pub fn NewLayerWindow(
                     </td>
                 </tr>
                 <tr>
-                    <td style:color="white">"Background color:"</td>
-                    <td><ColorPicker /></td>
+                    <td style:color="white" style="vertical-align:top; padding-top:0.5rem;">"Background color:"</td>
+                    <td><ColorPicker color=color/></td>
                 </tr>
             </table>
             <div
