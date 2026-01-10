@@ -11,4 +11,12 @@ impl Color {
     pub fn new(r: u8, g: u8, b: u8, alpha: f32) -> Self {
         Self { r, g, b, alpha }
     }
+
+    pub fn default_white() -> Self {
+        Self::new(255, 255, 255, 1.0)
+    }
+
+    pub fn default_black() -> Self {
+        Self::new(0, 0, 0, 1.0)
+    }
 }

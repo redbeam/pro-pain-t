@@ -13,7 +13,7 @@ pub fn NewLayerWindow(
     id: RwSignal<usize>,
 ) -> impl IntoView {
     let (title, set_title) = signal(String::from("New layer"));
-    let color = RwSignal::new(Color::new(255, 255, 255, 1.0));
+    let color = RwSignal::new(Color::default_white());
 
     let create_layer = move || {
         let layer_id = id.get();
