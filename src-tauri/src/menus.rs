@@ -34,6 +34,14 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         match event.id().0.as_str() {
             // ===== File =====
             "new_project" => {
+                let answer = app_handle.dialog()
+                    .message("This will overwrite the currently opened project. Do you want to continue?")
+                    .title("Warning")
+                    .buttons(MessageDialogButtons::OkCancelCustom("Yes".to_string(), "No".to_string()))
+                    .blocking_show();
+                if !answer {
+                    return;
+                }
                 app_handle
                     .emit("menu-new-project", ())
                     .expect("Failed to emit menu-new-project");
