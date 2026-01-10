@@ -24,8 +24,8 @@ pub fn CanvasArea() -> impl IntoView {
             <div
                 style=move || format!(
                     "width:{:.2}px; height:{:.2}px; background:#dcdcdc; box-shadow:0 0 0 1px #777, 0 10px 24px rgba(0,0,0,0.6); image-rendering:pixelated;",
-                    project.width.get() as f32 * view_state.zoom.get(),
-                    project.height.get() as f32 * view_state.zoom.get()
+                    project.width.get() as f32 * view_state.zoom_factor.get(),
+                    project.height.get() as f32 * view_state.zoom_factor.get()
                 )
             ></div>
         </section>
