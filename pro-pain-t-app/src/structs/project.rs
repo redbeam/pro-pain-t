@@ -25,6 +25,10 @@ impl Project {
         }
     }
 
+    pub fn default() -> Self {
+        Self::new("Unnamed project".to_string(), 300, 300, Color::default_white())
+    }
+
     pub fn add_new_layer(&mut self) {
         self.layers.update(|layers| {
             layers.push(Layer::new(
