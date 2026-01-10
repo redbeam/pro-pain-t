@@ -9,7 +9,7 @@ use crate::components::status_bar::StatusBar;
 
 #[component]
 pub fn App() -> impl IntoView {
-    let project = Project::new("test".to_string(), 800, 600, Color::new(0, 0, 0, 0));
+    let project = Project::new("test".to_string(), 800, 600, Color::new(255, 255, 255, 1.0));
 
     view! {
         <div
