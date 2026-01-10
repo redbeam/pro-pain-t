@@ -7,6 +7,7 @@ use crate::components::tool_palette::ToolPalette;
 use leptos::html::Dialog;
 use leptos::prelude::*;
 use pro_pain_t_app::structs::project::Project;
+use std::fs;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -19,6 +20,15 @@ pub fn App() -> impl IntoView {
     //is_new_project_window_open.set(true); TODO :(
 
     let is_canvas_size_open = RwSignal::new(false);
+
+    let _open_project_handler = || {
+        let project_file_path = String::new(); // TODO receive from tauri event
+        let _project_file_data = fs::read(project_file_path).expect("Failed to read file");
+        let project_loaded = Project::default(); // TODO deserialize and load
+        project.update(|project| {
+            project.replace_project_with_blank(project_loaded.name, project_loaded.width.get(), project_loaded.height.get(), project_loaded.background_color);
+        });
+    };
 
     view! {
         <div

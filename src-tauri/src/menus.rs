@@ -1,5 +1,6 @@
 use tauri::menu::{MenuBuilder, SubmenuBuilder};
 use tauri::{App, Emitter};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 
 pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let dummy_menu = SubmenuBuilder::new(app, "Pro PainT").build()?;
@@ -40,10 +41,26 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             }
 
             "open_project" => {
-                app_handle
-                    .emit("menu-open-project", ())
-                    .expect("Failed to emit menu-open-project");
-                println!("emitted open_project");
+                let answer = app_handle.dialog()
+                    .message("This will overwrite the currently opened project. Do you want to continue?")
+                    .title("Warning")
+                    .buttons(MessageDialogButtons::OkCancelCustom("Yes".to_string(), "No".to_string()))
+                    .blocking_show();
+                if !answer {
+                    return;
+                }
+
+                let handle = app_handle.clone();
+                app_handle.dialog().file()
+                    .add_filter("ProPainTProject", &["ppp"])
+                    .pick_file(move |file_path| {
+                    if let Some(path) = file_path {
+                        handle
+                            .emit("menu-open-project", path.to_string())
+                            .expect("Failed to emit menu-open-project");
+                        println!("emitted open_project");
+                    }
+                });
             }
 
             "save_project" => {
