@@ -5,7 +5,6 @@ use crate::components::color_picker::ColorPicker;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {
-
     let current_color = RwSignal::new(Color::new(255, 255, 255, 1.0));
 
     view! {

@@ -1,9 +1,8 @@
 use leptos::{html, prelude::*};
-use pro_pain_t_app::structs::project::{Project};
+use pro_pain_t_app::structs::project::Project;
 
 #[component]
-pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView
-{
+pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
     let width_input_ref: NodeRef<html::Input> = NodeRef::new();
     let ok_button_ref: NodeRef<html::Button> = NodeRef::new();
 
@@ -38,21 +37,13 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView
 
     let on_width_input = move |ev: leptos::ev::Event| {
         let value = event_target_value(&ev);
-        let parsed = value
-            .parse::<u32>()
-            .ok()
-            .filter(|v| *v > 0)
-            .unwrap_or(1);
+        let parsed = value.parse::<u32>().ok().filter(|v| *v > 0).unwrap_or(1);
         set_local_width.set(parsed);
     };
 
     let on_height_input = move |ev: leptos::ev::Event| {
         let value = event_target_value(&ev);
-        let parsed = value
-            .parse::<u32>()
-            .ok()
-            .filter(|v| *v > 0)
-            .unwrap_or(1);
+        let parsed = value.parse::<u32>().ok().filter(|v| *v > 0).unwrap_or(1);
         set_local_height.set(parsed);
     };
 
