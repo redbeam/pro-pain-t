@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use pro_pain_t_app::structs::project::Project;
 
 #[component]
-pub fn StatusBar(on_open_canvas_size: impl Fn() + 'static + Clone) -> impl IntoView {
+pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap().get();
 
     view! {
@@ -22,7 +22,7 @@ pub fn StatusBar(on_open_canvas_size: impl Fn() + 'static + Clone) -> impl IntoV
         >
             <div style="display:flex; gap:1.5rem; align-items:center;">
                 <button
-                    on:click=move |_| on_open_canvas_size()
+                    on:click=move |_| is_open.set(true)
                     style="
                         border:none;
                         background:transparent;

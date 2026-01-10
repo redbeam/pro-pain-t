@@ -13,9 +13,6 @@ pub fn App() -> impl IntoView {
     provide_context(project);
 
     let is_canvas_size_open = RwSignal::new(false);
-    let open_canvas_size = move || {
-        is_canvas_size_open.set(true);
-    };
 
     view! {
         <div
@@ -39,7 +36,7 @@ pub fn App() -> impl IntoView {
                 <LayerPanel />
             </div>
             <StatusBar
-                on_open_canvas_size = open_canvas_size
+                is_open = is_canvas_size_open
             />
             <CanvasSizeWindow
                 is_open = is_canvas_size_open
