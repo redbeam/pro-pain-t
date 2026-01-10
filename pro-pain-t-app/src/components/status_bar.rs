@@ -1,7 +1,11 @@
 use leptos::prelude::*;
 
 #[component]
-pub fn StatusBar() -> impl IntoView {
+pub fn StatusBar(
+    canvas_width: RwSignal<u32>,
+    canvas_height: RwSignal<u32>,
+    on_open_canvas_size: impl Fn() + 'static + Clone,
+) -> impl IntoView {
     view! {
         <footer
             style="
@@ -17,8 +21,21 @@ pub fn StatusBar() -> impl IntoView {
                 box-sizing:border-box;
             "
         >
-            <div style="display:flex; gap:1.5rem;">
-                <span>"933×627 px"</span>
+            <div style="display:flex; gap:1.5rem; align-items:center;">
+                <button
+                    on:click=move |_| on_open_canvas_size()
+                    style="
+                        border:none;
+                        background:transparent;
+                        color:#c0c0c0;
+                        padding:0;
+                        cursor:pointer;
+                        font-size:0.75rem;
+                    "
+                    title="Change canvas size"
+                >
+                    {move || format!("{}×{} px", canvas_width.get(), canvas_height.get())}
+                </button>
                 <span>"x = 412, y = 238"</span>
             </div>
             <div style="display:flex; align-items:center; gap:0.35rem;">

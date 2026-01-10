@@ -20,4 +20,8 @@ impl Layer {
             is_visible: true,
         }
     }
+
+    pub fn resize_canvas(&mut self, new_width: u32, new_height: u32) {
+        self.canvas.resize(new_width, new_height);
+    }
 }
