@@ -10,7 +10,7 @@ use crate::components::canvas_size_window::CanvasSizeWindow;
 
 #[component]
 pub fn App() -> impl IntoView {
-    let project = Project::new("test".to_string(), 400, 300, Color::new(0, 0, 0, 0));
+    let project = Project::new("test".to_string(), 400, 300, Color::new(0, 0, 0, 0.0));
 
     let canvas_width = project.width;
     let canvas_height = project.height;
