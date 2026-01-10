@@ -33,6 +33,12 @@ pub fn App() -> impl IntoView {
         });
     };
 
+    let _save_project_handler = || {
+        let project_file_save_path = String::new(); // TODO receive from event
+        let project_serialized: Vec<u8> = Vec::new(); // TODO serialize project
+        fs::write(project_file_save_path, project_serialized).expect("Failed to write to file");
+    };
+
     view! {
         <div
             style="
