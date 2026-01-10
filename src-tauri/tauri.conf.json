@@ -7,7 +7,7 @@
     "beforeBuildCommand": "cd pro-pain-t-app && trunk build --dist dist",
     "beforeDevCommand": "cd pro-pain-t-app && trunk serve --port 1420 --open",
     "devUrl": "http://localhost:1420",
-    "frontendDist": "pro-pain-t-app/dist"
+    "frontendDist": "../pro-pain-t-app/dist"
   },
   "app": {
     "windows": [
