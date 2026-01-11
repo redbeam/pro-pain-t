@@ -79,6 +79,21 @@ pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
                 >
                     "-"
                 </button>
+                <button
+                    on:click=move |_| view_state.reset_zoom_to_100()
+                    title="Reset zoom (100%)"
+                    style="border:none; background:transparent; color:#c0c0c0; cursor:pointer; padding:0 0.25rem;"
+                >
+                    "="
+                </button>
+                <button
+                    on:click=move |_| view_state.zoom_in_by_step()
+                    title="Zoom in"
+                    style=zoom_in_style
+                    prop:disabled=move || zoom_in_disabled.get()
+                >
+                    "+"
+                </button>
                 <input
                     type="number"
                     min="5"
@@ -95,21 +110,6 @@ pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
                     }
                 />
                 <span style="opacity:0.85;">"%"</span>
-                <button
-                    on:click=move |_| view_state.reset_zoom_to_100()
-                    title="Reset zoom (100%)"
-                    style="border:none; background:transparent; color:#c0c0c0; cursor:pointer; padding:0 0.25rem;"
-                >
-                    "="
-                </button>
-                <button
-                    on:click=move |_| view_state.zoom_in_by_step()
-                    title="Zoom in"
-                    style=zoom_in_style
-                    prop:disabled=move || zoom_in_disabled.get()
-                >
-                    "+"
-                </button>
             </div>
         </footer>
     }
