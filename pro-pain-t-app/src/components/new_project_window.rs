@@ -1,6 +1,6 @@
 use crate::components::color_picker::ColorPicker;
 use leptos::prelude::{NodeRef, RwSignal};
-use leptos::{component, view, IntoView};
+use leptos::{IntoView, component, view};
 use leptos::{html::Dialog, prelude::*};
 use pro_pain_t_app::structs::color::Color;
 use pro_pain_t_app::structs::project::Project;

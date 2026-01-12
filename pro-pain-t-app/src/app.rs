@@ -4,6 +4,7 @@ use crate::components::layer_panel::LayerPanel;
 use crate::components::new_project_window::NewProjectWindow;
 use crate::components::status_bar::StatusBar;
 use crate::components::tool_palette::ToolPalette;
+use crate::view_state::ProjectViewState;
 use leptos::html::Dialog;
 use leptos::prelude::*;
 use pro_pain_t_app::structs::project::Project;
@@ -12,8 +13,10 @@ use std::fs;
 #[component]
 pub fn App() -> impl IntoView {
     let project = RwSignal::new(Project::default());
+    let view_state = ProjectViewState::new();
 
     provide_context(project);
+    provide_context(view_state);
 
     let new_project_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_project_window_open = RwSignal::new(false);

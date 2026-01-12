@@ -21,35 +21,59 @@ impl Project {
             width: RwSignal::new(width),
             height: RwSignal::new(height),
             background_color,
-            layers: RwSignal::new(vec![Layer::new(0, "Layer 0".to_string(), width, height, background_color)]),
+            layers: RwSignal::new(vec![Layer::new(
+                0,
+                "Layer 0".to_string(),
+                width,
+                height,
+                background_color,
+            )]),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
         }
     }
 
-    pub fn replace_project_with_blank(&mut self, name: String, width: u32, height: u32, color: Color) {
+    pub fn replace_project_with_blank(
+        &mut self,
+        name: String,
+        width: u32,
+        height: u32,
+        color: Color,
+    ) {
         self.name = name;
         self.width.set(width);
         self.height.set(height);
         self.background_color = color;
-        self.layers.set(vec![Layer::new(0, "Layer 0".to_string(), width, height, color)]);
+        self.layers.set(vec![Layer::new(
+            0,
+            "Layer 0".to_string(),
+            width,
+            height,
+            color,
+        )]);
         self.history = History::new(10);
         self.next_layer_id.set(1);
     }
 
     pub fn default() -> Self {
-        Self::new("Unnamed project".to_string(), 300, 300, Color::default_white())
+        Self::new(
+            "Unnamed project".to_string(),
+            300,
+            300,
+            Color::default_white(),
+        )
     }
 
     pub fn add_new_layer(&mut self) {
         self.layers.update(|layers| {
             layers.push(Layer::new(
-            self.next_layer_id.get(),
-            self.name.clone(),
-            self.width.get(),
-            self.height.get(),
-            self.background_color,
-        ));});
+                self.next_layer_id.get(),
+                self.name.clone(),
+                self.width.get(),
+                self.height.get(),
+                self.background_color,
+            ));
+        });
 
         self.next_layer_id.set(self.next_layer_id.get() + 1);
     }
