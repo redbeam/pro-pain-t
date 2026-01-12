@@ -1,7 +1,7 @@
+use crate::components::color_picker::ColorPicker;
 use leptos::{html::Dialog, logging, prelude::*};
+use pro_pain_t_app::structs::project::Project;
 use pro_pain_t_app::structs::{color::Color, layer::Layer};
-use pro_pain_t_app::structs::project::{Project};
-use crate::components::{color_picker::ColorPicker};
 
 #[component]
 pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> impl IntoView {
@@ -14,13 +14,26 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
         let layer_id = project.next_layer_id.get();
         let mut layers_vector = project.layers.get();
 
-        let layer = Layer::new(layer_id, title.get(), project.width.get(), project.height.get(), color.get());
+        let layer = Layer::new(
+            layer_id,
+            title.get(),
+            project.width.get(),
+            project.height.get(),
+            color.get(),
+        );
         layers_vector.push(layer);
         let count = layers_vector.iter().count();
         project.layers.set(layers_vector);
         project.next_layer_id.set(layer_id + 1);
 
-        logging::log!("new_layer: {}, {}, {}, {}, count: {}", layer_id, project.width.get(), project.height.get(), title.get(), count);
+        logging::log!(
+            "new_layer: {}, {}, {}, {}, count: {}",
+            layer_id,
+            project.width.get(),
+            project.height.get(),
+            title.get(),
+            count
+        );
     };
 
     view! {
