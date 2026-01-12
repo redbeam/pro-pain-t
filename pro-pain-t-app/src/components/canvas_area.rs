@@ -1,7 +1,10 @@
 use leptos::prelude::*;
+use pro_pain_t_app::structs::project::Project;
 
 #[component]
-pub fn CanvasArea(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>) -> impl IntoView {
+pub fn CanvasArea() -> impl IntoView {
+    let project = use_context::<RwSignal<Project>>().unwrap().get();
+
     view! {
         <section
             style="
@@ -18,8 +21,8 @@ pub fn CanvasArea(canvas_width: RwSignal<u32>, canvas_height: RwSignal<u32>) -> 
             <div
                 style=move || format!(
                     "width:{}px; height:{}px; background:#dcdcdc; box-shadow:0 0 0 1px #777, 0 10px 24px rgba(0,0,0,0.6);",
-                    canvas_width.get(),
-                    canvas_height.get()
+                    project.width.get(),
+                    project.height.get()
                 )
             ></div>
         </section>

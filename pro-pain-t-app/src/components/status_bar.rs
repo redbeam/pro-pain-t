@@ -1,11 +1,10 @@
 use leptos::prelude::*;
+use pro_pain_t_app::structs::project::Project;
 
 #[component]
-pub fn StatusBar(
-    canvas_width: RwSignal<u32>,
-    canvas_height: RwSignal<u32>,
-    on_open_canvas_size: impl Fn() + 'static + Clone,
-) -> impl IntoView {
+pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
+    let project = use_context::<RwSignal<Project>>().unwrap().get();
+
     view! {
         <footer
             style="
@@ -23,7 +22,7 @@ pub fn StatusBar(
         >
             <div style="display:flex; gap:1.5rem; align-items:center;">
                 <button
-                    on:click=move |_| on_open_canvas_size()
+                    on:click=move |_| is_open.set(true)
                     style="
                         border:none;
                         background:transparent;
@@ -34,9 +33,9 @@ pub fn StatusBar(
                     "
                     title="Change canvas size"
                 >
-                    {move || format!("{}×{} px", canvas_width.get(), canvas_height.get())}
+                    {move || format!("{}×{} px", project.width.get(), project.height.get())}
                 </button>
-                <span>"x = 412, y = 238"</span>
+                <span>"x = 0, y = 0"</span>
             </div>
             <div style="display:flex; align-items:center; gap:0.35rem;">
                 <button style="border:none; background:transparent; color:#c0c0c0;">"-"</button>

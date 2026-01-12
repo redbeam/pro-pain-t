@@ -4,5 +4,6 @@ mod app;
 mod components;
 
 fn main() {
-    leptos::mount::mount_to_body(|| view! { <app::App /> });
+    console_error_panic_hook::set_once();
+    mount_to_body(|| view! { <app::App /> });
 }
