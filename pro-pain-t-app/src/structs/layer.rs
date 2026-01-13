@@ -1,8 +1,8 @@
 use image::RgbImage;
+use serde::{Deserialize, Serialize};
 use crate::structs::{canvas::Canvas, color::Color};
 
-#[derive(Clone)]
-#[allow(dead_code, unused_variables)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Layer {
     pub id: usize,
     pub title: String,

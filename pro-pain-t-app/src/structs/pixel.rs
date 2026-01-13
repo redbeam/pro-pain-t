@@ -1,8 +1,8 @@
 use image::Rgb;
+use serde::{Deserialize, Serialize};
 use crate::structs::color::Color;
 
-#[allow(dead_code, unused_variables)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Pixel {
     pub x: u32,
     pub y: u32,
