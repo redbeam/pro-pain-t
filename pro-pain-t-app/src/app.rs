@@ -8,7 +8,7 @@ use crate::view_state::ProjectViewState;
 use leptos::html::Dialog;
 use leptos::prelude::*;
 use pro_pain_t_app::structs::project::Project;
-use std::fs;
+use std::{env, fs};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -31,6 +31,17 @@ pub fn App() -> impl IntoView {
         project.update(|project| {
             project.replace_project_with_blank(project_loaded.name, project_loaded.width.get(), project_loaded.height.get(), project_loaded.background_color);
         });
+    };
+
+    let _save_project_handler = || {
+        let project_file_save_path = String::new(); // TODO receive from event
+        let project_serialized: Vec<u8> = Vec::new(); // TODO serialize project
+        fs::write(project_file_save_path, project_serialized).expect("Failed to write to file");
+    };
+
+    let _autosave_handler = || {
+        let _autosave_path = env::temp_dir().set_file_name(format!("{}_autosave.ppp", project.get().name));
+        // TODO call save project handler with this path
     };
 
     view! {

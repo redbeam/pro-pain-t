@@ -72,10 +72,19 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             }
 
             "save_project" => {
-                app_handle
-                    .emit("menu-save-project", ())
-                    .expect("Failed to emit menu-save-project");
-                println!("emitted save_project");
+                let handle = app_handle.clone();
+                app_handle.dialog().file()
+                    .add_filter("ProPainTProject", &["ppp"])
+                    .set_file_name("unnamed.ppp")
+                    .set_can_create_directories(true)
+                    .save_file(move |file_path| {
+                        if let Some(path) = file_path {
+                            handle
+                                .emit("menu-save-project", path.to_string())
+                                .expect("Failed to emit menu-save-project");
+                            println!("emitted save_project");
+                        }
+                    });
             }
 
             "import_as_layer" => {
