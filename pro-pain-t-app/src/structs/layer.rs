@@ -1,3 +1,4 @@
+use image::RgbImage;
 use crate::structs::{canvas::Canvas, color::Color};
 
 #[derive(Clone)]
@@ -17,6 +18,16 @@ impl Layer {
             title,
             is_locked: false,
             canvas: Canvas::new(width, height, background_color),
+            is_visible: true,
+        }
+    }
+
+    pub fn from_image(image: &RgbImage, id: usize, title: impl Into<String>, background_color: Color) -> Self {
+        Self {
+            id,
+            title: title.into(),
+            is_locked: false,
+            canvas: Canvas::from_image(image, background_color),
             is_visible: true,
         }
     }

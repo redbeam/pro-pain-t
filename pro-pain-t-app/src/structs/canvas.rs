@@ -1,3 +1,4 @@
+use image::RgbImage;
 use crate::structs::{color::Color, pixel::Pixel};
 
 #[derive(Clone)]
@@ -26,6 +27,21 @@ impl Canvas {
         Self {
             width,
             height,
+            content,
+            background_color,
+        }
+    }
+
+    pub fn from_image(image: &RgbImage, background_color: Color) -> Self {
+        let content = image
+            .enumerate_pixels()
+            .into_iter()
+            .map(|pixel| Pixel::from_rgb(pixel.0, pixel.1, *pixel.2))
+            .collect::<Vec<Pixel>>();
+
+        Self {
+            width: image.width(),
+            height: image.height(),
             content,
             background_color,
         }
