@@ -1,3 +1,4 @@
+use crate::components::edit_layer_window::EditLayerWindow;
 use crate::components::new_layer_window::NewLayerWindow;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::layer::Layer;
@@ -6,9 +7,19 @@ use pro_pain_t_app::structs::project::Project;
 #[component]
 pub fn LayerPanel() -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let id_to_edit = RwSignal::new(None);
 
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
+
+    let edit_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
+    let is_edit_layer_window_open = RwSignal::new(false);
+
+    let open_edit_layer_window = move |id: usize| {
+        id_to_edit.set(Some(id));
+        new_layer_window_ref.get().unwrap().open();
+        is_edit_layer_window_open.set(true);
+    };
 
     view! {
         <aside
@@ -116,6 +127,22 @@ pub fn LayerPanel() -> impl IntoView {
                                     }>
                                     "🗑️"
                                     </button>
+
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = project.layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        logging::log!("Edit button clicked!");
+                                        open_edit_layer_window(layer.id);
+                                    }>
+                                    "✏️"
+                                    </button>
                                 </div>
                                 <div
                                     style="
@@ -194,7 +221,7 @@ pub fn LayerPanel() -> impl IntoView {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 let original_layer = layers.get(index).unwrap();
                                                 let mut layer_cloned = original_layer.clone();
-                                                layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
+                                                layer_cloned.title.set((layer_cloned.title.get() + " (Copy)").to_string());
                                                 let layer_id = project.next_layer_id.get();
                                                 layer_cloned.id = layer_id;
                                                 project.next_layer_id.set(layer_id + 1);
@@ -213,13 +240,21 @@ pub fn LayerPanel() -> impl IntoView {
                 />
                 </div>
 
+            <Show when = move || id_to_edit.get().is_some() fallback = || ()>
+                <EditLayerWindow
+                    dialog_ref = edit_layer_window_ref
+                    is_open = is_edit_layer_window_open
+                    id = id_to_edit.get().unwrap()
+                />
+            </Show>
+
             <NewLayerWindow
                 dialog_ref = new_layer_window_ref
                 is_open = is_new_layer_window_open
             />
             <button
                 on:click = move |_| {
-                    logging::log!("Button clicked!");
+                    logging::log!("Add layer button clicked!");
                     new_layer_window_ref.get().unwrap().open();
                     is_new_layer_window_open.set(true);
                 }

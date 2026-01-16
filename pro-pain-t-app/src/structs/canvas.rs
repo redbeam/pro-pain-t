@@ -6,7 +6,7 @@ pub struct Canvas {
     pub width: u32,
     pub height: u32,
     content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + x
-    background_color: Color,
+    pub background_color: Color,
 }
 
 impl Canvas {
