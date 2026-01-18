@@ -8,32 +8,14 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
     let (title, set_title) = signal(String::from("New layer"));
     let color = RwSignal::new(Color::default_white());
 
-    let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let project = use_context::<RwSignal<Project>>().unwrap();
 
     let create_layer = move || {
-        let layer_id = project.next_layer_id.get();
-        let mut layers_vector = project.layers.get();
+        let layer_id = project.get().next_layer_id.get();
+        let layer = Layer::new(layer_id, title.get(), project.get().width.get(), project.get().height.get(), color.get());
+        project.get().add_new_layer(layer);
 
-        let layer = Layer::new(
-            layer_id,
-            title.get(),
-            project.width.get(),
-            project.height.get(),
-            color.get(),
-        );
-        layers_vector.push(layer);
-        let count = layers_vector.iter().count();
-        project.layers.set(layers_vector);
-        project.next_layer_id.set(layer_id + 1);
-
-        logging::log!(
-            "new_layer: {}, {}, {}, {}, count: {}",
-            layer_id,
-            project.width.get(),
-            project.height.get(),
-            title.get(),
-            count
-        );
+        logging::log!("new_layer: {}, {}, {}, {}, count: {}", layer_id, project.get().width.get(), project.get().height.get(), title.get(), project.get().layer_count());
     };
 
     view! {
