@@ -64,17 +64,14 @@ impl Project {
         )
     }
 
-    pub fn add_new_layer(&mut self) {
+    pub fn add_new_layer(&self, layer: Layer) {
         self.layers.update(|layers| {
-            layers.push(Layer::new(
-                self.next_layer_id.get(),
-                self.name.clone(),
-                self.width.get(),
-                self.height.get(),
-                self.background_color,
-            ));
+            layers.push(layer);
         });
-
         self.next_layer_id.set(self.next_layer_id.get() + 1);
+    }
+
+    pub fn layer_count(&self) -> usize {
+        self.layers.get().len()
     }
 }

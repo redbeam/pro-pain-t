@@ -9,6 +9,9 @@ use leptos::html::Dialog;
 use leptos::prelude::*;
 use pro_pain_t_app::structs::project::Project;
 use std::{env, fs};
+use image::ImageReader;
+use pro_pain_t_app::structs::color::Color;
+use pro_pain_t_app::structs::layer::Layer;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -42,6 +45,17 @@ pub fn App() -> impl IntoView {
     let _autosave_handler = || {
         let _autosave_path = env::temp_dir().set_file_name(format!("{}_autosave.ppp", project.get().name));
         // TODO call save project handler with this path
+    };
+
+    let _import_image_as_layer_handler = || {
+        let image_file_path = String::new(); // TODO receive from event
+        let image = ImageReader::open(image_file_path).expect("Failed to read image file")
+            .decode().expect("Failed to decode image file")
+            .into_rgb8();
+
+        let layer_id = project.get().next_layer_id.get();
+        let new_layer = Layer::from_image(&image, layer_id, "Imported image", Color::default_black());
+        project.get().add_new_layer(new_layer);
     };
 
     view! {

@@ -88,10 +88,17 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             }
 
             "import_as_layer" => {
-                app_handle
-                    .emit("menu-import-as-layer", ())
-                    .expect("Failed to emit menu-import-as-layer");
-                println!("emitted import_as_layer");
+                let handle = app_handle.clone();
+                app_handle.dialog().file()
+                    .add_filter("PNG or JPG images", &["png", "jpg", "jpeg"])
+                    .pick_file(move |file_path| {
+                        if let Some(path) = file_path {
+                            handle
+                                .emit("menu-import-as-layer", path.to_string())
+                                .expect("Failed to emit menu-import-as-layer");
+                            println!("emitted import_as_layer");
+                        }
+                    });
             }
 
             "export_project" => {
