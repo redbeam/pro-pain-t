@@ -1,8 +1,8 @@
 use image::RgbImage;
+use serde::{Deserialize, Serialize};
 use crate::structs::{color::Color, pixel::Pixel};
 
-#[derive(Clone)]
-#[allow(dead_code, unused_variables)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Canvas {
     pub width: u32,
     pub height: u32,
