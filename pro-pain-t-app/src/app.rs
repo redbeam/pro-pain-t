@@ -59,12 +59,25 @@ pub fn App() -> impl IntoView {
                     flex:1;
                     display:flex;
                     min-height:0;
+
                 "
             >
                 <ToolPalette />
-                <CanvasArea />
+                <div 
+                    style="
+                    flex:1;
+                    display:flex;
+                    justify-content:center;
+                    align-items:center;
+                    background:#3a3a3a;
+                "
+                >
+                    <CanvasArea />
+                </div>
+                
                 <LayerPanel />
-            </div>
+            </div
+            >
             <StatusBar
                 is_open = is_canvas_size_open
             />

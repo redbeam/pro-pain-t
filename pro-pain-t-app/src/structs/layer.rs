@@ -6,7 +6,7 @@ pub struct Layer {
     pub id: usize,
     pub title: String,
     pub is_locked: bool,
-    canvas: Canvas,
+    pub canvas: Canvas,
     pub is_visible: bool,
 }
 

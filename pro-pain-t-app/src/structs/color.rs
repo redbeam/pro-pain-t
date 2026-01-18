@@ -13,7 +13,7 @@ impl Color {
     }
 
     pub fn default_white() -> Self {
-        Self::new(255, 255, 255, 1.0)
+        Self::new(0, 255, 255, 0.5)
     }
 
     pub fn default_black() -> Self {
