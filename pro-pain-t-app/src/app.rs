@@ -53,7 +53,7 @@ pub fn App() -> impl IntoView {
             .into_rgb8();
 
         let layer_id = project.get().next_layer_id.get();
-        let new_layer = Layer::from_image(&image, layer_id, "Imported image", Color::default_black());
+        let new_layer = Layer::from_image(&image, layer_id, String::from("Imported image"), Color::default_black());
         project.get().add_new_layer(new_layer);
     };
 

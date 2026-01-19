@@ -9,14 +9,14 @@ pub fn EditLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, id:
     let layers = project.layers.get();
     let layer = layers.iter().find(|l| l.id == id).unwrap();
     
-    let title = RwSignal::new(layer.title.get());
+    let title = RwSignal::new(layer.title.clone());
     let color = RwSignal::new(layer.canvas.background_color);
     
     let edit_layer = move || {
         project.layers.update(|layers| {
             if let Some(index) = layers.iter_mut().position(|l| l.id == id) {
                 layers[index].canvas.background_color = color.get();
-                layers[index].title.set(title.get());
+                layers[index].title = title.get();
                 logging::log!("Layer {} edited", id);
             }
         });
