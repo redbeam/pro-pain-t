@@ -1,4 +1,5 @@
 use crate::components::new_layer_window::NewLayerWindow;
+use crate::components::layer_preview::LayerPreview;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::layer::Layer;
 use pro_pain_t_app::structs::project::Project;
@@ -125,13 +126,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         gap:0.15rem;
                                     "
                                 >
-                                    <div
-                                        style="
-                                            height:50px;
-                                            background:#d8d8d8;
-                                            border-radius:2px;
-                                        "
-                                    ></div>
+                                    <LayerPreview layer=layer.clone() />
                                     <span style="font-size:0.8rem;">{layer.title.clone()}</span>
                                 </div>
                                 <div

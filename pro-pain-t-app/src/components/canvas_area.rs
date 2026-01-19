@@ -5,7 +5,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast
 
 use crate::view_state::ProjectViewState;
 
-fn draw_checkerboard(
+pub fn draw_checkerboard(
     ctx: &CanvasRenderingContext2d,
     width: u32,
     height: u32,
@@ -32,7 +32,6 @@ fn draw_checkerboard(
     }
 }
 
-#[inline]
 fn blend(dst: Color, src: Color) -> Color {
     let sa = src.alpha.clamp(0.0, 1.0);
     let da = dst.alpha.clamp(0.0, 1.0);
@@ -130,7 +129,7 @@ fn draw_to_canvas(
             }
 
             ctx.set_global_alpha(a);
-            ctx.set_fill_style(&JsValue::from_str(&format!("rgb({},{},{})", r, g, b)));
+            ctx.set_fill_style_str(&format!("rgb({},{},{})", r, g, b));
             ctx.fill_rect(x as f64, y as f64, 1.0, 1.0);
         }
     }
