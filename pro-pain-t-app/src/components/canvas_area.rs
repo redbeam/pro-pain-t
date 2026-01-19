@@ -1,10 +1,36 @@
 use leptos::prelude::*;
 use leptos::*;
 use pro_pain_t_app::structs::{color::Color, layer::Layer, project::Project};
-use wasm_bindgen::Clamped;
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData, wasm_bindgen::JsCast};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast, JsValue}};
 
 use crate::view_state::ProjectViewState;
+
+fn draw_checkerboard(
+    ctx: &CanvasRenderingContext2d,
+    width: u32,
+    height: u32,
+    tile_size: u32,
+) {
+    let light = "#e0e0e0";
+    let dark = "#b0b0b0";
+
+    for y in (0..height).step_by(tile_size as usize) {
+        for x in (0..width).step_by(tile_size as usize) {
+            let is_dark = ((x / tile_size + y / tile_size) % 2) == 0;
+            let color = if is_dark { dark } else { light };
+
+            #[allow(deprecated)]
+            ctx.set_fill_style(&JsValue::from_str(color));
+
+            ctx.fill_rect(
+                x as f64,
+                y as f64,
+                tile_size as f64,
+                tile_size as f64,
+            );
+        }
+    }
+}
 
 #[inline]
 fn blend(dst: Color, src: Color) -> Color {
@@ -85,21 +111,31 @@ fn draw_to_canvas(
     pixels: &[u8],
     width: u32,
     height: u32,
-    zoom: f32,
 ) {
     ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
     ctx.clear_rect(0.0, 0.0, f64::INFINITY, f64::INFINITY);
 
-    ctx.scale(zoom as f64, zoom as f64).unwrap();
+    draw_checkerboard(ctx, width, height, 8);
 
-    let image_data = ImageData::new_with_u8_clamped_array_and_sh(
-        Clamped(pixels),
-        width,
-        height,
-    ).unwrap();
+    for y in 0..height {
+        for x in 0..width {
+            let i = ((y * width + x) * 4) as usize;
+            let r = pixels[i];
+            let g = pixels[i + 1];
+            let b = pixels[i + 2];
+            let a = pixels[i + 3] as f64 / 255.0;
 
-    ctx.set_image_smoothing_enabled(false);
-    ctx.put_image_data(&image_data, 0.0, 0.0).unwrap();
+            if a == 0.0 {
+                continue;
+            }
+
+            ctx.set_global_alpha(a);
+            ctx.set_fill_style(&JsValue::from_str(&format!("rgb({},{},{})", r, g, b)));
+            ctx.fill_rect(x as f64, y as f64, 1.0, 1.0);
+        }
+    }
+
+    ctx.set_global_alpha(1.0);
 }
 
 #[component]
@@ -125,13 +161,12 @@ pub fn CanvasArea(
             return;
         }
 
-        let zoom = view_state.zoom_factor.get();
         let (pixels, width, height) = composite_layers(&layers);
 
         canvas.set_width(width);
         canvas.set_height(height);
 
-        draw_to_canvas(&ctx, &pixels, width, height, zoom);
+        draw_to_canvas(&ctx, &pixels, width, height);
     });
 
     view! {
