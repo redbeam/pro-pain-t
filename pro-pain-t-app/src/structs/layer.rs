@@ -7,15 +7,15 @@ pub struct Layer {
     pub id: usize,
     pub title: String,
     pub is_locked: bool,
-    canvas: Canvas,
+    pub canvas: Canvas,
     pub is_visible: bool,
 }
 
 impl Layer {
-    pub fn new(id: usize, title: String, width: u32, height: u32, background_color: Color) -> Self {
+    pub fn new(id: usize, title: impl Into<String>, width: u32, height: u32, background_color: Color) -> Self {
         Self {
             id,
-            title,
+            title: title.into(),
             is_locked: false,
             canvas: Canvas::new(width, height, background_color),
             is_visible: true,

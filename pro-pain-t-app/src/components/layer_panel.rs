@@ -1,3 +1,4 @@
+use crate::components::edit_layer_window::EditLayerWindow;
 use crate::components::new_layer_window::NewLayerWindow;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::layer::Layer;
@@ -5,10 +6,20 @@ use pro_pain_t_app::structs::project::Project;
 
 #[component]
 pub fn LayerPanel() -> impl IntoView {
-    let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let project = use_context::<RwSignal<Project>>().unwrap();
+    let id_to_edit = RwSignal::new(None);
 
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
+
+    let edit_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
+    let is_edit_layer_window_open = RwSignal::new(false);
+
+    let open_edit_layer_window = move |id: usize| {
+        id_to_edit.set(Some(id));
+        new_layer_window_ref.get().unwrap().open();
+        is_edit_layer_window_open.set(true);
+    };
 
     view! {
         <aside
@@ -42,7 +53,7 @@ pub fn LayerPanel() -> impl IntoView {
                     font-size:0.8rem;
                 ">
                 <For
-                    each=move || project.layers.get()
+                    each=move || project.get().layers.get()
                     key=|layer| layer.id
                     children=move |layer: Layer| {
                         view! {
@@ -68,7 +79,7 @@ pub fn LayerPanel() -> impl IntoView {
                                 >
                                     <button
                                     disabled = move || {
-                                        if let Some(layer_reactive) = project.layers.get().iter().find(|l| l.id == layer.id) {
+                                        if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
                                             layer_reactive.is_locked
                                         }
                                         else {
@@ -76,7 +87,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         }
                                     }
                                     on:click = move |_| {
-                                        project.layers.update(|layers| {
+                                        project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_visible = !layers[index].is_visible;
                                                 logging::log!("Layer {} visibility toggle: {}", layers[index].id, layers[index].is_visible);
@@ -87,7 +98,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     </button>
 
                                     <button on:click = move |_| {
-                                        project.layers.update(|layers| {
+                                        project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_locked = !layers[index].is_locked;
                                                 logging::log!("Layer {} locked toggle: {}", layers[index].id, layers[index].is_locked);
@@ -99,7 +110,7 @@ pub fn LayerPanel() -> impl IntoView {
 
                                     <button
                                     disabled = move || {
-                                        if let Some(layer_reactive) = project.layers.get().iter().find(|l| l.id == layer.id) {
+                                        if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
                                             layer_reactive.is_locked
                                         }
                                         else {
@@ -107,7 +118,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         }
                                     }
                                     on:click = move |_| {
-                                        project.layers.update(|layers| {
+                                        project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers.remove(index);
                                                 logging::log!("Layer {} delete pressed", layer.id);
@@ -115,6 +126,22 @@ pub fn LayerPanel() -> impl IntoView {
                                         });
                                     }>
                                     "🗑️"
+                                    </button>
+
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        logging::log!("Edit button clicked!");
+                                        open_edit_layer_window(layer.id);
+                                    }>
+                                    "✏️"
                                     </button>
                                 </div>
                                 <div
@@ -132,7 +159,11 @@ pub fn LayerPanel() -> impl IntoView {
                                             border-radius:2px;
                                         "
                                     ></div>
-                                    <span style="font-size:0.8rem;">{layer.title.clone()}</span>
+                                    <span style="font-size:0.8rem;">{move || {
+                                        let binding = project.get().layers.get();
+                                        let l = binding.iter().find(|l| l.id == layer.id).unwrap();
+                                        l.title.clone()
+                                    }}</span>
                                 </div>
                                 <div
                                     style="
@@ -145,7 +176,7 @@ pub fn LayerPanel() -> impl IntoView {
                                 >
                                     <button
                                     disabled = move || {
-                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
+                                        if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
                                             index <= 0
                                         }
                                         else {
@@ -153,7 +184,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         }
                                     }
                                     on:click = move |_| {
-                                        project.layers.update(|layers| {
+                                        project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 if index <= 0 {
                                                     return;
@@ -168,15 +199,15 @@ pub fn LayerPanel() -> impl IntoView {
 
                                     <button
                                     disabled = move || {
-                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= project.layers.get().iter().count() - 1
+                                        if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
+                                            index >= project.get().layers.get().iter().count() - 1
                                         }
                                         else {
                                             true
                                         }
                                     }
                                     on:click = move |_| {
-                                        project.layers.update(|layers| {
+                                        project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 if index >= layers.len() - 1 {
                                                     return;
@@ -190,14 +221,14 @@ pub fn LayerPanel() -> impl IntoView {
                                     </button>
                                     <button
                                     on:click = move |_| {
-                                        project.layers.update(|layers| {
+                                        project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 let original_layer = layers.get(index).unwrap();
                                                 let mut layer_cloned = original_layer.clone();
                                                 layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
-                                                let layer_id = project.next_layer_id.get();
+                                                let layer_id = project.get().next_layer_id.get();
                                                 layer_cloned.id = layer_id;
-                                                project.next_layer_id.set(layer_id + 1);
+                                                project.get().next_layer_id.set(layer_id + 1);
 
                                                 layers.insert(index + 1, layer_cloned);
                                                 logging::log!("Layer {} cloned", layer.id);
@@ -213,13 +244,21 @@ pub fn LayerPanel() -> impl IntoView {
                 />
                 </div>
 
+            <Show when = move || id_to_edit.get().is_some() fallback = || ()>
+                <EditLayerWindow
+                    dialog_ref = edit_layer_window_ref
+                    is_open = is_edit_layer_window_open
+                    id = id_to_edit.get().unwrap()
+                />
+            </Show>
+
             <NewLayerWindow
                 dialog_ref = new_layer_window_ref
                 is_open = is_new_layer_window_open
             />
             <button
                 on:click = move |_| {
-                    logging::log!("Button clicked!");
+                    logging::log!("Add layer button clicked!");
                     new_layer_window_ref.get().unwrap().open();
                     is_new_layer_window_open.set(true);
                 }
