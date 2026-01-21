@@ -5,24 +5,6 @@ use pro_pain_t_app::structs::layer::Layer;
 
 use crate::components::canvas_area::draw_checkerboard;
 
-pub fn layer_to_rgba(layer: &Layer) -> (Vec<u8>, u32, u32) {
-    let canvas = &layer.canvas;
-    let width = canvas.width;
-    let height = canvas.height;
-
-    let mut out = vec![0u8; (width * height * 4) as usize];
-
-    for pixel in &canvas.content {
-        let i = ((pixel.y * width + pixel.x) * 4) as usize;
-
-        out[i]     = pixel.color.r;
-        out[i + 1] = pixel.color.g;
-        out[i + 2] = pixel.color.b;
-        out[i + 3] = (pixel.color.alpha * 255.0) as u8;
-    }
-
-    (out, width, height)
-}
 
 fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
     let document = window().unwrap().document().unwrap();
@@ -86,7 +68,7 @@ pub fn LayerPreview(layer: Layer) -> impl IntoView {
             .get_context("2d").unwrap().unwrap()
             .dyn_into::<CanvasRenderingContext2d>().unwrap();
 
-        let (pixels, w, h) = layer_to_rgba(&layer);
+        let (pixels, w, h) = layer.to_rgba();
 
         let preview_size = 50.0;
         let scale = preview_size / w as f32;
@@ -105,7 +87,6 @@ pub fn LayerPreview(layer: Layer) -> impl IntoView {
                 height:50px;
                 image-rendering:pixelated;
                 border-radius:2px;
-                border:1px solid #333;
             "
         />
     }

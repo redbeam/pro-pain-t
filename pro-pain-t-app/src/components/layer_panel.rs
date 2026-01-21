@@ -43,7 +43,7 @@ pub fn LayerPanel() -> impl IntoView {
                     font-size:0.8rem;
                 ">
                 <For
-                    each=move || project.layers.get()
+                    each=move || project.layers.get().into_iter().rev()
                     key=|layer| layer.id
                     children=move |layer: Layer| {
                         view! {
@@ -141,29 +141,6 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
-                                            index <= 0
-                                        }
-                                        else {
-                                            true
-                                        }
-                                    }
-                                    on:click = move |_| {
-                                        project.layers.update(|layers| {
-                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
-                                                if index <= 0 {
-                                                    return;
-                                                }
-                                                layers.swap(index, index - 1);
-                                                logging::log!("Layer {} moved up", layers[index].id);
-                                            }
-                                        });
-                                    }>
-                                    "▲"
-                                    </button>
-
-                                    <button
-                                    disabled = move || {
-                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
                                             index >= project.layers.get().iter().count() - 1
                                         }
                                         else {
@@ -181,8 +158,30 @@ pub fn LayerPanel() -> impl IntoView {
                                             }
                                         });
                                     }>
-                                    "▼"
+                                    "▲"
                                     </button>
+                                    <button
+                                    disabled = move || {
+                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
+                                            index <= 0
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
+                                        project.layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                if index <= 0 {
+                                                    return;
+                                                }
+                                                layers.swap(index, index - 1);
+                                                logging::log!("Layer {} moved up", layers[index].id);
+                                            }
+                                        });
+                                    }>
+                                    "▼"
+                                    </button>                      
                                     <button
                                     on:click = move |_| {
                                         project.layers.update(|layers| {

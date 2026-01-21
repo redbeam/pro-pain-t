@@ -157,6 +157,14 @@ pub fn CanvasArea(
 
         let layers = project.layers.get();
         if layers.is_empty() {
+            let width = project.width.get();
+            let height = project.height.get();
+            canvas.set_width(width);
+            canvas.set_height(height);
+
+            ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
+            ctx.clear_rect(0.0, 0.0, f64::INFINITY, f64::INFINITY);
+            draw_checkerboard(&ctx, width, height, 8);
             return;
         }
 
