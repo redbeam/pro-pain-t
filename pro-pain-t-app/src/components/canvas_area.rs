@@ -16,7 +16,7 @@ pub fn draw_checkerboard(
 
     for y in (0..height).step_by(tile_size as usize) {
         for x in (0..width).step_by(tile_size as usize) {
-            let is_dark = ((x / tile_size + y / tile_size) % 2) == 0;
+            let is_dark = (x / tile_size + y / tile_size).is_multiple_of(2);
             let color = if is_dark { dark } else { light };
 
             #[allow(deprecated)]
