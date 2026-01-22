@@ -66,10 +66,6 @@ pub fn LayerPanel() -> impl IntoView {
                                     padding:0.25rem 0.3rem;
                                     border-radius:2px;
                                 "
-                                on:click = move |_| {
-                                    logging::log!("Layer {} selected: ", layer.id);
-                                    project.get().selected_layer_id.set(Some(layer.id));
-                                }
                             >
                                 <div
                                     style="
@@ -122,12 +118,32 @@ pub fn LayerPanel() -> impl IntoView {
                                         }
                                     }
                                     on:click = move |_| {
+                                        let selected = project.get().selected_layer_id.get();
+                                        let layers_original = project.get().layers.get();
+                                        let layer_index = layers_original.iter().position(|l| l.id == layer.id).unwrap();
+                                        let mut new_selected = selected;
+
+                                        if selected.is_some() && selected.unwrap() == layer.id {
+                                            if layers_original.len() <= 1 {
+                                                new_selected = None;
+                                                logging::log!("Selected layer after delete: None")
+                                            } else if layer_index == layers_original.len() - 1 {
+                                                new_selected = Some(layers_original[layer_index - 1].id);
+                                                logging::log!("Selected layer after delete: {}", layers_original[layer_index - 1].id);
+                                            } else {
+                                                new_selected = Some(layers_original[layer_index + 1].id);
+                                                logging::log!("Selected layer after delete: {}", layers_original[layer_index + 1].id);
+                                            }
+                                        }
+
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers.remove(index);
                                                 logging::log!("Layer {} delete pressed", layer.id);
                                             }
                                         });
+                                        
+                                        project.get().selected_layer_id.set(new_selected);
                                     }>
                                     "🗑️"
                                     </button>
@@ -155,6 +171,10 @@ pub fn LayerPanel() -> impl IntoView {
                                         flex-direction:column;
                                         gap:0.15rem;
                                     "
+                                    on:click = move |_| {
+                                        logging::log!("Layer {} selected: ", layer.id);
+                                        project.get().selected_layer_id.set(Some(layer.id));
+                                    }
                                 >
                                     <LayerPreview layer=layer.clone() />
                                     <span style="font-size:0.8rem;">{move || {
