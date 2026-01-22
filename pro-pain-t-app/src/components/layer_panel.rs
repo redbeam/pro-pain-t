@@ -191,6 +191,37 @@ pub fn LayerPanel() -> impl IntoView {
                                     }>
                                     "▲"
                                     </button>
+                                    
+                                    <button
+                                    on:click = move |_| {
+                                        project.get().layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                let original_layer = layers.get(index).unwrap();
+                                                let mut layer_cloned = original_layer.clone();
+                                                layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
+                                                let layer_id = project.get().next_layer_id.get();
+                                                layer_cloned.id = layer_id;
+                                                project.get().next_layer_id.set(layer_id + 1);
+
+                                                layers.insert(index + 1, layer_cloned);
+                                                logging::log!("Layer {} cloned", layer.id);
+                                            }
+                                        });
+                                    }>
+                                    "📄"
+                                    </button>
+
+                                    <button on:click = move |_| {
+                                        project.get().layers.update(|layers| {
+                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
+                                                layers[index].canvas.clear();
+                                                logging::log!("Layer {} cleared", layers[index].id);
+                                            }
+                                        });
+                                    }>
+                                    "🧽"
+                                    </button>
+
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
@@ -213,24 +244,6 @@ pub fn LayerPanel() -> impl IntoView {
                                     }>
                                     "▼"
                                     </button>                      
-                                    <button
-                                    on:click = move |_| {
-                                        project.get().layers.update(|layers| {
-                                            if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
-                                                let original_layer = layers.get(index).unwrap();
-                                                let mut layer_cloned = original_layer.clone();
-                                                layer_cloned.title = (layer_cloned.title + " (Copy)").to_string();
-                                                let layer_id = project.get().next_layer_id.get();
-                                                layer_cloned.id = layer_id;
-                                                project.get().next_layer_id.set(layer_id + 1);
-
-                                                layers.insert(index + 1, layer_cloned);
-                                                logging::log!("Layer {} cloned", layer.id);
-                                            }
-                                        });
-                                    }>
-                                    "📄"
-                                    </button>
                                 </div>
                             </div>
                         }
