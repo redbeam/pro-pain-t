@@ -1,7 +1,8 @@
+use image::RgbImage;
+use serde::{Deserialize, Serialize};
 use crate::structs::{canvas::Canvas, color::Color};
 
-#[derive(Clone)]
-#[allow(dead_code, unused_variables)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Layer {
     pub id: usize,
     pub title: String,
@@ -11,12 +12,22 @@ pub struct Layer {
 }
 
 impl Layer {
-    pub fn new(id: usize, title: String, width: u32, height: u32, background_color: Color) -> Self {
+    pub fn new(id: usize, title: impl Into<String>, width: u32, height: u32, background_color: Color) -> Self {
         Self {
             id,
-            title,
+            title: title.into(),
             is_locked: false,
             canvas: Canvas::new(width, height, background_color),
+            is_visible: true,
+        }
+    }
+
+    pub fn from_image(image: &RgbImage, id: usize, title: impl Into<String>, background_color: Color) -> Self {
+        Self {
+            id,
+            title: title.into(),
+            is_locked: false,
+            canvas: Canvas::from_image(image, background_color),
             is_visible: true,
         }
     }

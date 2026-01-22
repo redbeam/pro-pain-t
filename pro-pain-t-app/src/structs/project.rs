@@ -1,9 +1,9 @@
-use leptos::prelude::{Get, RwSignal, Set, Update};
-
 use crate::structs::{color::Color, history::History, layer::Layer};
+use leptos::prelude::{Get, RwSignal, Set, Update};
+use serde::{Deserialize, Serialize};
+use std::fs;
 
-#[allow(dead_code, unused_variables)]
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Project {
     pub name: String,
     pub width: RwSignal<u32>,
@@ -11,11 +11,16 @@ pub struct Project {
     pub background_color: Color,
     pub layers: RwSignal<Vec<Layer>>,
     pub history: History,
-    pub next_layer_id: RwSignal<usize>, // best approach for seriliazing ids
+    pub next_layer_id: RwSignal<usize>, // best approach for serializing ids
 }
 
 impl Project {
-    pub fn new(name: String, width: u32, height: u32, background_color: Color) -> Self {
+    pub fn new(
+        name: String,
+        width: u32,
+        height: u32,
+        background_color: Color,
+    ) -> Self {
         Self {
             name,
             width: RwSignal::new(width),
@@ -33,28 +38,6 @@ impl Project {
         }
     }
 
-    pub fn replace_project_with_blank(
-        &mut self,
-        name: String,
-        width: u32,
-        height: u32,
-        color: Color,
-    ) {
-        self.name = name;
-        self.width.set(width);
-        self.height.set(height);
-        self.background_color = color;
-        self.layers.set(vec![Layer::new(
-            0,
-            "Layer 0".to_string(),
-            width,
-            height,
-            color,
-        )]);
-        self.history = History::new(10);
-        self.next_layer_id.set(1);
-    }
-
     pub fn default() -> Self {
         Self::new(
             "Unnamed project".to_string(),
@@ -64,17 +47,55 @@ impl Project {
         )
     }
 
-    pub fn add_new_layer(&mut self) {
-        self.layers.update(|layers| {
-            layers.push(Layer::new(
-                self.next_layer_id.get(),
-                self.name.clone(),
-                self.width.get(),
-                self.height.get(),
-                self.background_color,
-            ));
-        });
+    pub fn from_file(file_path: String) -> Self {
+        let project_file_data = fs::read(file_path).expect("Failed to read file");
+        ron::de::from_bytes(&*project_file_data).expect("Failed to deserialize project")
+    }
 
+    pub fn replace_project_with_blank(
+        &mut self,
+        name: String,
+        width: u32,
+        height: u32,
+        background_color: Color,
+    ) {
+        self.name = name;
+        self.width.set(width);
+        self.height.set(height);
+        self.background_color = background_color;
+        self.layers.set(vec![Layer::new(
+            0,
+            "Layer 0".to_string(),
+            width,
+            height,
+            background_color,
+        )]);
+        self.history = History::new(10);
+        self.next_layer_id.set(1);
+    }
+
+    pub fn replace_project_with(&mut self, new_project: Project) {
+        self.name = new_project.name;
+        self.width.set(new_project.width.get());
+        self.height.set(new_project.height.get());
+        self.background_color = new_project.background_color;
+        self.layers.set(new_project.layers.get());
+        self.history = new_project.history;
+        self.next_layer_id.set(new_project.next_layer_id.get());
+    }
+
+    pub fn add_new_layer(&self, layer: Layer) {
+        self.layers.update(|layers| {
+            layers.push(layer);
+        });
         self.next_layer_id.set(self.next_layer_id.get() + 1);
+    }
+
+    pub fn layer_count(&self) -> usize {
+        self.layers.get().len()
+    }
+
+    pub fn serialize(&self) -> String {
+        ron::ser::to_string(self).expect("Couldn't serialize project")
     }
 }

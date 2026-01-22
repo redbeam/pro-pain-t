@@ -1,21 +1,25 @@
 use crate::components::color_picker::ColorPicker;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::project::Project;
-use pro_pain_t_app::structs::{color::Color, layer::Layer};
 
 #[component]
-pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> impl IntoView {
-    let (title, set_title) = signal(String::from("New layer"));
-    let color = RwSignal::new(Color::default_white());
+pub fn EditLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, id: usize) -> impl IntoView {
+    let project = use_context::<RwSignal<Project>>().unwrap().get();
 
-    let project = use_context::<RwSignal<Project>>().unwrap();
-
-    let create_layer = move || {
-        let layer_id = project.get().next_layer_id.get();
-        let layer = Layer::new(layer_id, title.get(), project.get().width.get(), project.get().height.get(), color.get());
-        project.get().add_new_layer(layer);
-
-        logging::log!("new_layer: {}, {}, {}, {}, count: {}", layer_id, project.get().width.get(), project.get().height.get(), title.get(), project.get().layer_count());
+    let layers = project.layers.get();
+    let layer = layers.iter().find(|l| l.id == id).unwrap();
+    
+    let title = RwSignal::new(layer.title.clone());
+    let color = RwSignal::new(layer.canvas.background_color);
+    
+    let edit_layer = move || {
+        project.layers.update(|layers| {
+            if let Some(index) = layers.iter_mut().position(|l| l.id == id) {
+                layers[index].canvas.background_color = color.get();
+                layers[index].title = title.get();
+                logging::log!("Layer {} edited", id);
+            }
+        });
     };
 
     view! {
@@ -28,7 +32,7 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
                 display:{};", if is_open.get() {"block"} else {"none"})}
         >
             <h1 style="color:white; text-align:center;">
-                "New layer"
+                "Edit layer"
             </h1>
             <table>
                 <tr>
@@ -39,10 +43,10 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
                         <input
                             type="text"
                             prop:value = move || title.get()
-                            on:input = move |value| { set_title.set(event_target_value(&value)) }
+                            on:input = move |value| { title.set(event_target_value(&value)) }
                             style:color="black"
                             style:text="Title"
-                            id="new-layer-title"
+                            id="edit-layer-title"
                         />
                     </td>
                 </tr>
@@ -58,7 +62,7 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
                         is_open.set(false);
                         dialog_ref.get().unwrap().close();
                     }
-                    id="cancel-add-layer-window"
+                    id="cancel-edit-layer-window"
                     style="
                         margin-top:0.25rem;
                         padding:0.25rem 0.5rem;
@@ -77,9 +81,9 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
                     on:click = move |_| {
                         is_open.set(false);
                         dialog_ref.get().unwrap().close();
-                        create_layer();
+                        edit_layer();
                     }
-                    id="confirm-add-layer-window"
+                    id="confirm-edit-layer-window"
                     style="
                         margin-top:0.25rem;
                         padding:0.25rem 0.5rem;
