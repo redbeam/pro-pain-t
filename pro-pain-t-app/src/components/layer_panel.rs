@@ -18,7 +18,6 @@ pub fn LayerPanel() -> impl IntoView {
 
     let open_edit_layer_window = move |id: usize| {
         id_to_edit.set(Some(id));
-        new_layer_window_ref.get().unwrap().open();
         is_edit_layer_window_open.set(true);
     };
 
@@ -67,6 +66,10 @@ pub fn LayerPanel() -> impl IntoView {
                                     padding:0.25rem 0.3rem;
                                     border-radius:2px;
                                 "
+                                on:click = move |_| {
+                                    logging::log!("Layer {} selected: ", layer.id);
+                                    project.get().selected_layer_id.set(Some(layer.id));
+                                }
                             >
                                 <div
                                     style="
