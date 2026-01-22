@@ -1,5 +1,6 @@
 use crate::components::edit_layer_window::EditLayerWindow;
 use crate::components::new_layer_window::NewLayerWindow;
+use crate::components::layer_preview::LayerPreview;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::structs::layer::Layer;
 use pro_pain_t_app::structs::project::Project;
@@ -53,7 +54,7 @@ pub fn LayerPanel() -> impl IntoView {
                     font-size:0.8rem;
                 ">
                 <For
-                    each=move || project.get().layers.get()
+                    each=move || project.get().layers.get().into_iter().rev()
                     key=|layer| layer.id
                     children=move |layer: Layer| {
                         view! {
@@ -152,13 +153,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         gap:0.15rem;
                                     "
                                 >
-                                    <div
-                                        style="
-                                            height:50px;
-                                            background:#d8d8d8;
-                                            border-radius:2px;
-                                        "
-                                    ></div>
+                                    <LayerPreview layer=layer.clone() />
                                     <span style="font-size:0.8rem;">{move || {
                                         let binding = project.get().layers.get();
                                         let l = binding.iter().find(|l| l.id == layer.id).unwrap();
@@ -177,7 +172,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
-                                            index <= 0
+                                            index >= project.get().layers.get().iter().count() - 1
                                         }
                                         else {
                                             true
@@ -186,17 +181,17 @@ pub fn LayerPanel() -> impl IntoView {
                                     on:click = move |_| {
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
-                                                if index <= 0 {
+                                                if index >= layers.len() - 1 {
                                                     return;
                                                 }
-                                                layers.swap(index, index - 1);
-                                                logging::log!("Layer {} moved up", layers[index].id);
+                                                layers.swap(index, index + 1);
+                                                logging::log!("Layer {} moved down", layer.id);
                                             }
                                         });
                                     }>
                                     "▲"
                                     </button>
-
+                                    
                                     <button
                                     on:click = move |_| {
                                         project.get().layers.update(|layers| {
@@ -239,16 +234,16 @@ pub fn LayerPanel() -> impl IntoView {
                                     on:click = move |_| {
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
-                                                if index >= layers.len() - 1 {
+                                                if index <= 0 {
                                                     return;
                                                 }
-                                                layers.swap(index, index + 1);
-                                                logging::log!("Layer {} moved down", layer.id);
+                                                layers.swap(index, index - 1);
+                                                logging::log!("Layer {} moved up", layers[index].id);
                                             }
                                         });
                                     }>
                                     "▼"
-                                    </button>
+                                    </button>                      
                                 </div>
                             </div>
                         }

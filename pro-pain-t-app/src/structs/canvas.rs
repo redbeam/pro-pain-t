@@ -6,7 +6,7 @@ use crate::structs::{color::Color, pixel::Pixel};
 pub struct Canvas {
     pub width: u32,
     pub height: u32,
-    content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + x
+    pub content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + x
     pub background_color: Color,
 }
 
