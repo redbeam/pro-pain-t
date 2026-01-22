@@ -56,6 +56,8 @@ fn draw_rgba_over_checkerboard(
 
 #[component]
 pub fn LayerPreview(layer: Layer) -> impl IntoView {
+    let max_width = 120;
+    let max_height = 80;
     let canvas_ref = NodeRef::new();
 
     Effect::new(move |_| {
@@ -83,8 +85,6 @@ pub fn LayerPreview(layer: Layer) -> impl IntoView {
         <canvas
             node_ref=canvas_ref
             style="
-                width:100px;
-                height:50px;
                 image-rendering:pixelated;
                 border-radius:2px;
             "

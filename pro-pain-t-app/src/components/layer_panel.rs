@@ -72,9 +72,8 @@ pub fn LayerPanel() -> impl IntoView {
                                     style="
                                         display:flex;
                                         flex-direction:column;
-                                        gap:0.75rem;
+                                        gap:0.15rem;
                                         font-size:0.7rem;
-                                        align-items:center;
                                         color:#d0d0d0;
                                     "
                                 >
