@@ -8,4 +8,5 @@ pub mod new_project_window;
 pub mod rgb_slider;
 pub mod status_bar;
 pub mod tool_palette;
+pub mod layer_preview;
 pub mod edit_layer_window;
