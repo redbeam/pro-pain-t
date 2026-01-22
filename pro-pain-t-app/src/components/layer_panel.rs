@@ -54,7 +54,7 @@ pub fn LayerPanel() -> impl IntoView {
                     font-size:0.8rem;
                 ">
                 <For
-                    each=move || project.layers.get().into_iter().rev()
+                    each=move || project.get().layers.get().into_iter().rev()
                     key=|layer| layer.id
                     children=move |layer: Layer| {
                         view! {
@@ -171,8 +171,8 @@ pub fn LayerPanel() -> impl IntoView {
                                 >
                                     <button
                                     disabled = move || {
-                                        if let Some(index) = project.layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= project.layers.get().iter().count() - 1
+                                        if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
+                                            index >= project.get().layers.get().iter().count() - 1
                                         }
                                         else {
                                             true
