@@ -58,14 +58,20 @@ pub fn LayerPanel() -> impl IntoView {
                     children=move |layer: Layer| {
                         view! {
                             <div
-                                style="
+                                style= format!("
                                     display:flex;
                                     align-items:center;
                                     gap:0.35rem;
-                                    background:#2c2c2c;
                                     padding:0.25rem 0.3rem;
                                     border-radius:2px;
-                                "
+                                ")
+                                style:background-color = move || {
+                                    if project.with(|p| p.selected_layer_id.get()) == Some(layer.id) {
+                                        "#151515"
+                                    } else {
+                                        "#2c2c2c"
+                                    }
+                                }
                             >
                                 <div
                                     style="
@@ -74,7 +80,6 @@ pub fn LayerPanel() -> impl IntoView {
                                         gap:0.75rem;
                                         font-size:0.7rem;
                                         align-items:center;
-                                        color:#d0d0d0;
                                     "
                                 >
                                     <button
