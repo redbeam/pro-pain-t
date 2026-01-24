@@ -208,7 +208,7 @@ pub fn LayerPanel() -> impl IntoView {
                                                     return;
                                                 }
                                                 layers.swap(index, index + 1);
-                                                logging::log!("Layer {} moved down", layer.id);
+                                                logging::log!("Layer {} moved up", layer.id);
                                             }
                                         });
                                     }>
@@ -248,7 +248,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= project.get().layers.get().iter().count() - 1
+                                            index <= 0
                                         }
                                         else {
                                             true
@@ -261,7 +261,7 @@ pub fn LayerPanel() -> impl IntoView {
                                                     return;
                                                 }
                                                 layers.swap(index, index - 1);
-                                                logging::log!("Layer {} moved up", layers[index].id);
+                                                logging::log!("Layer {} moved down", layer.id);
                                             }
                                         });
                                     }>
