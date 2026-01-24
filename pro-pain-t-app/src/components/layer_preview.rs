@@ -56,15 +56,15 @@ fn draw_rgba_over_checkerboard(
 
 #[component]
 pub fn LayerPreview(layer: Layer) -> impl IntoView {
-    let mut width = 120;
-    let mut height = 80;
+    let mut width = 90;
+    let mut height = 60;
 
     let htw_ratio = layer.canvas.height as f32 / layer.canvas.width as f32;
     if htw_ratio >= 1.5 {
-        height = (120f32 / htw_ratio) as i32;
+        height = (width as f32 / htw_ratio) as i32;
     }
     else {
-        width = (80f32 * htw_ratio) as i32;
+        width = (height as f32 * htw_ratio) as i32;
     }
 
     let mut width = width.to_string();
