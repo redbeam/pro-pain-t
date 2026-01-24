@@ -1,4 +1,5 @@
 use crate::structs::{color::Color, history::History, layer::Layer};
+use crate::tools::pen::PenState;
 use crate::tools::tools::Tool;
 use leptos::prelude::{Get, RwSignal, Set, Update};
 use serde::{Deserialize, Serialize};
@@ -38,8 +39,8 @@ impl Project {
                 background_color,
             )]),
             current_color: RwSignal::new(Color::default_black()),
-            active_layer: RwSignal::new(0),
-            current_tool: RwSignal::new(Tool::Pen),
+            active_layer: RwSignal::new(0), // TODO: use implementation of active layer
+            current_tool: RwSignal::new(Tool::Pen(PenState::default())),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
         }

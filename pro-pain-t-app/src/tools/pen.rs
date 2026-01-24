@@ -1,4 +1,5 @@
 use leptos::prelude::{Get, RwSignal, Update};
+use serde::{Deserialize, Serialize};
 use crate::structs::{pixel::Pixel, project::Project};
 
 use crate::tools::geometry::screen_to_canvas;
@@ -39,8 +40,7 @@ fn draw_line(
     }
 }
 
-/// State for the pen tool
-#[derive(Default)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PenState {
     pub is_drawing: bool,
     pub last_pos: Option<(i32, i32)>,

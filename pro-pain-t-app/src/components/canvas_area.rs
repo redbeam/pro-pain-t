@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos::*;
-use pro_pain_t_app::{structs::{color::Color, layer::Layer, project::Project}, tools::{pen::{PenState, pen_mouse_down, pen_mouse_move, pen_mouse_up}, tools::Tool}};
+use pro_pain_t_app::{structs::{color::Color, layer::Layer, project::Project}};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast, JsValue}};
 
 use crate::view_state::ProjectViewState;
@@ -145,9 +145,7 @@ pub fn CanvasArea(
     let project = use_context::<RwSignal<Project>>().unwrap();
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
 
-    let pen_state = RwSignal::new(PenState::default());
-
-    let current_tool = project.get().current_tool.get();
+    let current_tool = project.get().current_tool;
 
     Effect::new(move |_| {
         let canvas: HtmlCanvasElement = match canvas_ref.get() {
@@ -197,40 +195,18 @@ pub fn CanvasArea(
                 )
             }
 
-            on:mousedown = move |_| {
-                match current_tool {
-                    Tool::Pen => pen_state.update(|s| pen_mouse_down(s)),
-                }
-            }
-
+            on:mousedown = move |_| { current_tool.update(|t| t.on_mouse_down()) }
             on:mousemove = move |e| {
-                let canvas = match canvas_ref.get() {
+                 let canvas = match canvas_ref.get() {
                     Some(c) => c,
                     None => return,
                 };
 
                 let zoom = view_state.zoom_factor.get();
-
-                match current_tool {
-                    Tool::Pen => {
-                        pen_state.update(|state| {
-                            pen_mouse_move(state, &e, &project, &canvas, zoom);
-                        });
-                    },
-                }
+                current_tool.update(|t| t.on_mouse_move(&e, &canvas, zoom, &project)) 
             }
-
-            on:mouseup = move |_| {
-                match current_tool {
-                    Tool::Pen => pen_state.update(|s| pen_mouse_up(s)),
-                }
-            }
-
-            on:mouseleave = move |_| {
-                match current_tool {
-                    Tool::Pen => pen_state.update(|s| pen_mouse_up(s)),
-                }
-            }
+            on:mouseup = move |_| { current_tool.update(|t| t.on_mouse_up()) }
+            on:mouseleave = move |_| { current_tool.update(|t| t.on_mouse_up()) }     
             
         />
     }
