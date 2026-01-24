@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use pro_pain_t_app::structs::{project::Project};
+use pro_pain_t_app::{structs::project::Project, tools::{pen::PenState, tools::Tool}};
 
 use crate::components::color_picker::ColorPicker;
 
@@ -27,9 +27,17 @@ pub fn ToolPalette() -> impl IntoView {
                     display:grid;
                     grid-template-columns:repeat(4, 1fr);
                     gap:0.25rem;
+                    cursor: pointer;
                 "
             >
-                { (0..12).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
+                <div
+                    // TODO: show pen icon
+                    style="width:24px; height:24px; background:#ffff00; border-radius:2px;"
+                    on:click=move |_| {
+                        project.get().current_tool.update(|_| {Tool::Pen(PenState::default());});
+                    }
+                />
+                { (0..11).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
             </div>
 
             <ColorPicker color=project.get().current_color />
