@@ -78,6 +78,22 @@ pub fn LayerPanel() -> impl IntoView {
                                     "
                                 >
                                     <button
+                                    style:background = move || {
+                                        if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
+                                            if layer_reactive.is_locked {
+                                                "#757575"
+                                            }
+                                            else if layer_reactive.is_visible {
+                                                "#B0B0B0"
+                                            }
+                                            else {
+                                                "#404040"
+                                            }
+                                        }
+                                        else {
+                                            "#B0B0B0"
+                                        }
+                                    }
                                     disabled = move || {
                                         if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
                                             layer_reactive.is_locked
@@ -97,7 +113,21 @@ pub fn LayerPanel() -> impl IntoView {
                                     "👀"
                                     </button>
 
-                                    <button on:click = move |_| {
+                                    <button
+                                    style:background = move || {
+                                        if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
+                                            if layer_reactive.is_locked {
+                                                "#404040"
+                                            }
+                                            else {
+                                                "#B0B0B0"
+                                            }
+                                        }
+                                        else {
+                                            "#B0B0B0"
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].is_locked = !layers[index].is_locked;
@@ -211,7 +241,16 @@ pub fn LayerPanel() -> impl IntoView {
                                     "📄"
                                     </button>
 
-                                    <button on:click = move |_| {
+                                    <button
+                                    disabled = move || {
+                                        if let Some(layer_reactive) = project.get().layers.get().iter().find(|l| l.id == layer.id) {
+                                            layer_reactive.is_locked
+                                        }
+                                        else {
+                                            true
+                                        }
+                                    }
+                                    on:click = move |_| {
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers[index].canvas.clear();

@@ -1,0 +1,34 @@
+/*
+Base color light: #5F5F5F
+Base color: #353535
+Base color dark: #272727
+Button text: #FFFFFF
+Button background selected: #404040
+Button background available: #B0B0B0
+Button background disabled: #757575
+*/
+
+button {
+    background: #B0B0B0;
+    border: none;
+    color: #d0d0d0;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 2;
+    border-radius: 4px;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button:disabled {
+    background: #757575;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+button.toggle-button-toggled {
+    background: #202020
+}
