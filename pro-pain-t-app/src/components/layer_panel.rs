@@ -150,6 +150,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         display:flex;
                                         flex-direction:column;
                                         gap:0.15rem;
+                                        align-items:center
                                     "
                                 >
                                     <LayerPreview layer=layer.clone() />
