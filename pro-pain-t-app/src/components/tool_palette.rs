@@ -1,11 +1,11 @@
 use leptos::prelude::*;
-use pro_pain_t_app::structs::color::Color;
+use pro_pain_t_app::structs::{color::Color, project::Project};
 
 use crate::components::color_picker::ColorPicker;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {
-    let current_color = RwSignal::new(Color::new(255, 255, 255, 1.0));
+    let project = use_context::<RwSignal<Project>>().unwrap();
 
     view! {
         <nav
@@ -32,7 +32,7 @@ pub fn ToolPalette() -> impl IntoView {
                 { (0..12).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
             </div>
 
-            <ColorPicker color=current_color />
+            <ColorPicker color=project.get().current_color />
         </nav>
     }
 }
