@@ -1,4 +1,5 @@
 use crate::structs::{color::Color, history::History, layer::Layer};
+use crate::tools::tools::Tool;
 use leptos::prelude::{Get, RwSignal, Set, Update};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -13,6 +14,7 @@ pub struct Project {
     pub history: History,
     pub current_color: RwSignal<Color>,
     pub active_layer: RwSignal<usize>,
+    pub current_tool: RwSignal<Tool>,
     pub next_layer_id: RwSignal<usize>, // best approach for serializing ids
 }
 
@@ -37,6 +39,7 @@ impl Project {
             )]),
             current_color: RwSignal::new(Color::default_black()),
             active_layer: RwSignal::new(0),
+            current_tool: RwSignal::new(Tool::Pen),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
         }

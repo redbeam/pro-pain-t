@@ -1,5 +1,5 @@
 use leptos::prelude::*;
-use pro_pain_t_app::structs::{color::Color, project::Project};
+use pro_pain_t_app::structs::{project::Project};
 
 use crate::components::color_picker::ColorPicker;
 

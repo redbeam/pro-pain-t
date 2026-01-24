@@ -1,44 +1,9 @@
 use leptos::prelude::*;
 use leptos::*;
-use pro_pain_t_app::{structs::{color::Color, layer::Layer, pixel::Pixel, project::Project}, utils::geometry::screen_to_canvas};
+use pro_pain_t_app::{structs::{color::Color, layer::Layer, project::Project}, tools::{pen::{PenState, pen_mouse_down, pen_mouse_move, pen_mouse_up}, tools::Tool}};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast, JsValue}};
 
 use crate::view_state::ProjectViewState;
-
-fn draw_line(
-    x0: i32,
-    y0: i32,
-    x1: i32,
-    y1: i32,
-    mut plot: impl FnMut(i32, i32),
-) {
-    let dx = (x1 - x0).abs();
-    let dy = -(y1 - y0).abs();
-    let sx = if x0 < x1 { 1 } else { -1 };
-    let sy = if y0 < y1 { 1 } else { -1 };
-    let mut err = dx + dy;
-
-    let mut x = x0;
-    let mut y = y0;
-
-    loop {
-        plot(x, y);
-
-        if x == x1 && y == y1 {
-            break;
-        }
-
-        let e2 = 2 * err;
-        if e2 >= dy {
-            err += dy;
-            x += sx;
-        }
-        if e2 <= dx {
-            err += dx;
-            y += sy;
-        }
-    }
-}
 
 pub fn draw_checkerboard(
     ctx: &CanvasRenderingContext2d,
@@ -180,8 +145,9 @@ pub fn CanvasArea(
     let project = use_context::<RwSignal<Project>>().unwrap();
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
 
-    let is_drawing = RwSignal::new(false);
-    let last_pos = RwSignal::new(None::<(i32, i32)>);
+    let pen_state = RwSignal::new(PenState::default());
+
+    let current_tool = project.get().current_tool.get();
 
     Effect::new(move |_| {
         let canvas: HtmlCanvasElement = match canvas_ref.get() {
@@ -231,77 +197,40 @@ pub fn CanvasArea(
                 )
             }
 
-            on:mousemove = move |e| {
-                if !is_drawing.get() {
-                    return;
+            on:mousedown = move |_| {
+                match current_tool {
+                    Tool::Pen => pen_state.update(|s| pen_mouse_down(s)),
                 }
+            }
 
+            on:mousemove = move |e| {
                 let canvas = match canvas_ref.get() {
                     Some(c) => c,
                     None => return,
                 };
 
-                let rect = canvas.get_bounding_client_rect();
                 let zoom = view_state.zoom_factor.get();
 
-                let x = ((e.client_x() as f64 - rect.left()) / zoom as f64).floor() as i32;
-                let y = ((e.client_y() as f64 - rect.top()) / zoom as f64).floor() as i32;
-
-                if x < 0 || y < 0 {
-                    return;
+                match current_tool {
+                    Tool::Pen => {
+                        pen_state.update(|state| {
+                            pen_mouse_move(state, &e, &project, &canvas, zoom);
+                        });
+                    },
                 }
-
-                let current = (x, y);
-                let color = project.get().current_color.get();
-
-                project.get().layers.update(|layers| {
-                    let layer_index = project.get().active_layer.get();
-
-                    let Some(layer) = layers.get_mut(layer_index) else {
-                        return;
-                    };
-
-                    if layer.is_locked || !layer.is_visible {
-                        return;
-                    }
-
-                    let canvas = &mut layer.canvas;
-
-                    if let Some((lx, ly)) = last_pos.get() {
-                        draw_line(lx, ly, x, y, |px, py| {
-                            if px < 0 || py < 0 {
-                                return;
-                            }
-
-                            let _ = canvas.set_pixel(Pixel {
-                                x: px as u32,
-                                y: py as u32,
-                                color,
-                            });
-                        });
-                    } else {
-                        let _ = canvas.set_pixel(Pixel {
-                            x: x as u32,
-                            y: y as u32,
-                            color,
-                        });
-                    }
-                });
-
-                last_pos.set(Some(current));
             }
 
-            on:mousedown=move |_| is_drawing.set(true)
             on:mouseup = move |_| {
-                is_drawing.set(false);
-                last_pos.set(None);
+                match current_tool {
+                    Tool::Pen => pen_state.update(|s| pen_mouse_up(s)),
+                }
             }
 
             on:mouseleave = move |_| {
-                is_drawing.set(false);
-                last_pos.set(None);
+                match current_tool {
+                    Tool::Pen => pen_state.update(|s| pen_mouse_up(s)),
+                }
             }
-
             
         />
     }
