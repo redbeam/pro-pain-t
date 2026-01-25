@@ -56,6 +56,22 @@ fn draw_rgba_over_checkerboard(
 
 #[component]
 pub fn LayerPreview(layer: Layer) -> impl IntoView {
+    let mut width = 90;
+    let mut height = 60;
+
+    let htw_ratio = layer.canvas.height as f32 / layer.canvas.width as f32;
+    if htw_ratio >= 1.5 {
+        height = (width as f32 / htw_ratio) as i32;
+    }
+    else {
+        width = (height as f32 * htw_ratio) as i32;
+    }
+
+    let mut width = width.to_string();
+    width.push_str("px");
+    let mut height = height.to_string();
+    height.push_str("px");
+
     let canvas_ref = NodeRef::new();
 
     Effect::new(move |_| {
@@ -83,11 +99,11 @@ pub fn LayerPreview(layer: Layer) -> impl IntoView {
         <canvas
             node_ref=canvas_ref
             style="
-                width:100px;
-                height:50px;
                 image-rendering:pixelated;
                 border-radius:2px;
             "
+            style:width = {width}
+            style:height = {height}
         />
     }
 }
