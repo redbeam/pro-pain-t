@@ -33,13 +33,7 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
             class="dialog"
         >
             <div
-                style:display="flex"
-                style:flex-direction="column"
-                style:align-items="center"
-                style:justify-content="space-between"
-                style:padding="5px"
-                style:color="white"
-                style:text-align="center">
+                class="layer-dialog-layout">
                 <h1 style="color:white; text-align:center;">
                     "New layer"
                 </h1>
