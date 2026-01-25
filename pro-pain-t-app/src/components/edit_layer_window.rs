@@ -1,6 +1,6 @@
 use crate::components::color_picker::ColorPicker;
 use leptos::{html::Dialog, logging, prelude::*};
-use pro_pain_t_app::structs::project::Project;
+use crate::structs::project::Project;
 
 #[component]
 pub fn EditLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, id: usize) -> impl IntoView {
@@ -8,10 +8,10 @@ pub fn EditLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, id:
     
     let layers = project.layers.get();
     let layer = layers.iter().find(|l| l.id == id).unwrap();
-    
+
     let title = RwSignal::new(layer.title.clone());
     let color = RwSignal::new(layer.canvas.background_color);
-    
+
     let edit_layer = move || {
         project.layers.update(|layers| {
             if let Some(index) = layers.iter_mut().position(|l| l.id == id) {

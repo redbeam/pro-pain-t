@@ -1,8 +1,7 @@
 use leptos::prelude::*;
 use leptos::*;
-use pro_pain_t_app::structs::{color::Color, layer::Layer, project::Project};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast, JsValue}};
-
+use crate::structs::{color::Color, layer::Layer, project::Project};
 use crate::view_state::ProjectViewState;
 
 pub fn draw_checkerboard(

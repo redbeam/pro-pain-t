@@ -1,6 +1,7 @@
+use crate::handlers::{export_layer_handler, import_as_layer_handler, open_file_handler, project_overwrite_confirmation, save_project_handler};
 use tauri::menu::{MenuBuilder, SubmenuBuilder};
-use tauri::{App, Emitter};
-use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
+use tauri::{App, AppHandle, Emitter};
+use tauri_plugin_dialog::DialogExt;
 
 pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let dummy_menu = SubmenuBuilder::new(app, "Pro PainT").build()?;

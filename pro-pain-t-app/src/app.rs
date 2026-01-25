@@ -4,10 +4,10 @@ use crate::components::layer_panel::LayerPanel;
 use crate::components::new_project_window::NewProjectWindow;
 use crate::components::status_bar::StatusBar;
 use crate::components::tool_palette::ToolPalette;
+use crate::structs::project::Project;
 use crate::view_state::ProjectViewState;
 use leptos::html::Dialog;
 use leptos::prelude::*;
-use pro_pain_t_app::structs::project::Project;
 use std::{env, fs};
 use image::ImageReader;
 use pro_pain_t_app::structs::color::Color;
@@ -72,25 +72,22 @@ pub fn App() -> impl IntoView {
                     flex:1;
                     display:flex;
                     min-height:0;
-
                 "
             >
                 <ToolPalette />
-                <div 
+                <div
                     style="
-                    flex:1;
-                    display:flex;
-                    justify-content:center;
-                    align-items:center;
-                    background:#3a3a3a;
-                "
+                        flex:1;
+                        display:flex;
+                        justify-content:center;
+                        align-items:center;
+                        background:#3a3a3a;
+                    "
                 >
                     <CanvasArea />
                 </div>
-                
                 <LayerPanel />
-            </div
-            >
+            </div>
             <StatusBar
                 is_open = is_canvas_size_open
             />

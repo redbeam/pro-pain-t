@@ -1,7 +1,7 @@
 use crate::components::color_picker::ColorPicker;
 use leptos::{html::Dialog, logging, prelude::*};
-use pro_pain_t_app::structs::project::Project;
-use pro_pain_t_app::structs::{color::Color, layer::Layer};
+use crate::structs::project::Project;
+use crate::structs::{color::Color, layer::Layer};
 
 #[component]
 pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> impl IntoView {
