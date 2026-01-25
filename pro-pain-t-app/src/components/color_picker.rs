@@ -139,7 +139,7 @@ pub fn ColorPicker(#[prop(into)] color: RwSignal<Color>) -> impl IntoView {
                 on:click=on_click
             />
 
-            <div style="font-size:0.85rem; letter-spacing:0.06em; color:white; align-self:flex-start; padding:0 0 0 6px;">
+            <div style="font-size:0.85rem; letter-spacing:0.06em; color:white;">
                 "Brightness"
             </div>
 
@@ -152,7 +152,6 @@ pub fn ColorPicker(#[prop(into)] color: RwSignal<Color>) -> impl IntoView {
                 style="writing-mode: bt-lr; height:10px;"
                 on:input=on_value
             />
-
 
         </div>
 
