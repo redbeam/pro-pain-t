@@ -5,7 +5,7 @@ use crate::view_state::ProjectViewState;
 
 #[component]
 pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
-    let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let project = use_context::<RwSignal<Project>>().unwrap();
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
 
     let zoom_out_disabled = Memo::new(move |_| {
@@ -66,7 +66,7 @@ pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
                     "
                     title="Change canvas size"
                 >
-                    {move || format!("{}×{} px", project.width.get(), project.height.get())}
+                    {move || project.with(|project| format!("{}×{} px", project.width.get(), project.height.get()))}
                 </button>
                 <span>"x = 0, y = 0"</span>
             </div>

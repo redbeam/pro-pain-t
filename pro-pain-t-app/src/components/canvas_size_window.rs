@@ -6,17 +6,22 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
     let width_input_ref: NodeRef<html::Input> = NodeRef::new();
     let ok_button_ref: NodeRef<html::Button> = NodeRef::new();
 
-    let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let project = use_context::<RwSignal<Project>>().unwrap();
 
-    let (local_width, set_local_width) = signal(project.width.get());
-    let (local_height, set_local_height) = signal(project.height.get());
+    let initial_width = project.with_untracked(|project| project.width.get_untracked());
+    let initial_height = project.with_untracked(|project| project.height.get_untracked());
+
+    let (local_width, set_local_width) = signal(initial_width);
+    let (local_height, set_local_height) = signal(initial_height);
 
     {
         let width_input_ref = width_input_ref.clone();
         Effect::new(move |_| {
             if is_open.get() {
-                set_local_width.set(project.width.get());
-                set_local_height.set(project.height.get());
+                project.with(|project| {
+                    set_local_width.set(project.width.get());
+                    set_local_height.set(project.height.get());
+                });
 
                 if let Some(input) = width_input_ref.get() {
                     let _ = input.focus();
@@ -26,13 +31,15 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
     }
 
     let on_resize_canvas = move |new_w: u32, new_h: u32| {
-        project.layers.update(|layers_vec| {
-            for layer in layers_vec.iter_mut() {
-                layer.resize_canvas(new_w, new_h);
-            }
+        project.update(|project| {
+            project.layers.update(|layers_vec| {
+                for layer in layers_vec.iter_mut() {
+                    layer.resize_canvas(new_w, new_h);
+                }
+            });
+            project.width.set(new_w);
+            project.height.set(new_h);
         });
-        project.width.set(new_w);
-        project.height.set(new_h);
     };
 
     let on_width_input = move |ev: leptos::ev::Event| {

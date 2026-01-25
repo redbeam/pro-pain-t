@@ -142,7 +142,7 @@ pub fn CanvasArea(
 ) -> impl IntoView {
     let canvas_ref = NodeRef::new();
 
-    let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let project = use_context::<RwSignal<Project>>().unwrap();
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
 
     Effect::new(move |_| {
@@ -155,25 +155,27 @@ pub fn CanvasArea(
             .get_context("2d").unwrap().unwrap()
             .dyn_into::<CanvasRenderingContext2d>().unwrap();
 
-        let layers = project.layers.get();
-        if layers.is_empty() {
-            let width = project.width.get();
-            let height = project.height.get();
+        project.with(|project| {
+            let layers = project.layers.get();
+            if layers.is_empty() {
+                let width = project.width.get();
+                let height = project.height.get();
+                canvas.set_width(width);
+                canvas.set_height(height);
+
+                ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
+                ctx.clear_rect(0.0, 0.0, f64::INFINITY, f64::INFINITY);
+                draw_checkerboard(&ctx, width, height, 8);
+                return;
+            }
+
+            let (pixels, width, height) = composite_layers(&layers);
+
             canvas.set_width(width);
             canvas.set_height(height);
 
-            ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
-            ctx.clear_rect(0.0, 0.0, f64::INFINITY, f64::INFINITY);
-            draw_checkerboard(&ctx, width, height, 8);
-            return;
-        }
-
-        let (pixels, width, height) = composite_layers(&layers);
-
-        canvas.set_width(width);
-        canvas.set_height(height);
-
-        draw_to_canvas(&ctx, &pixels, width, height);
+            draw_to_canvas(&ctx, &pixels, width, height);
+        });
     });
 
     view! {
@@ -181,16 +183,18 @@ pub fn CanvasArea(
             node_ref=canvas_ref
             style=move || {
                 let zoom = view_state.zoom_factor.get();
-                format!(
-                    "
-                    width:{}px;
-                    height:{}px;
-                    image-rendering:pixelated;
-                    background:#ccc;
-                    ",
-                    (project.width.get() as f32 * zoom),
-                    (project.height.get() as f32 * zoom),
-                )
+                project.with(|project| {
+                    format!(
+                        "
+                        width:{}px;
+                        height:{}px;
+                        image-rendering:pixelated;
+                        background:#ccc;
+                        ",
+                        (project.width.get() as f32 * zoom),
+                        (project.height.get() as f32 * zoom),
+                    )
+                })
             }
         />
     }
