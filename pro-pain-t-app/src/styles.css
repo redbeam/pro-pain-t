@@ -30,7 +30,6 @@ button:disabled {
     opacity: 1;
 }
 
-/* TODO: which one? */
 .dialog {
     background: #272727;
     border-radius: 20px;
