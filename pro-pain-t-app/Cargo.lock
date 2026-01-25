@@ -1497,9 +1497,18 @@ dependencies = [
  "console_error_panic_hook",
  "image",
  "leptos",
+ "pro-pain-t-shared",
  "ron",
  "serde",
  "web-sys",
+]
+
+[[package]]
+name = "pro-pain-t-shared"
+version = "0.1.0"
+dependencies = [
+ "image",
+ "serde",
 ]
 
 [[package]]
