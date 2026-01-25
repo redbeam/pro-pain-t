@@ -18,7 +18,6 @@ pub fn LayerPanel() -> impl IntoView {
 
     let open_edit_layer_window = move |id: usize| {
         id_to_edit.set(Some(id));
-        new_layer_window_ref.get().unwrap().open();
         is_edit_layer_window_open.set(true);
     };
 
@@ -59,14 +58,20 @@ pub fn LayerPanel() -> impl IntoView {
                     children=move |layer: Layer| {
                         view! {
                             <div
-                                style="
+                                style= format!("
                                     display:flex;
                                     align-items:center;
                                     gap:0.35rem;
-                                    background:#2c2c2c;
                                     padding:0.25rem 0.3rem;
                                     border-radius:2px;
-                                "
+                                ")
+                                style:background-color = move || {
+                                    if project.with(|p| p.selected_layer_id.get()) == Some(layer.id) {
+                                        "#151515"
+                                    } else {
+                                        "#2c2c2c"
+                                    }
+                                }
                             >
                                 <div
                                     style="
@@ -74,7 +79,6 @@ pub fn LayerPanel() -> impl IntoView {
                                         flex-direction:column;
                                         gap:0.15rem;
                                         font-size:0.7rem;
-                                        color:#d0d0d0;
                                     "
                                 >
                                     <button
@@ -148,12 +152,33 @@ pub fn LayerPanel() -> impl IntoView {
                                         }
                                     }
                                     on:click = move |_| {
+                                        let current_project = project.get();
+                                        let selected = current_project.selected_layer_id.get();
+                                        let layers_original = current_project.layers.get();
+                                        let layer_index = layers_original.iter().position(|l| l.id == layer.id).unwrap();
+                                        let mut new_selected = selected;
+
+                                        if selected.is_some() && selected.unwrap() == layer.id {
+                                            if layers_original.len() <= 1 {
+                                                new_selected = None;
+                                                logging::log!("Selected layer after delete: None")
+                                            } else if layer_index == layers_original.len() - 1 {
+                                                new_selected = Some(layers_original[layer_index - 1].id);
+                                                logging::log!("Selected layer after delete: {}", layers_original[layer_index - 1].id);
+                                            } else {
+                                                new_selected = Some(layers_original[layer_index + 1].id);
+                                                logging::log!("Selected layer after delete: {}", layers_original[layer_index + 1].id);
+                                            }
+                                        }
+
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
                                                 layers.remove(index);
                                                 logging::log!("Layer {} delete pressed", layer.id);
                                             }
                                         });
+                                        
+                                        project.get().selected_layer_id.set(new_selected);
                                     }>
                                     "🗑️"
                                     </button>
@@ -182,6 +207,10 @@ pub fn LayerPanel() -> impl IntoView {
                                         gap:0.15rem;
                                         align-items:center
                                     "
+                                    on:click = move |_| {
+                                        logging::log!("Layer {} selected: ", layer.id);
+                                        project.get().selected_layer_id.set(Some(layer.id));
+                                    }
                                 >
                                     <LayerPreview layer=layer.clone() />
                                     <span style="font-size:0.8rem;">{move || {
@@ -215,7 +244,7 @@ pub fn LayerPanel() -> impl IntoView {
                                                     return;
                                                 }
                                                 layers.swap(index, index + 1);
-                                                logging::log!("Layer {} moved down", layer.id);
+                                                logging::log!("Layer {} moved up", layer.id);
                                             }
                                         });
                                     }>
@@ -264,7 +293,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= project.get().layers.get().iter().count() - 1
+                                            index <= 0
                                         }
                                         else {
                                             true
@@ -277,7 +306,7 @@ pub fn LayerPanel() -> impl IntoView {
                                                     return;
                                                 }
                                                 layers.swap(index, index - 1);
-                                                logging::log!("Layer {} moved up", layers[index].id);
+                                                logging::log!("Layer {} moved down", layer.id);
                                             }
                                         });
                                     }>

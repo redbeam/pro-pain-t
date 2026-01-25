@@ -12,6 +12,7 @@ pub struct Project {
     pub layers: RwSignal<Vec<Layer>>,
     pub history: History,
     pub next_layer_id: RwSignal<usize>, // best approach for serializing ids
+    pub selected_layer_id: RwSignal<Option<usize>>,
 }
 
 impl Project {
@@ -35,6 +36,7 @@ impl Project {
             )]),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
+            selected_layer_id: RwSignal::new(None),
         }
     }
 
