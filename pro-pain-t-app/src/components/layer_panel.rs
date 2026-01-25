@@ -123,8 +123,9 @@ pub fn LayerPanel() -> impl IntoView {
                                         }
                                     }
                                     on:click = move |_| {
-                                        let selected = project.get().selected_layer_id.get();
-                                        let layers_original = project.get().layers.get();
+                                        let current_project = project.get();
+                                        let selected = current_project.selected_layer_id.get();
+                                        let layers_original = current_project.layers.get();
                                         let layer_index = layers_original.iter().position(|l| l.id == layer.id).unwrap();
                                         let mut new_selected = selected;
 
