@@ -11,3 +11,6 @@ web-sys = { version = "0.3", features = ["HtmlCanvasElement", "HtmlElement", "Ca
 serde = { version = "1.0.228", features = ["derive"] }
 ron = "0.12.0"
 pro-pain-t-shared = { version = "0.1.0", path = "../shared" }
+tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", branch = "v2", features = ["all"] }
+futures = "0.3.31"
+wasm-bindgen = "0.2.108"
