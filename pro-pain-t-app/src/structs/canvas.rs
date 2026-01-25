@@ -6,22 +6,28 @@ use crate::structs::{color::Color, pixel::Pixel};
 pub struct Canvas {
     pub width: u32,
     pub height: u32,
-    pub content: Vec<Pixel>, // Two-dimensional - position of [x, y] is y * width + x
+    pub content: Vec<u8>, // One-dimensional - rgba bytes in order
     pub background_color: Color,
 }
 
 impl Canvas {
     pub fn new(width: u32, height: u32, background_color: Color) -> Self {
+
+        let pixel = [
+            background_color.r,
+            background_color.g,
+            background_color.b,
+            (background_color.alpha * 255.0) as u8,
+        ];
+
         let capacity = width
-            .checked_mul(height)
+            .checked_mul(height * 4)
             .expect("canvas dimensions too large: width * height overflowed u32");
 
-        let mut content: Vec<Pixel> = Vec::with_capacity(capacity as usize);
+        let mut content = Vec::with_capacity(capacity as usize);
 
-        for y in 0..height {
-            for x in 0..width {
-                content.push(Pixel::new(x, y, background_color));
-            }
+        for _ in 0..width * height {
+            content.extend_from_slice(&pixel);
         }
 
         Self {
@@ -33,70 +39,112 @@ impl Canvas {
     }
 
     pub fn from_image(image: &RgbImage, background_color: Color) -> Self {
-        let content = image
-            .enumerate_pixels()
-            .into_iter()
-            .map(|pixel| Pixel::from_rgb(pixel.0, pixel.1, *pixel.2))
-            .collect::<Vec<Pixel>>();
+        let mut out = Vec::with_capacity((image.width() * image.height() * 4) as usize);
+
+        for (_x, _y, pixel) in image.enumerate_pixels() {
+            out.push(pixel[0]); // R
+            out.push(pixel[1]); // G
+            out.push(pixel[2]); // B
+            out.push(255);      // A
+        };
+ 
 
         Self {
             width: image.width(),
             height: image.height(),
-            content,
+            content: out,
             background_color,
         }
     }
 
-    pub fn set_pixel(&mut self, pixel: Pixel) -> Result<(), String> {
-        if pixel.x >= self.width || pixel.y >= self.height {
-            return Err("Pixel out of bounds".to_string());
+    pub fn set_pixel(&mut self, x: u32, y: u32, rgba: [u8; 4]) -> Result<(), &'static str> {
+        if x >= self.width || y >= self.height {
+            return Err("pixel out of bounds");
         }
 
-        let index = (pixel.y * self.width + pixel.x) as usize;
-        self.content[index] = pixel;
-
+        let idx = ((y * self.width + x) * 4) as usize;
+        self.content[idx..idx + 4].copy_from_slice(&rgba);
         Ok(())
     }
-
-    pub fn get_pixel(&self, x: u32, y: u32) -> Result<&Pixel, String> {
+    
+    pub fn get_pixel(&self, x: u32, y: u32) -> Result<Pixel, String> {
         if x >= self.width || y >= self.height {
             return Err("Pixel out of bounds".to_string());
         }
 
-        let index = (y * self.width + x) as usize;
+        let index = ((y * self.width + x) * 4) as usize;
 
-        Ok(&self.content[index])
+        let r = self.content[index];
+        let g = self.content[index + 1];
+        let b = self.content[index + 2];
+        let alpha = self.content[index + 3] as f32 / 255.0;
+
+        Ok(Pixel {
+            x,
+            y,
+            color: Color { r, g, b, alpha },
+        })
     }
 
     pub fn resize(&mut self, new_width: u32, new_height: u32) {
-        if new_width == self.width && new_height == self.height {
-            return;
-        }
-
-        let capacity = new_width
-            .checked_mul(new_height)
-            .expect("Canvas dimensions too large: width * height overflowed u32");
-
-        let mut new_content: Vec<Pixel> = Vec::with_capacity(capacity as usize);
-
-        for y in 0..new_height {
-            for x in 0..new_width {
-                if x < self.width && y < self.height {
-                    let old_index = (y * self.width + x) as usize;
-                    let pixel = self.content[old_index];
-                    new_content.push(pixel);
-                } else {
-                    new_content.push(Pixel::new(x, y, self.background_color));
-                }
-            }
-        }
-
-        self.width = new_width;
-        self.height = new_height;
-        self.content = new_content;
+    if new_width == self.width && new_height == self.height {
+        return;
     }
 
+    let new_len = (new_width * new_height * 4) as usize;
+    let mut new_content = vec![0u8; new_len];
+
+    let copy_width = self.width.min(new_width);
+    let copy_height = self.height.min(new_height);
+
+    for y in 0..copy_height {
+        let old_row = (y * self.width * 4) as usize;
+        let new_row = (y * new_width * 4) as usize;
+
+        let bytes = (copy_width * 4) as usize;
+        new_content[new_row..new_row + bytes]
+            .copy_from_slice(&self.content[old_row..old_row + bytes]);
+    }
+
+    let background_pixel = [
+        self.background_color.r,
+        self.background_color.g,
+        self.background_color.b,
+        (self.background_color.alpha * 255.0) as u8,
+    ];
+
+    for y in 0..new_height {
+        for x in 0..new_width {
+            if x < copy_width && y < copy_height {
+                continue;
+            }
+            let idx = ((y * new_width + x) * 4) as usize;
+            new_content[idx..idx + 4].copy_from_slice(&background_pixel);
+        }
+    }
+
+    self.width = new_width;
+    self.height = new_height;
+    self.content = new_content;
+}
+
+
     pub fn clear(&mut self) {
-        self.content.iter_mut().for_each(|p| p.color = self.background_color);
+        let pixel = [
+            self.background_color.r,
+            self.background_color.g,
+            self.background_color.b,
+            (self.background_color.alpha * 255.0) as u8,
+        ];
+
+        let capacity = self.width
+            .checked_mul(self.height * 4)
+            .expect("canvas dimensions too large: width * height overflowed u32");
+
+        self.content = Vec::with_capacity(capacity as usize);
+
+        for _ in 0..self.width * self.height {
+            self.content.extend_from_slice(&pixel);
+        }
     }
 }
