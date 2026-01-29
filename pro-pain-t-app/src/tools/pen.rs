@@ -46,69 +46,73 @@ pub struct PenState {
     pub last_pos: Option<(i32, i32)>,
 }
 
-pub fn pen_mouse_down(state: &mut PenState) {
-    state.is_drawing = true;
-    state.last_pos = None;
-}
-
-pub fn pen_mouse_up(state: &mut PenState) {
-    state.is_drawing = false;
-    state.last_pos = None;
-}
-
-pub fn pen_mouse_move(
-    state: &mut PenState,
-    e: &web_sys::MouseEvent,
-    project: &RwSignal<Project>,
-    canvas: &web_sys::HtmlCanvasElement,
-    zoom: f32,
-) {
-    if !state.is_drawing {
-        return;
+impl PenState {
+    pub fn pen_mouse_down(&mut self) {
+        self.is_drawing = true;
+        self.last_pos = None;
     }
 
-    let (x, y) = screen_to_canvas(canvas, e.client_x() as f64, e.client_y() as f64, zoom);
-
-    if x < 0 || y < 0 {
-        return;
+    pub fn pen_mouse_up(&mut self) {
+        self.is_drawing = false;
+        self.last_pos = None;
     }
 
-    let color = project.get().current_color.get();
-    let current = (x, y);
-
-    project.get().layers.update(|layers| {
-        let layer_index = project.get().active_layer.get();
-
-        let Some(layer) = layers.get_mut(layer_index) else {
-            return;
-        };
-
-        if layer.is_locked || !layer.is_visible {
+    pub fn pen_mouse_move(
+        &mut self,
+        e: &web_sys::MouseEvent,
+        project: &RwSignal<Project>,
+        canvas: &web_sys::HtmlCanvasElement,
+        zoom: f32,
+    ) {
+        if !self.is_drawing {
             return;
         }
 
-        let canvas = &mut layer.canvas;
+        let (x, y) = screen_to_canvas(canvas, e.client_x() as f64, e.client_y() as f64, zoom);
 
-        if let Some((lx, ly)) = state.last_pos {
-            draw_line(lx, ly, x, y, |px, py| {
-                if px < 0 || py < 0 {
-                    return;
-                }
+        if x < 0 || y < 0 || x as u32 >= project.get().height.get() || y as u32 >= project.get().width.get() {
+            return;
+        }
 
+        let color = project.get().current_color.get();
+        let current = (x, y);
+
+        project.get().layers.update(|layers| {
+            let layer_index = project.get().active_layer.get();
+
+            let Some(layer) = layers.get_mut(layer_index) else {
+                return;
+            };
+
+            if layer.is_locked || !layer.is_visible {
+                return;
+            }
+
+            let canvas = &mut layer.canvas;
+
+            if let Some((lx, ly)) = self.last_pos {
+                draw_line(lx, ly, x, y, |px, py| {
+                    if px < 0 || py < 0 {
+                        return;
+                    }
+
+                    let _ = canvas.set_pixel(Pixel {
+                        x: px as u32,
+                        y: py as u32,
+                        color,
+                    });
+                });
+            } else {
                 let _ = canvas.set_pixel(Pixel {
-                    x: px as u32,
-                    y: py as u32,
+                    x: x as u32,
+                    y: y as u32,
                     color,
                 });
-            });
-        } else {
-            let _ = canvas.set_pixel(Pixel {
-                x: x as u32,
-                y: y as u32,
-                color,
-            });
-        }
-    });
+            }
+        });
 
-    state.last_pos = Some(current);
+        self.last_pos = Some(current);
+    }
 }
+
+

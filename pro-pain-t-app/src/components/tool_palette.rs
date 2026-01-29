@@ -31,12 +31,13 @@ pub fn ToolPalette() -> impl IntoView {
                 "
             >
                 <div
-                    // TODO: show pen icon
-                    style="width:24px; height:24px; background:#ffff00; border-radius:2px;"
+                    style="width:24px; height:24px; background:#3a3a3a; font-size:1rem; display: flex; align-items: center; justify-content: center;"
                     on:click=move |_| {
-                        project.get().current_tool.update(|_| {Tool::Pen(PenState::default());});
+                        project.get().current_tool.set(Tool::Pen(PenState::default()));
                     }
-                />
+                >
+                "🖊️"
+                </div>
                 { (0..11).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
             </div>
 
