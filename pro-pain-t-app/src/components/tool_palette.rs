@@ -1,11 +1,12 @@
 use leptos::prelude::*;
-use pro_pain_t_app::{structs::project::Project, tools::{pen::PenState, tools::Tool}};
+use pro_pain_t_app::{state::workspace_state::WorkspaceState, structs::project::Project, tools::{pen::PenState, tools::Tool}};
 
 use crate::components::color_picker::ColorPicker;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap();
+    let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
 
     view! {
         <nav
@@ -33,7 +34,7 @@ pub fn ToolPalette() -> impl IntoView {
                 <div
                     style="width:24px; height:24px; background:#3a3a3a; font-size:1rem; display: flex; align-items: center; justify-content: center;"
                     on:click=move |_| {
-                        project.get().current_tool.set(Tool::Pen(PenState::default()));
+                        workspace_state.current_tool.set(Tool::Pen(PenState::default()));
                     }
                 >
                 "🖊️"

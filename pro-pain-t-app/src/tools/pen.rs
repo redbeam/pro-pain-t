@@ -63,7 +63,9 @@ impl PenState {
         project: &RwSignal<Project>,
         canvas: &web_sys::HtmlCanvasElement,
         zoom: f32,
+        layer_index: usize,
     ) {
+        
         if !self.is_drawing {
             return;
         }
@@ -78,7 +80,7 @@ impl PenState {
         let current = (x, y);
 
         project.get().layers.update(|layers| {
-            let layer_index = project.get().active_layer.get();
+            
 
             let Some(layer) = layers.get_mut(layer_index) else {
                 return;
