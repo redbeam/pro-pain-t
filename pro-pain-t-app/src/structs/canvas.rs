@@ -95,4 +95,8 @@ impl Canvas {
         self.height = new_height;
         self.content = new_content;
     }
+
+    pub fn clear(&mut self) {
+        self.content.iter_mut().for_each(|p| p.color = self.background_color);
+    }
 }

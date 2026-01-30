@@ -17,6 +17,7 @@ pub struct Project {
     pub active_layer: RwSignal<usize>,
     pub current_tool: RwSignal<Tool>,
     pub next_layer_id: RwSignal<usize>, // best approach for serializing ids
+    pub selected_layer_id: RwSignal<Option<usize>>,
 }
 
 impl Project {
@@ -43,6 +44,7 @@ impl Project {
             current_tool: RwSignal::new(Tool::Pen(PenState::default())),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
+            selected_layer_id: RwSignal::new(None),
         }
     }
 
