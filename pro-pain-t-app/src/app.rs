@@ -9,7 +9,7 @@ use crate::structs::project::Project;
 use crate::view_state::ProjectViewState;
 use leptos::html::Dialog;
 use leptos::prelude::*;
-use pro_pain_t_app::state::workspace_state::WorkspaceState;
+use crate::state::workspace_state::WorkspaceState;
 
 #[component]
 pub fn App() -> impl IntoView {
