@@ -1,7 +1,6 @@
 use crate::structs::{color::Color, history::History, layer::Layer};
 use leptos::prelude::{Get, RwSignal, Set, Update};
 use serde::{Deserialize, Serialize};
-use std::fs;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Project {
@@ -49,9 +48,8 @@ impl Project {
         )
     }
 
-    pub fn from_file(file_path: String) -> Self {
-        let project_file_data = fs::read(file_path).expect("Failed to read file");
-        ron::de::from_bytes(&*project_file_data).expect("Failed to deserialize project")
+    pub fn from_file_data(data: Vec<u8>) -> Self {
+        ron::de::from_bytes(&*data).expect("Failed to deserialize project")
     }
 
     pub fn replace_project_with_blank(

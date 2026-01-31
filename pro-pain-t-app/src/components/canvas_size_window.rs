@@ -1,5 +1,5 @@
 use leptos::{html, prelude::*};
-use pro_pain_t_app::structs::project::Project;
+use crate::structs::project::Project;
 
 #[component]
 pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {

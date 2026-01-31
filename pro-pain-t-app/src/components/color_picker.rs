@@ -2,9 +2,8 @@ use leptos::html::Canvas;
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use leptos::web_sys;
-use pro_pain_t_app::structs::color::Color;
 use web_sys::CanvasRenderingContext2d;
-
+use crate::structs::color::Color;
 use crate::components::alpha_slider::AlphaSlider;
 use crate::components::rgb_slider::RGBSlider;
 

@@ -1,6 +1,5 @@
 use leptos::prelude::*;
-use pro_pain_t_app::{state::workspace_state::WorkspaceState, structs::project::Project, tools::{pen::PenState, tools::Tool}};
-
+use crate::{state::workspace_state::WorkspaceState, structs::project::Project, tools::{pen::PenState, tools::Tool}};
 use crate::components::color_picker::ColorPicker;
 
 #[component]

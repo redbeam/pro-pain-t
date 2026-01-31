@@ -3,8 +3,8 @@ use crate::components::new_layer_window::NewLayerWindow;
 use crate::components::layer_preview::LayerPreview;
 use leptos::{html::Dialog, logging, prelude::*};
 use pro_pain_t_app::state::workspace_state::WorkspaceState;
-use pro_pain_t_app::structs::layer::Layer;
-use pro_pain_t_app::structs::project::Project;
+use crate::structs::layer::Layer;
+use crate::structs::project::Project;
 
 #[component]
 pub fn LayerPanel() -> impl IntoView {
