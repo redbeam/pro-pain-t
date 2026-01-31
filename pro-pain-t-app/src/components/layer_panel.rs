@@ -2,6 +2,7 @@ use crate::components::edit_layer_window::EditLayerWindow;
 use crate::components::new_layer_window::NewLayerWindow;
 use crate::components::layer_preview::LayerPreview;
 use leptos::{html::Dialog, logging, prelude::*};
+use crate::state::workspace_state::WorkspaceState;
 use crate::structs::layer::Layer;
 use crate::structs::project::Project;
 
@@ -9,6 +10,8 @@ use crate::structs::project::Project;
 pub fn LayerPanel() -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap();
     let id_to_edit = RwSignal::new(None);
+
+    let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
 
     let new_layer_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_layer_window_open = RwSignal::new(false);
@@ -66,7 +69,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     border-radius:2px;
                                 ")
                                 style:background-color = move || {
-                                    if project.with(|p| p.selected_layer_id.get()) == Some(layer.id) {
+                                    if workspace_state.selected_layer_id.with(|_| workspace_state.selected_layer_id.get()) == Some(layer.id) {
                                         "#151515"
                                     } else {
                                         "#2c2c2c"
@@ -153,7 +156,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     }
                                     on:click = move |_| {
                                         let current_project = project.get();
-                                        let selected = current_project.selected_layer_id.get();
+                                        let selected = workspace_state.selected_layer_id.get();
                                         let layers_original = current_project.layers.get();
                                         let layer_index = layers_original.iter().position(|l| l.id == layer.id).unwrap();
                                         let mut new_selected = selected;
@@ -178,7 +181,7 @@ pub fn LayerPanel() -> impl IntoView {
                                             }
                                         });
                                         
-                                        project.get().selected_layer_id.set(new_selected);
+                                        workspace_state.selected_layer_id.set(new_selected);
                                     }>
                                     "🗑️"
                                     </button>
@@ -209,7 +212,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     "
                                     on:click = move |_| {
                                         logging::log!("Layer {} selected: ", layer.id);
-                                        project.get().selected_layer_id.set(Some(layer.id));
+                                        workspace_state.selected_layer_id.set(Some(layer.id));
                                     }
                                 >
                                     <LayerPreview layer=layer.clone() />

@@ -10,8 +10,8 @@ pub struct Project {
     pub background_color: Color,
     pub layers: RwSignal<Vec<Layer>>,
     pub history: History,
+    pub current_color: RwSignal<Color>,
     pub next_layer_id: RwSignal<usize>, // best approach for serializing ids
-    pub selected_layer_id: RwSignal<Option<usize>>,
 }
 
 impl Project {
@@ -33,9 +33,9 @@ impl Project {
                 height,
                 background_color,
             )]),
+            current_color: RwSignal::new(Color::default_black()),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
-            selected_layer_id: RwSignal::new(None),
         }
     }
 

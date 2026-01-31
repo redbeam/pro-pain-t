@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos::*;
+use crate::{state::workspace_state::WorkspaceState, structs::{color::Color, layer::Layer, project::Project}};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast, JsValue}};
-use crate::structs::{color::Color, layer::Layer, project::Project};
 use crate::view_state::ProjectViewState;
 
 pub fn draw_checkerboard(
@@ -141,8 +141,11 @@ pub fn CanvasArea(
 ) -> impl IntoView {
     let canvas_ref = NodeRef::new();
 
-    let project = use_context::<RwSignal<Project>>().unwrap().get();
+    let project = use_context::<RwSignal<Project>>().unwrap();
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
+    let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
+
+    let current_tool = workspace_state.current_tool;
 
     Effect::new(move |_| {
         let canvas: HtmlCanvasElement = match canvas_ref.get() {
@@ -154,10 +157,10 @@ pub fn CanvasArea(
             .get_context("2d").unwrap().unwrap()
             .dyn_into::<CanvasRenderingContext2d>().unwrap();
 
-        let layers = project.layers.get();
+        let layers = project.get().layers.get();
         if layers.is_empty() {
-            let width = project.width.get();
-            let height = project.height.get();
+            let width = project.get().width.get();
+            let height = project.get().height.get();
             canvas.set_width(width);
             canvas.set_height(height);
 
@@ -187,10 +190,27 @@ pub fn CanvasArea(
                     image-rendering:pixelated;
                     background:#ccc;
                     ",
-                    (project.width.get() as f32 * zoom),
-                    (project.height.get() as f32 * zoom),
+                    (project.get().width.get() as f32 * zoom),
+                    (project.get().height.get() as f32 * zoom),
                 )
             }
+
+            on:mousedown = move |_| { current_tool.update(|t| t.on_mouse_down()) }
+            on:mousemove = move |e| {
+                 let canvas = match canvas_ref.get() {
+                    Some(c) => c,
+                    None => return,
+                };
+
+                let zoom = view_state.zoom_factor.get();
+                let Some(layer_index) = workspace_state.selected_layer_id.get() else {
+                    return;
+                };
+                current_tool.update(|t| t.on_mouse_move(&e, &canvas, zoom, layer_index, &project)) 
+            }
+            on:mouseup = move |_| { current_tool.update(|t| t.on_mouse_up()) }
+            on:mouseleave = move |_| { current_tool.update(|t| t.on_mouse_up()) }     
+            
         />
     }
 }

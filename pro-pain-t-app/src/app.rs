@@ -9,14 +9,18 @@ use crate::structs::project::Project;
 use crate::view_state::ProjectViewState;
 use leptos::html::Dialog;
 use leptos::prelude::*;
+use crate::state::workspace_state::WorkspaceState;
 
 #[component]
 pub fn App() -> impl IntoView {
     let project = RwSignal::new(Project::default());
     let view_state = ProjectViewState::new();
+    let workspace_state = WorkspaceState::new();
 
     provide_context(project);
     provide_context(view_state);
+    provide_context(workspace_state);
+    
 
     let new_project_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_project_window_open = RwSignal::new(false);
