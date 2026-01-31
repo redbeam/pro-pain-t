@@ -1,6 +1,5 @@
 use leptos::prelude::*;
-use pro_pain_t_app::structs::project::Project;
-
+use crate::structs::project::Project;
 use crate::view_state::ProjectViewState;
 
 #[component]

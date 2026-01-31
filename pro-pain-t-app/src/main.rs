@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 
 mod app;
+mod structs;
+mod events;
 mod components;
 mod view_state;
 

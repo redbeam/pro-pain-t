@@ -2,8 +2,8 @@ use crate::components::edit_layer_window::EditLayerWindow;
 use crate::components::new_layer_window::NewLayerWindow;
 use crate::components::layer_preview::LayerPreview;
 use leptos::{html::Dialog, logging, prelude::*};
-use pro_pain_t_app::structs::layer::Layer;
-use pro_pain_t_app::structs::project::Project;
+use crate::structs::layer::Layer;
+use crate::structs::project::Project;
 
 #[component]
 pub fn LayerPanel() -> impl IntoView {

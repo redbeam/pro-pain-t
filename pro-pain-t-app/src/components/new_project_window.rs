@@ -2,8 +2,8 @@ use crate::components::color_picker::ColorPicker;
 use leptos::prelude::{NodeRef, RwSignal};
 use leptos::{IntoView, component, view};
 use leptos::{html::Dialog, prelude::*};
-use pro_pain_t_app::structs::color::Color;
-use pro_pain_t_app::structs::project::Project;
+use crate::structs::color::Color;
+use crate::structs::project::Project;
 
 #[component]
 pub fn NewProjectWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> impl IntoView {

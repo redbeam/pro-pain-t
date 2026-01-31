@@ -1,10 +1,8 @@
 use leptos::{prelude::{Effect, Get, NodeRef, NodeRefAttribute, StyleAttribute}, *};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData, wasm_bindgen::Clamped, window};
 use wasm_bindgen::JsCast;
-use pro_pain_t_app::structs::layer::Layer;
-
+use crate::structs::layer::Layer;
 use crate::components::canvas_area::draw_checkerboard;
-
 
 fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
     let document = window().unwrap().document().unwrap();

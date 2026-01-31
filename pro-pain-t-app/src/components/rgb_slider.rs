@@ -1,6 +1,6 @@
 use crate::components::color_picker::Channel;
+use crate::structs::color::Color;
 use leptos::prelude::*;
-use pro_pain_t_app::structs::color::Color;
 
 #[component]
 pub fn RGBSlider(channel: Channel, color: RwSignal<Color>) -> impl IntoView {
