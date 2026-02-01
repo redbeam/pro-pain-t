@@ -203,10 +203,10 @@ pub fn CanvasArea(
                 };
 
                 let zoom = view_state.zoom_factor.get();
-                let Some(layer_index) = workspace_state.selected_layer_id.get() else {
+                let Some(layer_id) = workspace_state.selected_layer_id.get() else {
                     return;
                 };
-                current_tool.update(|t| t.on_mouse_move(&e, &canvas, zoom, layer_index, &project)) 
+                current_tool.update(|t| t.on_mouse_move(&e, &canvas, zoom, layer_id, &project)) 
             }
             on:mouseup = move |_| { current_tool.update(|t| t.on_mouse_up()) }
             on:mouseleave = move |_| { current_tool.update(|t| t.on_mouse_up()) }     

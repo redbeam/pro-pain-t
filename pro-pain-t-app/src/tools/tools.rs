@@ -16,9 +16,9 @@ impl Tool {
         }
     }
 
-    pub fn on_mouse_move(&mut self, e: &web_sys::MouseEvent, canvas: &HtmlCanvasElement, zoom: f32, layer_index: usize, project: &RwSignal<Project>) {
+    pub fn on_mouse_move(&mut self, e: &web_sys::MouseEvent, canvas: &HtmlCanvasElement, zoom: f32, layer_id: usize, project: &RwSignal<Project>) {
         match self {
-            Tool::Pen(state) => state.pen_mouse_move(e, project, canvas, zoom, layer_index),
+            Tool::Pen(state) => state.pen_mouse_move(e, project, canvas, zoom, layer_id),
         }
     }
 

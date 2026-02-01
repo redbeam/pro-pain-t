@@ -63,7 +63,7 @@ impl PenState {
         project: &RwSignal<Project>,
         canvas: &web_sys::HtmlCanvasElement,
         zoom: f32,
-        layer_index: usize,
+        layer_id: usize,
     ) {
         
         if !self.is_drawing {
@@ -82,7 +82,7 @@ impl PenState {
         project.get().layers.update(|layers| {
             
 
-            let Some(layer) = layers.get_mut(layer_index) else {
+            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
                 return;
             };
 
