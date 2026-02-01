@@ -2,9 +2,8 @@ use leptos::html::Canvas;
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use leptos::web_sys;
-use pro_pain_t_app::structs::color::Color;
 use web_sys::CanvasRenderingContext2d;
-
+use crate::structs::color::Color;
 use crate::components::alpha_slider::AlphaSlider;
 use crate::components::rgb_slider::RGBSlider;
 
@@ -139,7 +138,7 @@ pub fn ColorPicker(#[prop(into)] color: RwSignal<Color>) -> impl IntoView {
                 on:click=on_click
             />
 
-            <div style="font-size:0.85rem; letter-spacing:0.06em; color:white; align-self:flex-start; padding:0 0 0 6px;">
+            <div style="font-size:0.85rem; letter-spacing:0.06em; color:white;">
                 "Brightness"
             </div>
 
@@ -152,7 +151,6 @@ pub fn ColorPicker(#[prop(into)] color: RwSignal<Color>) -> impl IntoView {
                 style="writing-mode: bt-lr; height:10px;"
                 on:input=on_value
             />
-
 
         </div>
 

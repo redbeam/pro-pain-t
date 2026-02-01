@@ -1,7 +1,6 @@
 use crate::structs::{color::Color, history::History, layer::Layer};
 use leptos::prelude::{Get, RwSignal, Set, Update};
 use serde::{Deserialize, Serialize};
-use std::fs;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Project {
@@ -11,6 +10,7 @@ pub struct Project {
     pub background_color: Color,
     pub layers: RwSignal<Vec<Layer>>,
     pub history: History,
+    pub current_color: RwSignal<Color>,
     pub next_layer_id: RwSignal<usize>, // best approach for serializing ids
 }
 
@@ -33,6 +33,7 @@ impl Project {
                 height,
                 background_color,
             )]),
+            current_color: RwSignal::new(Color::default_black()),
             history: History::new(10),
             next_layer_id: RwSignal::new(1),
         }
@@ -47,9 +48,8 @@ impl Project {
         )
     }
 
-    pub fn from_file(file_path: String) -> Self {
-        let project_file_data = fs::read(file_path).expect("Failed to read file");
-        ron::de::from_bytes(&*project_file_data).expect("Failed to deserialize project")
+    pub fn from_file_data(data: Vec<u8>) -> Self {
+        ron::de::from_bytes(&*data).expect("Failed to deserialize project")
     }
 
     pub fn replace_project_with_blank(

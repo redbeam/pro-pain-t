@@ -1,5 +1,5 @@
 use leptos::{html, prelude::*};
-use pro_pain_t_app::structs::project::Project;
+use crate::structs::project::Project;
 
 #[component]
 pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
@@ -63,14 +63,6 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
     };
 
     view! {
-        <style>
-            {"
-            .canvas-dialog-button:focus-visible {
-                outline: 2px solid #ffffff;
-                outline-offset: 2px;
-            }
-            "}
-        </style>
         <div
             style=move || format!(
                 "position:fixed; inset:0; background:rgba(0,0,0,0.4); display:{}; align-items:center; justify-content:center; z-index:1000;",
@@ -132,21 +124,13 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
                             "
                         >
                     <button
-                        class="canvas-dialog-button"
+                        class="dialog-button"
                         on:click=move |_| {
                             is_open.set(false);
                         }
-                                style="
-                                    padding:0.25rem 0.6rem;
-                                    border-radius:2px;
-                                    border:none;
-                                    background:#3a3a3a;
-                                    color:#f5f5f5;
-                                    font-size:0.8rem;
-                            "
                         >"Cancel"</button>
                     <button
-                        class="canvas-dialog-button"
+                        class="dialog-button-ok"
                         node_ref=ok_button_ref
                         on:click=move |_| {
                             let w = local_width.get();
@@ -154,14 +138,6 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
                             on_resize_canvas(w, h);
                             is_open.set(false);
                         }
-                                style="
-                                    padding:0.25rem 0.75rem;
-                                    border-radius:2px;
-                                    border:none;
-                                    background:#4a7cff;
-                                    color:#f5f5f5;
-                                    font-size:0.8rem;
-                            "
                         >"OK"</button>
                 </div>
             </div>
