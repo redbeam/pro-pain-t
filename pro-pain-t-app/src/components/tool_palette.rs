@@ -31,14 +31,33 @@ pub fn ToolPalette() -> impl IntoView {
                 "
             >
                 <div
-                    style="width:24px; height:24px; background:#3a3a3a; font-size:1rem; display: flex; align-items: center; justify-content: center;"
+                    style=move || format!(
+                        "width:24px; height:24px; background:{}; font-size:1rem; display: flex; align-items: center; justify-content: center; border-radius: 2px; border: 1px solid {};",
+                        if workspace_state.current_tool.get().is_pan() { "#2f3e66" } else { "#3a3a3a" },
+                        if workspace_state.current_tool.get().is_pan() { "#4a7cff" } else { "transparent" }
+                    )
+                    on:click=move |_| {
+                        use crate::tools::{pan::PanState, tools::Tool};
+                        workspace_state.current_tool.set(Tool::Pan(PanState::default()));
+                    }
+                    title="Pan tool"
+                >
+                "🤚🏻"
+                </div>
+                <div
+                    style=move || format!(
+                        "width:24px; height:24px; background:{}; font-size:1rem; display: flex; align-items: center; justify-content: center; border-radius: 2px; border: 1px solid {};",
+                        if !workspace_state.current_tool.get().is_pan() { "#2f3e66" } else { "#3a3a3a" },
+                        if !workspace_state.current_tool.get().is_pan() { "#4a7cff" } else { "transparent" }
+                    )
                     on:click=move |_| {
                         workspace_state.current_tool.set(Tool::Pen(PenState::default()));
                     }
+                    title="Pen tool"
                 >
                 "🖊️"
                 </div>
-                { (0..11).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
+                { (0..10).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
             </div>
 
             <ColorPicker color=project.get().current_color />
