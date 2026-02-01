@@ -10,7 +10,7 @@ pub struct WorkspaceState {
 impl Default for WorkspaceState {
     fn default() -> Self {
         Self {
-            selected_layer_id: RwSignal::new(None),
+            selected_layer_id: RwSignal::new(Some(0)),
             current_tool: RwSignal::new(Tool::Pen(PenState::default())),
         }
     }

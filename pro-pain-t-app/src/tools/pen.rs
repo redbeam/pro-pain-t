@@ -73,8 +73,8 @@ impl PenState {
 
         if x < 0
             || y < 0
-            || x as u32 >= ctx.project.get().height.get()
-            || y as u32 >= ctx.project.get().width.get()
+            || x as u32 >= ctx.project.get().width.get()
+            || y as u32 >= ctx.project.get().height.get()
         {
             return;
         }
@@ -115,6 +115,11 @@ impl PenState {
         });
 
         self.last_pos = Some(current);
+    }
+
+    pub fn cancel(&mut self) {
+        self.is_drawing = false;
+        self.last_pos = None;
     }
 
     pub fn cursor(&self) -> &'static str {

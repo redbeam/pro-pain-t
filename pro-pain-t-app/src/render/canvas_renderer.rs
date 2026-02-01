@@ -82,6 +82,10 @@ fn blend(dst: Color, src: Color) -> Color {
 }
 
 pub fn composite_layers(layers: &[Layer]) -> (Vec<u8>, u32, u32) {
+    if layers.is_empty() {
+        return (Vec::new(), 0, 0);
+    }
+
     let base_canvas = &layers[0].canvas;
     let width = base_canvas.width;
     let height = base_canvas.height;
@@ -102,6 +106,10 @@ pub fn composite_layers(layers: &[Layer]) -> (Vec<u8>, u32, u32) {
         }
 
         for pixel in &layer.canvas.content {
+            if pixel.x >= width || pixel.y >= height {
+                continue;
+            }
+
             let idx = (pixel.y * width + pixel.x) as usize;
 
             let dst = out[idx];

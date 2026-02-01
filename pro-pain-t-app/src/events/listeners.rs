@@ -79,7 +79,12 @@ pub fn export_project_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<PathDto>(EVENT_MENU_EXPORT_PROJECT).await.unwrap();
         while let Some(data) = listener.next().await {
-            let raw_image = composite_layers(&*project.get().layers.get()).0;
+            let layers = project.get().layers.get();
+            if layers.is_empty() {
+                continue;
+            }
+
+            let raw_image = composite_layers(&layers).0;
             let image_dto = ImageDto::new(
                 project.get().width.get(),
                 project.get().height.get(),

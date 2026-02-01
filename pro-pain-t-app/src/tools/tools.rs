@@ -36,8 +36,9 @@ impl Tool {
     }
 
     pub fn on_pointer_cancel(&mut self) {
-        if let Tool::Pan(state) = self {
-            state.cancel();
+        match self {
+            Tool::Pen(state) => state.cancel(),
+            Tool::Pan(state) => state.cancel(),
         }
     }
 
