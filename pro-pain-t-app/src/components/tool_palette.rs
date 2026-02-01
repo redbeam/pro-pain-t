@@ -10,6 +10,7 @@ use leptos::prelude::*;
 pub fn ToolPalette() -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap();
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
+    let current_color = project.with_untracked(|p| p.current_color);
 
     view! {
         <nav
@@ -64,7 +65,7 @@ pub fn ToolPalette() -> impl IntoView {
                 { (0..10).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
             </div>
 
-            <ColorPicker color=project.get().current_color />
+            <ColorPicker color=current_color />
         </nav>
     }
 }

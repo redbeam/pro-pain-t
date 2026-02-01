@@ -1,5 +1,22 @@
 use crate::structs::{color::Color, layer::Layer};
-use web_sys::{CanvasRenderingContext2d, wasm_bindgen::JsValue};
+use wasm_bindgen::{Clamped, JsCast, JsValue};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
+
+fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
+    let document = web_sys::window()
+        .and_then(|w| w.document())
+        .expect("document missing");
+
+    let canvas = document
+        .create_element("canvas")
+        .expect("Failed to create canvas element")
+        .dyn_into::<HtmlCanvasElement>()
+        .expect("Failed to cast element to HtmlCanvasElement");
+
+    canvas.set_width(width);
+    canvas.set_height(height);
+    canvas
+}
 
 #[derive(Clone, Copy, Debug)]
 pub struct ViewTransform {
@@ -18,10 +35,13 @@ pub fn draw_checkerboard(ctx: &CanvasRenderingContext2d, width: u32, height: u32
             let is_dark = (x / tile_size + y / tile_size).is_multiple_of(2);
             let color = if is_dark { dark } else { light };
 
+            let w = (width - x).min(tile_size);
+            let h = (height - y).min(tile_size);
+
             #[allow(deprecated)]
             ctx.set_fill_style(&JsValue::from_str(color));
 
-            ctx.fill_rect(x as f64, y as f64, tile_size as f64, tile_size as f64);
+            ctx.fill_rect(x as f64, y as f64, w as f64, h as f64);
         }
     }
 }
@@ -126,25 +146,32 @@ pub fn draw_project_viewport(
     let _ = ctx.set_transform(scale, 0.0, 0.0, scale, tx, ty);
     ctx.set_image_smoothing_enabled(false);
 
-    draw_checkerboard(ctx, proj_w, proj_h, 8);
+    ctx.save();
+    ctx.begin_path();
+    ctx.rect(0.0, 0.0, proj_w as f64, proj_h as f64);
+    ctx.clip();
 
-    for y in 0..proj_h {
-        for x in 0..proj_w {
-            let i = ((y * proj_w + x) * 4) as usize;
-            let r = pixels[i];
-            let g = pixels[i + 1];
-            let b = pixels[i + 2];
-            let a = pixels[i + 3] as f64 / 255.0;
-
-            if a == 0.0 {
-                continue;
-            }
-
-            ctx.set_global_alpha(a);
-            ctx.set_fill_style_str(&format!("rgb({},{},{})", r, g, b));
-            ctx.fill_rect(x as f64, y as f64, 1.0, 1.0);
-        }
+    let has_transparency = pixels.chunks_exact(4).any(|px| px[3] < 255);
+    if has_transparency {
+        draw_checkerboard(ctx, proj_w, proj_h, 8);
     }
 
-    ctx.set_global_alpha(1.0);
+    let offscreen = create_offscreen_canvas(proj_w, proj_h);
+    let off_ctx = offscreen
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()
+        .unwrap();
+
+    let image_data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(pixels), proj_w, proj_h)
+        .expect("Failed to create ImageData");
+    off_ctx
+        .put_image_data(&image_data, 0.0, 0.0)
+        .expect("Failed to put ImageData");
+
+    ctx.draw_image_with_html_canvas_element(&offscreen, 0.0, 0.0)
+        .expect("Failed to draw offscreen canvas");
+
+    ctx.restore();
 }
