@@ -1,51 +1,76 @@
 //! Pan tool implementation.
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
-pub struct PanOffset {
-	pub x: f32,
-	pub y: f32,
-}
+use serde::{Deserialize, Serialize};
 
-impl PanOffset {
-	pub fn new(x: f32, y: f32) -> Self {
-		Self { x, y }
-	}
+use crate::tools::context::ToolContext;
+use web_sys::PointerEvent;
 
-	pub fn translate_by(&mut self, dx: f32, dy: f32) {
-		if !dx.is_finite() || !dy.is_finite() {
-			return;
-		}
-		self.x += dx;
-		self.y += dy;
-	}
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum PanAction {
-	Started,
-	Delta { dx: f32, dy: f32 },
-	Stopped,
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct PanTool {
+#[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct PanState {
 	is_panning: bool,
 	pointer_id: Option<i32>,
 	last_pos: Option<(f32, f32)>,
-	allowed_buttons: [bool; 3],
 }
 
-impl PanTool {
-	pub fn new() -> Self {
+impl Default for PanState {
+	fn default() -> Self {
 		Self {
 			is_panning: false,
 			pointer_id: None,
 			last_pos: None,
-			allowed_buttons: [true, false, false],
 		}
 	}
+}
 
-	pub fn set_allowed_buttons(&mut self, primary: bool, middle: bool, secondary: bool) {
-		self.allowed_buttons = [primary, middle, secondary];
+impl PanState {
+	pub fn on_pointer_down(&mut self, e: &PointerEvent, _ctx: &ToolContext) {
+		if self.is_panning {
+			return;
+		}
+
+		self.is_panning = true;
+		self.pointer_id = Some(e.pointer_id());
+		self.last_pos = Some((e.client_x() as f32, e.client_y() as f32));
+	}
+
+	pub fn on_pointer_move(&mut self, e: &PointerEvent, ctx: &ToolContext) {
+		if !self.is_panning {
+			return;
+		}
+		if self.pointer_id != Some(e.pointer_id()) {
+			return;
+		}
+
+		let client_x = e.client_x() as f32;
+		let client_y = e.client_y() as f32;
+
+		let Some((lx, ly)) = self.last_pos else {
+			self.last_pos = Some((client_x, client_y));
+			return;
+		};
+
+		let dx = client_x - lx;
+		let dy = client_y - ly;
+		if !dx.is_finite() || !dy.is_finite() {
+			return;
+		}
+
+		self.last_pos = Some((client_x, client_y));
+		ctx.view_state.pan_by(dx, dy);
+	}
+
+	pub fn on_pointer_up(&mut self, e: &PointerEvent) {
+		if self.pointer_id != Some(e.pointer_id()) {
+			return;
+		}
+		self.is_panning = false;
+		self.pointer_id = None;
+		self.last_pos = None;
+	}
+
+	pub fn cancel(&mut self) {
+		self.is_panning = false;
+		self.pointer_id = None;
+		self.last_pos = None;
 	}
 
 	pub fn is_panning(&self) -> bool {
@@ -54,77 +79,6 @@ impl PanTool {
 
 	pub fn cursor(&self) -> &'static str {
 		if self.is_panning { "grabbing" } else { "grab" }
-	}
-
-	pub fn on_pointer_down(
-		&mut self,
-		button: i16,
-		pointer_id: i32,
-		client_x: f32,
-		client_y: f32,
-	) -> Option<PanAction> {
-		if self.is_panning {
-			return None;
-		}
-
-		let allow = match button {
-			0 => self.allowed_buttons[0],
-			1 => self.allowed_buttons[1],
-			2 => self.allowed_buttons[2],
-			_ => false,
-		};
-
-		if !allow {
-			return None;
-		}
-
-		self.is_panning = true;
-		self.pointer_id = Some(pointer_id);
-		self.last_pos = Some((client_x, client_y));
-		Some(PanAction::Started)
-	}
-
-	pub fn on_pointer_move(
-		&mut self,
-		pointer_id: i32,
-		client_x: f32,
-		client_y: f32,
-	) -> Option<PanAction> {
-		if !self.is_panning || self.pointer_id != Some(pointer_id) {
-			return None;
-		}
-
-		let (lx, ly) = self.last_pos?;
-		let dx = client_x - lx;
-		let dy = client_y - ly;
-		self.last_pos = Some((client_x, client_y));
-
-		if !dx.is_finite() || !dy.is_finite() {
-			return None;
-		}
-
-		if dx.abs() < 0.000_1 && dy.abs() < 0.000_1 {
-			return None;
-		}
-
-		Some(PanAction::Delta { dx, dy })
-	}
-
-	pub fn on_pointer_up(&mut self, pointer_id: i32) -> Option<PanAction> {
-		if !self.is_panning || self.pointer_id != Some(pointer_id) {
-			return None;
-		}
-
-		self.is_panning = false;
-		self.pointer_id = None;
-		self.last_pos = None;
-		Some(PanAction::Stopped)
-	}
-
-	pub fn cancel(&mut self) {
-		self.is_panning = false;
-		self.pointer_id = None;
-		self.last_pos = None;
 	}
 }
 

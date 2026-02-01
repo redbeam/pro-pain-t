@@ -7,6 +7,7 @@ mod components;
 mod view_state;
 mod tools;
 mod state;
+mod render;
 
 fn main() {
     console_error_panic_hook::set_once();

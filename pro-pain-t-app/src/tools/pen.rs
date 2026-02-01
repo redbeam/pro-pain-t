@@ -1,8 +1,10 @@
-use leptos::prelude::{Get, RwSignal, Update};
+use leptos::prelude::{Get, Update};
 use serde::{Deserialize, Serialize};
-use crate::structs::{pixel::Pixel, project::Project};
+use crate::structs::pixel::Pixel;
 
 use crate::tools::geometry::screen_to_canvas;
+use web_sys::PointerEvent;
+use crate::tools::context::ToolContext;
 
 /// Bresenham line
 fn draw_line(
@@ -47,39 +49,47 @@ pub struct PenState {
 }
 
 impl PenState {
-    pub fn pen_mouse_down(&mut self) {
+    pub fn on_pointer_down(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {
         self.is_drawing = true;
         self.last_pos = None;
     }
 
-    pub fn pen_mouse_up(&mut self) {
+    pub fn on_pointer_up(&mut self, _e: &PointerEvent) {
         self.is_drawing = false;
         self.last_pos = None;
     }
 
-    pub fn pen_mouse_move(
-        &mut self,
-        e: &web_sys::MouseEvent,
-        project: &RwSignal<Project>,
-        canvas: &web_sys::HtmlCanvasElement,
-        zoom: f32,
-        layer_index: usize,
-    ) {
+    pub fn on_pointer_move(&mut self, e: &PointerEvent, ctx: &ToolContext) {
         
         if !self.is_drawing {
             return;
         }
 
-        let (x, y) = screen_to_canvas(canvas, e.client_x() as f64, e.client_y() as f64, zoom);
+        let Some(layer_index) = ctx.selected_layer else {
+            return;
+        };
 
-        if x < 0 || y < 0 || x as u32 >= project.get().height.get() || y as u32 >= project.get().width.get() {
+        let (x, y) = screen_to_canvas(
+            ctx.canvas,
+            e.client_x() as f64,
+            e.client_y() as f64,
+            ctx.zoom,
+            ctx.pan_x,
+            ctx.pan_y,
+        );
+
+        if x < 0
+            || y < 0
+            || x as u32 >= ctx.project.get().height.get()
+            || y as u32 >= ctx.project.get().width.get()
+        {
             return;
         }
 
-        let color = project.get().current_color.get();
+        let color = ctx.project.get().current_color.get();
         let current = (x, y);
 
-        project.get().layers.update(|layers| {
+        ctx.project.get().layers.update(|layers| {
             
 
             let Some(layer) = layers.get_mut(layer_index) else {
@@ -114,6 +124,10 @@ impl PenState {
         });
 
         self.last_pos = Some(current);
+    }
+
+    pub fn cursor(&self) -> &'static str {
+        "default"
     }
 }
 

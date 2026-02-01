@@ -1,4 +1,4 @@
-use crate::components::canvas_area::composite_layers;
+use crate::render::canvas_renderer::composite_layers;
 use crate::structs::color::Color;
 use crate::structs::layer::Layer;
 use crate::structs::project::Project;
