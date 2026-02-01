@@ -1,10 +1,10 @@
 use crate::components::edit_layer_window::EditLayerWindow;
-use crate::components::new_layer_window::NewLayerWindow;
 use crate::components::layer_preview::LayerPreview;
-use leptos::{html::Dialog, logging, prelude::*};
+use crate::components::new_layer_window::NewLayerWindow;
 use crate::state::workspace_state::WorkspaceState;
 use crate::structs::layer::Layer;
 use crate::structs::project::Project;
+use leptos::{html::Dialog, logging, prelude::*};
 
 #[component]
 pub fn LayerPanel() -> impl IntoView {
@@ -180,7 +180,7 @@ pub fn LayerPanel() -> impl IntoView {
                                                 logging::log!("Layer {} delete pressed", layer.id);
                                             }
                                         });
-                                        
+
                                         workspace_state.selected_layer_id.set(new_selected);
                                     }>
                                     "🗑️"
@@ -253,7 +253,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     }>
                                     "▲"
                                     </button>
-                                    
+
                                     <button
                                     on:click = move |_| {
                                         project.get().layers.update(|layers| {
@@ -296,7 +296,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
-                                            index <= 0
+                                            index == 0
                                         }
                                         else {
                                             true
@@ -305,7 +305,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     on:click = move |_| {
                                         project.get().layers.update(|layers| {
                                             if let Some(index) = layers.iter_mut().position(|l| l.id == layer.id) {
-                                                if index <= 0 {
+                                                if index == 0 {
                                                     return;
                                                 }
                                                 layers.swap(index, index - 1);
@@ -314,7 +314,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         });
                                     }>
                                     "▼"
-                                    </button>                      
+                                    </button>
                                 </div>
                             </div>
                         }

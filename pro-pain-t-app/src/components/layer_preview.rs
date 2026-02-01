@@ -1,8 +1,13 @@
-use leptos::{prelude::{Effect, Get, NodeRef, NodeRefAttribute, StyleAttribute}, *};
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData, wasm_bindgen::Clamped, window};
-use wasm_bindgen::JsCast;
-use crate::structs::layer::Layer;
 use crate::render::canvas_renderer::draw_checkerboard;
+use crate::structs::layer::Layer;
+use leptos::{
+    prelude::{Effect, Get, NodeRef, NodeRefAttribute, StyleAttribute},
+    *,
+};
+use wasm_bindgen::JsCast;
+use web_sys::{
+    CanvasRenderingContext2d, HtmlCanvasElement, ImageData, wasm_bindgen::Clamped, window,
+};
 
 fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
     let document = window().unwrap().document().unwrap();
@@ -18,7 +23,6 @@ fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
 
     canvas
 }
-
 
 fn draw_rgba_over_checkerboard(
     ctx: &CanvasRenderingContext2d,
@@ -36,21 +40,21 @@ fn draw_rgba_over_checkerboard(
 
     let offscreen = create_offscreen_canvas(width, height);
     let off_ctx = offscreen
-        .get_context("2d").unwrap().unwrap()
-        .dyn_into::<CanvasRenderingContext2d>().unwrap();
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()
+        .unwrap();
 
-    let image_data = ImageData::new_with_u8_clamped_array_and_sh(
-        Clamped(pixels),
-        width,
-        height,
-    ).unwrap();
+    let image_data =
+        ImageData::new_with_u8_clamped_array_and_sh(Clamped(pixels), width, height).unwrap();
 
     off_ctx.put_image_data(&image_data, 0.0, 0.0).unwrap();
 
     ctx.set_image_smoothing_enabled(false);
-    ctx.draw_image_with_html_canvas_element(&offscreen, 0.0, 0.0).unwrap();
+    ctx.draw_image_with_html_canvas_element(&offscreen, 0.0, 0.0)
+        .unwrap();
 }
-
 
 #[component]
 pub fn LayerPreview(layer: Layer) -> impl IntoView {
@@ -60,8 +64,7 @@ pub fn LayerPreview(layer: Layer) -> impl IntoView {
     let htw_ratio = layer.canvas.height as f32 / layer.canvas.width as f32;
     if htw_ratio >= 1.5 {
         height = (width as f32 / htw_ratio) as i32;
-    }
-    else {
+    } else {
         width = (height as f32 * htw_ratio) as i32;
     }
 
@@ -79,8 +82,11 @@ pub fn LayerPreview(layer: Layer) -> impl IntoView {
         };
 
         let ctx = canvas
-            .get_context("2d").unwrap().unwrap()
-            .dyn_into::<CanvasRenderingContext2d>().unwrap();
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
 
         let (pixels, w, h) = layer.to_rgba();
 

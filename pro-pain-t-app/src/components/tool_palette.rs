@@ -1,6 +1,10 @@
-use leptos::prelude::*;
-use crate::{state::workspace_state::WorkspaceState, structs::project::Project, tools::{pen::PenState, tools::Tool}};
 use crate::components::color_picker::ColorPicker;
+use crate::{
+    state::workspace_state::WorkspaceState,
+    structs::project::Project,
+    tools::{pen::PenState, tools::Tool},
+};
+use leptos::prelude::*;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {

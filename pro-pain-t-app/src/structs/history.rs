@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
-use serde::{Deserialize, Serialize};
 use crate::structs::pixel::Pixel;
+use serde::{Deserialize, Serialize};
+use std::collections::VecDeque;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct History {

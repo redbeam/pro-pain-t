@@ -15,12 +15,7 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn new(
-        name: String,
-        width: u32,
-        height: u32,
-        background_color: Color,
-    ) -> Self {
+    pub fn new(name: String, width: u32, height: u32, background_color: Color) -> Self {
         Self {
             name,
             width: RwSignal::new(width),

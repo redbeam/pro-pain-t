@@ -1,11 +1,15 @@
 use crate::components::color_picker::ColorPicker;
-use leptos::{html::Dialog, logging, prelude::*};
 use crate::structs::project::Project;
+use leptos::{html::Dialog, logging, prelude::*};
 
 #[component]
-pub fn EditLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>, id: usize) -> impl IntoView {
+pub fn EditLayerWindow(
+    dialog_ref: NodeRef<Dialog>,
+    is_open: RwSignal<bool>,
+    id: usize,
+) -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap().get();
-    
+
     let layers = project.layers.get();
     let layer = layers.iter().find(|l| l.id == id).unwrap();
 

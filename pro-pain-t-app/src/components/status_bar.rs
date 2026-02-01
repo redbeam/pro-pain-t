@@ -1,6 +1,6 @@
-use leptos::prelude::*;
 use crate::structs::project::Project;
 use crate::view_state::ProjectViewState;
+use leptos::prelude::*;
 
 #[component]
 pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {

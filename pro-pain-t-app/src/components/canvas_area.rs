@@ -1,15 +1,14 @@
+use crate::view_state::ProjectViewState;
+use crate::{state::workspace_state::WorkspaceState, structs::project::Project};
 use leptos::prelude::*;
 use leptos::*;
-use crate::{state::workspace_state::WorkspaceState, structs::project::Project};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, PointerEvent, wasm_bindgen::JsCast};
-use crate::view_state::ProjectViewState;
 
-use crate::render::canvas_renderer::{composite_layers, draw_project_viewport, ViewTransform};
+use crate::render::canvas_renderer::{ViewTransform, composite_layers, draw_project_viewport};
 use crate::tools::context::ToolContext;
 
 #[component]
-pub fn CanvasArea(
-) -> impl IntoView {
+pub fn CanvasArea() -> impl IntoView {
     let canvas_ref = NodeRef::new();
 
     let project = use_context::<RwSignal<Project>>().unwrap();
@@ -99,8 +98,11 @@ pub fn CanvasArea(
         };
 
         let ctx = canvas
-            .get_context("2d").unwrap().unwrap()
-            .dyn_into::<CanvasRenderingContext2d>().unwrap();
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
 
         let zoom = view_state.zoom_factor.get();
         let pan_x_tracked = view_state.pan_x.get();
@@ -146,7 +148,6 @@ pub fn CanvasArea(
             };
 
             if layers.is_empty() {
-
                 let pixels = vec![0u8; (proj_w * proj_h * 4) as usize];
                 draw_project_viewport(
                     &ctx,
@@ -207,7 +208,7 @@ pub fn CanvasArea(
                     cursor,
                 )
             }
-            
+
         />
     }
 }

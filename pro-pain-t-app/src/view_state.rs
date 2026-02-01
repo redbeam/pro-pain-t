@@ -5,7 +5,7 @@ pub struct ProjectViewState {
     pub zoom_factor: RwSignal<f32>,
     pub pan_x: RwSignal<f32>,
     pub pan_y: RwSignal<f32>,
-	pub did_center_view: RwSignal<bool>,
+    pub did_center_view: RwSignal<bool>,
 }
 
 impl ProjectViewState {

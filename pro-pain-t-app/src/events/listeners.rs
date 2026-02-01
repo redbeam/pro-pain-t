@@ -11,7 +11,10 @@ use pro_pain_t_shared::dtos::image::ImageDto;
 use pro_pain_t_shared::dtos::path::PathDto;
 use pro_pain_t_shared::dtos::project::ProjectDto;
 use pro_pain_t_shared::dtos::save_object::SaveObjectDto;
-use pro_pain_t_shared::events::events::{EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER, EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_SAVE_PROJECT};
+use pro_pain_t_shared::events::events::{
+    EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER,
+    EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_SAVE_PROJECT,
+};
 use tauri_sys::core::invoke;
 use tauri_sys::event::listen;
 
@@ -41,20 +44,31 @@ pub fn save_project_listener(project: RwSignal<Project>) {
         let mut listener = listen::<PathDto>(EVENT_MENU_SAVE_PROJECT).await.unwrap();
         while let Some(data) = listener.next().await {
             let project_serialized = project.get().serialize();
-            invoke::<()>("save_project_command", SaveObjectDto::new(data.payload.path, project_serialized)).await;
+            invoke::<()>(
+                "save_project_command",
+                SaveObjectDto::new(data.payload.path, project_serialized),
+            )
+            .await;
         }
     });
 }
 
 pub fn import_as_layer_listener(project: RwSignal<Project>) {
     spawn_local(async move {
-        let mut listener = listen::<ImageDto>(EVENT_MENU_IMPORT_AS_LAYER).await.unwrap();
+        let mut listener = listen::<ImageDto>(EVENT_MENU_IMPORT_AS_LAYER)
+            .await
+            .unwrap();
         while let Some(data) = listener.next().await {
             project.update(|project| {
-                let image = RgbImage::from_raw(data.payload.width, data.payload.height, data.payload.raw_data)
-                    .expect("Unable to create image buffer");
+                let image = RgbImage::from_raw(
+                    data.payload.width,
+                    data.payload.height,
+                    data.payload.raw_data,
+                )
+                .expect("Unable to create image buffer");
                 let layer_id = project.next_layer_id.get();
-                let new_layer = Layer::from_image(&image, layer_id, "Imported image", Color::default_black());
+                let new_layer =
+                    Layer::from_image(&image, layer_id, "Imported image", Color::default_black());
                 project.add_new_layer(new_layer);
             });
         }
@@ -63,12 +77,19 @@ pub fn import_as_layer_listener(project: RwSignal<Project>) {
 
 pub fn export_project_listener(project: RwSignal<Project>) {
     spawn_local(async move {
-        let mut listener = listen::<PathDto>(EVENT_MENU_EXPORT_PROJECT).await
-            .unwrap();
+        let mut listener = listen::<PathDto>(EVENT_MENU_EXPORT_PROJECT).await.unwrap();
         while let Some(data) = listener.next().await {
             let raw_image = composite_layers(&*project.get().layers.get()).0;
-            let image_dto = ImageDto::new(project.get().width.get(), project.get().height.get(), raw_image);
-            invoke::<()>("export_project_command", ExportObjectDto::new(data.payload.path, image_dto)).await;
+            let image_dto = ImageDto::new(
+                project.get().width.get(),
+                project.get().height.get(),
+                raw_image,
+            );
+            invoke::<()>(
+                "export_project_command",
+                ExportObjectDto::new(data.payload.path, image_dto),
+            )
+            .await;
         }
     });
 }

@@ -1,13 +1,13 @@
 use leptos::prelude::*;
 
 mod app;
-mod structs;
-mod events;
 mod components;
-mod view_state;
-mod tools;
-mod state;
+mod events;
 mod render;
+mod state;
+mod structs;
+mod tools;
+mod view_state;
 
 fn main() {
     console_error_panic_hook::set_once();

@@ -9,12 +9,7 @@ pub struct ViewTransform {
     pub dpr: f64,
 }
 
-pub fn draw_checkerboard(
-    ctx: &CanvasRenderingContext2d,
-    width: u32,
-    height: u32,
-    tile_size: u32,
-) {
+pub fn draw_checkerboard(ctx: &CanvasRenderingContext2d, width: u32, height: u32, tile_size: u32) {
     let light = "#e0e0e0";
     let dark = "#b0b0b0";
 

@@ -14,7 +14,7 @@ pub struct ToolContext<'a> {
     pub viewport_h: f32,
 
     pub zoom: f32,
-    
+
     pub pan_x: f32,
     pub pan_y: f32,
 

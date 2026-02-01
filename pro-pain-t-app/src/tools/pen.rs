@@ -1,19 +1,13 @@
+use crate::structs::pixel::Pixel;
 use leptos::prelude::{Get, Update};
 use serde::{Deserialize, Serialize};
-use crate::structs::pixel::Pixel;
 
+use crate::tools::context::ToolContext;
 use crate::tools::geometry::screen_to_canvas;
 use web_sys::PointerEvent;
-use crate::tools::context::ToolContext;
 
 /// Bresenham line
-fn draw_line(
-    x0: i32,
-    y0: i32,
-    x1: i32,
-    y1: i32,
-    mut plot: impl FnMut(i32, i32),
-) {
+fn draw_line(x0: i32, y0: i32, x1: i32, y1: i32, mut plot: impl FnMut(i32, i32)) {
     let dx = (x1 - x0).abs();
     let dy = -(y1 - y0).abs();
     let sx = if x0 < x1 { 1 } else { -1 };
@@ -60,7 +54,6 @@ impl PenState {
     }
 
     pub fn on_pointer_move(&mut self, e: &PointerEvent, ctx: &ToolContext) {
-        
         if !self.is_drawing {
             return;
         }
@@ -90,8 +83,6 @@ impl PenState {
         let current = (x, y);
 
         ctx.project.get().layers.update(|layers| {
-            
-
             let Some(layer) = layers.get_mut(layer_index) else {
                 return;
             };
@@ -130,5 +121,3 @@ impl PenState {
         "default"
     }
 }
-
-

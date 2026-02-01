@@ -1,5 +1,5 @@
-use leptos::prelude::*;
 use crate::tools::{pen::PenState, tools::Tool};
+use leptos::prelude::*;
 
 #[derive(Clone)]
 pub struct WorkspaceState {
