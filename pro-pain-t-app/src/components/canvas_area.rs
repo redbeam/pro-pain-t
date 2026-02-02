@@ -17,6 +17,8 @@ pub fn CanvasArea() -> impl IntoView {
 
     let current_tool = workspace_state.current_tool;
 
+    let canvas_size_trigger = RwSignal::new(0u32);
+
     let on_pointer_down = move |ev: PointerEvent| {
         if ev.button() != 0 {
             return;
@@ -91,6 +93,54 @@ pub fn CanvasArea() -> impl IntoView {
         ev.prevent_default();
     };
 
+    Effect::new(move || {
+        use wasm_bindgen::prelude::*;
+        
+        if let Some(window) = web_sys::window() {
+            let trigger = canvas_size_trigger;
+            
+            let closure = Closure::wrap(Box::new(move |_: web_sys::Event| {
+                trigger.update(|v| *v = v.wrapping_add(1));
+            }) as Box<dyn FnMut(web_sys::Event)>);
+            
+            let _ = window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
+            
+            closure.forget();
+        }
+    });
+
+    Effect::new(move |_| {
+        let canvas: HtmlCanvasElement = match canvas_ref.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        if view_state.did_center_view.get_untracked() {
+            return;
+        }
+
+        let rect = canvas.get_bounding_client_rect();
+        let viewport_w_css = rect.width() as f32;
+        let viewport_h_css = rect.height() as f32;
+
+        project.with_untracked(|project| {
+            let layers = project.layers.get_untracked();
+            let proj_w = if layers.is_empty() {
+                project.width.get_untracked()
+            } else {
+                layers[0].canvas.width
+            };
+            let proj_h = if layers.is_empty() {
+                project.height.get_untracked()
+            } else {
+                layers[0].canvas.height
+            };
+
+            let zoom = view_state.zoom_factor.get_untracked();
+            view_state.ensure_centered_once(viewport_w_css, viewport_h_css, proj_w, proj_h, zoom);
+        });
+    });
+
     Effect::new(move |_| {
         let canvas: HtmlCanvasElement = match canvas_ref.get() {
             Some(c) => c,
@@ -105,15 +155,14 @@ pub fn CanvasArea() -> impl IntoView {
             .unwrap();
 
         let zoom = view_state.zoom_factor.get();
-        let pan_x_tracked = view_state.pan_x.get();
-        let pan_y_tracked = view_state.pan_y.get();
+        let pan_x = view_state.pan_x.get();
+        let pan_y = view_state.pan_y.get();
+        let _ = canvas_size_trigger.get();
 
         let window = web_sys::window().expect("window missing");
         let dpr = window.device_pixel_ratio();
 
         let rect = canvas.get_bounding_client_rect();
-        let viewport_w_css = rect.width() as f32;
-        let viewport_h_css = rect.height() as f32;
         let cw = (rect.width() * dpr).max(1.0).round() as u32;
         let ch = (rect.height() * dpr).max(1.0).round() as u32;
         if canvas.width() != cw {
@@ -134,17 +183,6 @@ pub fn CanvasArea() -> impl IntoView {
                 project.height.get()
             } else {
                 layers[0].canvas.height
-            };
-
-            let (pan_x, pan_y) = match view_state.ensure_centered_once(
-                viewport_w_css,
-                viewport_h_css,
-                proj_w,
-                proj_h,
-                zoom,
-            ) {
-                Some((x, y)) => (x, y),
-                None => (pan_x_tracked, pan_y_tracked),
             };
 
             if layers.is_empty() {
