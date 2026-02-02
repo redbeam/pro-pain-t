@@ -1,23 +1,41 @@
-use crate::render::canvas_renderer::composite_layers;
-use crate::structs::color::Color;
-use crate::structs::layer::Layer;
 use crate::structs::project::Project;
+use leptos::prelude::RwSignal;
+
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
+use crate::render::canvas_renderer::composite_layers;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
+use crate::structs::color::Color;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
+use crate::structs::layer::Layer;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use futures::stream::StreamExt;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use image::RgbImage;
-use leptos::prelude::{Get, RwSignal, Set, Update};
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
+use leptos::prelude::{Get, Set, Update};
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use leptos::task::spawn_local;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use pro_pain_t_shared::dtos::export_object::ExportObjectDto;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use pro_pain_t_shared::dtos::image::ImageDto;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use pro_pain_t_shared::dtos::path::PathDto;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use pro_pain_t_shared::dtos::project::ProjectDto;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use pro_pain_t_shared::dtos::save_object::SaveObjectDto;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use pro_pain_t_shared::events::events::{
     EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER,
     EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_SAVE_PROJECT,
 };
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use tauri_sys::core::invoke;
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 use tauri_sys::event::listen;
 
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 pub fn create_new_project_listener(project_window_signal: RwSignal<bool>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_NEW_PROJECT).await.unwrap();
@@ -27,6 +45,7 @@ pub fn create_new_project_listener(project_window_signal: RwSignal<bool>) {
     });
 }
 
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 pub fn open_project_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<ProjectDto>(EVENT_MENU_OPEN_PROJECT).await.unwrap();
@@ -39,6 +58,7 @@ pub fn open_project_listener(project: RwSignal<Project>) {
     });
 }
 
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 pub fn save_project_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<PathDto>(EVENT_MENU_SAVE_PROJECT).await.unwrap();
@@ -53,6 +73,7 @@ pub fn save_project_listener(project: RwSignal<Project>) {
     });
 }
 
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 pub fn import_as_layer_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<ImageDto>(EVENT_MENU_IMPORT_AS_LAYER)
@@ -75,6 +96,7 @@ pub fn import_as_layer_listener(project: RwSignal<Project>) {
     });
 }
 
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 pub fn export_project_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<PathDto>(EVENT_MENU_EXPORT_PROJECT).await.unwrap();
@@ -99,6 +121,7 @@ pub fn export_project_listener(project: RwSignal<Project>) {
     });
 }
 
+#[cfg(all(target_family = "wasm", feature = "tauri"))]
 pub fn canvas_size_listener(canvas_size_window_signal: RwSignal<bool>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_CANVAS_SIZE).await.unwrap();
@@ -106,4 +129,35 @@ pub fn canvas_size_listener(canvas_size_window_signal: RwSignal<bool>) {
             canvas_size_window_signal.set(true);
         }
     });
+}
+
+// Standalone browser - no-op stubs
+#[cfg(not(all(target_family = "wasm", feature = "tauri")))]
+pub fn create_new_project_listener(_project_window_signal: RwSignal<bool>) {
+    // No-op: menu events not available in standalone mode
+}
+
+#[cfg(not(all(target_family = "wasm", feature = "tauri")))]
+pub fn open_project_listener(_project: RwSignal<Project>) {
+    // No-op: file open not available in standalone mode
+}
+
+#[cfg(not(all(target_family = "wasm", feature = "tauri")))]
+pub fn save_project_listener(_project: RwSignal<Project>) {
+    // No-op: file save not available in standalone mode
+}
+
+#[cfg(not(all(target_family = "wasm", feature = "tauri")))]
+pub fn import_as_layer_listener(_project: RwSignal<Project>) {
+    // No-op: import not available in standalone mode
+}
+
+#[cfg(not(all(target_family = "wasm", feature = "tauri")))]
+pub fn export_project_listener(_project: RwSignal<Project>) {
+    // No-op: export not available in standalone mode
+}
+
+#[cfg(not(all(target_family = "wasm", feature = "tauri")))]
+pub fn canvas_size_listener(_canvas_size_window_signal: RwSignal<bool>) {
+    // No-op: menu events not available in standalone mode
 }
