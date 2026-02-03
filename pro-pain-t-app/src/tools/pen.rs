@@ -58,7 +58,7 @@ impl PenState {
             return;
         }
 
-        let Some(layer_index) = ctx.selected_layer else {
+        let Some(layer_id) = ctx.selected_layer else {
             return;
         };
 
@@ -83,7 +83,7 @@ impl PenState {
         let current = (x, y);
 
         ctx.project.get().layers.update(|layers| {
-            let Some(layer) = layers.get_mut(layer_index) else {
+            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
                 return;
             };
 
