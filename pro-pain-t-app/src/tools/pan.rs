@@ -58,7 +58,7 @@ impl PanState {
         ctx.view_state.pan_by(dx, dy);
     }
 
-    pub fn on_pointer_up(&mut self, e: &PointerEvent) {
+    pub fn on_pointer_up(&mut self, e: &PointerEvent, _ctx: &ToolContext) {
         if self.pointer_id != Some(e.pointer_id()) {
             return;
         }

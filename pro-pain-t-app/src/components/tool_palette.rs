@@ -2,7 +2,7 @@ use crate::components::color_picker::ColorPicker;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{pen::PenState, tools::Tool},
+    tools::{pen::PenState, select::SelectState, tools::Tool},
 };
 use leptos::prelude::*;
 
@@ -48,6 +48,19 @@ pub fn ToolPalette() -> impl IntoView {
                     title="Pan tool"
                 >
                 "🤚🏻"
+                </div>
+                <div
+                    style=move || format!(
+                        "width:24px; height:24px; background:{}; font-size:1rem; display: flex; align-items: center; justify-content: center; border-radius: 2px; border: 1px solid {};",
+                        if matches!(workspace_state.current_tool.get(), Tool::Select(_)) { "#2f3e66" } else { "#3a3a3a" },
+                        if matches!(workspace_state.current_tool.get(), Tool::Select(_)) { "#4a7cff" } else { "transparent" }
+                    )
+                    on:click=move |_| {
+                        workspace_state.current_tool.set(Tool::Select(SelectState::default()));
+                    }
+                    title="Select tool"
+                >
+                "🔲"
                 </div>
                 <div
                     style=move || format!(

@@ -6,6 +6,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, PointerEvent, wasm_bi
 
 use crate::render::canvas_renderer::{ViewTransform, composite_layers, draw_project_viewport};
 use crate::tools::context::ToolContext;
+use crate::tools::select::{commit_selection, SelectionBuffer, SelectionState};
 
 #[component]
 pub fn CanvasArea() -> impl IntoView {
@@ -14,6 +15,11 @@ pub fn CanvasArea() -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().unwrap();
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
+
+    let workspace_state_for_down = workspace_state.clone();
+    let workspace_state_for_move = workspace_state.clone();
+    let workspace_state_for_up = workspace_state.clone();
+    let workspace_state_for_render = workspace_state.clone();
 
     let current_tool = workspace_state.current_tool;
 
@@ -39,7 +45,7 @@ pub fn CanvasArea() -> impl IntoView {
         let zoom = view_state.zoom_factor.get();
         let pan_x = view_state.pan_x.get();
         let pan_y = view_state.pan_y.get();
-        let selected_layer = workspace_state.selected_layer_id.get();
+        let selected_layer = workspace_state_for_down.selected_layer_id.get();
 
         let rect = canvas.get_bounding_client_rect();
 
@@ -47,6 +53,7 @@ pub fn CanvasArea() -> impl IntoView {
             canvas: &canvas,
             project: &project,
             view_state: &view_state,
+            workspace_state: &workspace_state_for_down,
             viewport_w: rect.width() as f32,
             viewport_h: rect.height() as f32,
             zoom,
@@ -68,7 +75,7 @@ pub fn CanvasArea() -> impl IntoView {
         let zoom = view_state.zoom_factor.get();
         let pan_x = view_state.pan_x.get();
         let pan_y = view_state.pan_y.get();
-        let selected_layer = workspace_state.selected_layer_id.get();
+        let selected_layer = workspace_state_for_move.selected_layer_id.get();
 
         let rect = canvas.get_bounding_client_rect();
 
@@ -76,6 +83,7 @@ pub fn CanvasArea() -> impl IntoView {
             canvas: &canvas,
             project: &project,
             view_state: &view_state,
+            workspace_state: &workspace_state_for_move,
             viewport_w: rect.width() as f32,
             viewport_h: rect.height() as f32,
             zoom,
@@ -89,7 +97,32 @@ pub fn CanvasArea() -> impl IntoView {
     };
 
     let on_pointer_up = move |ev: PointerEvent| {
-        current_tool.update(|t| t.on_pointer_up(&ev));
+        let canvas: HtmlCanvasElement = match canvas_ref.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        let zoom = view_state.zoom_factor.get();
+        let pan_x = view_state.pan_x.get();
+        let pan_y = view_state.pan_y.get();
+        let selected_layer = workspace_state_for_up.selected_layer_id.get();
+
+        let rect = canvas.get_bounding_client_rect();
+
+        let ctx = ToolContext {
+            canvas: &canvas,
+            project: &project,
+            view_state: &view_state,
+            workspace_state: &workspace_state_for_up,
+            viewport_w: rect.width() as f32,
+            viewport_h: rect.height() as f32,
+            zoom,
+            pan_x,
+            pan_y,
+            selected_layer,
+        };
+
+        current_tool.update(|t| t.on_pointer_up(&ev, &ctx));
         ev.prevent_default();
     };
 
@@ -105,6 +138,30 @@ pub fn CanvasArea() -> impl IntoView {
             
             let _ = window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
             
+            closure.forget();
+        }
+    });
+
+    Effect::new(move || {
+        use wasm_bindgen::prelude::*;
+
+        if let Some(window) = web_sys::window() {
+            let ws = workspace_state.clone();
+            let tool = current_tool;
+            let project = project;
+
+            let closure = Closure::wrap(Box::new(move |ev: web_sys::KeyboardEvent| {
+                if ev.key() == "Escape" {
+                    if let Some(selection) = ws.selection.get() {
+                        commit_selection(&project, &selection);
+                    }
+                    ws.selection.set(None);
+                    tool.update(|t| t.on_pointer_cancel());
+                    ev.prevent_default();
+                }
+            }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
+
+            let _ = window.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
             closure.forget();
         }
     });
@@ -220,6 +277,23 @@ pub fn CanvasArea() -> impl IntoView {
                 },
             );
         });
+
+        let active_layer = workspace_state_for_render.selected_layer_id.get();
+        if let Some(selection) = workspace_state_for_render.selection.get() {
+            if Some(selection.layer_id) != active_layer {
+                return;
+            }
+            draw_selection_overlay(
+                &ctx,
+                &selection,
+                ViewTransform {
+                    zoom,
+                    pan_x,
+                    pan_y,
+                    dpr,
+                },
+            );
+        }
     });
 
     view! {
@@ -249,4 +323,112 @@ pub fn CanvasArea() -> impl IntoView {
 
         />
     }
+}
+
+fn draw_selection_overlay(ctx: &CanvasRenderingContext2d, selection: &SelectionState, t: ViewTransform) {
+    let scale = (t.zoom as f64) * t.dpr;
+    let tx = (t.pan_x as f64) * t.dpr;
+    let ty = (t.pan_y as f64) * t.dpr;
+
+    let _ = ctx.set_transform(scale, 0.0, 0.0, scale, tx, ty);
+    ctx.set_image_smoothing_enabled(false);
+
+    let line_width = (1.0 / scale.max(0.0001)).max(0.5);
+    ctx.set_line_width(line_width);
+
+    let rect = &selection.rect;
+    if rect.is_empty() {
+        return;
+    }
+    ctx.set_stroke_style_str("#4a7cff");
+    ctx.stroke_rect(rect.x as f64, rect.y as f64, rect.w as f64, rect.h as f64);
+
+    if let Some(buffer) = selection.buffer.as_ref() {
+        draw_selection_pixels(ctx, rect, buffer);
+    }
+
+    let handle_size = 6.0 / scale.max(0.0001);
+    let hs = handle_size / 2.0;
+    let x0 = rect.x as f64;
+    let y0 = rect.y as f64;
+    let x1 = rect.x as f64 + rect.w as f64;
+    let y1 = rect.y as f64 + rect.h as f64;
+    let xm = (x0 + x1) / 2.0;
+    let ym = (y0 + y1) / 2.0;
+
+    let handles = [
+        (x0, y0),
+        (x1, y0),
+        (x1, y1),
+        (x0, y1),
+        (xm, y0),
+        (x1, ym),
+        (xm, y1),
+        (x0, ym),
+    ];
+
+    ctx.set_fill_style_str("#ffffff");
+    ctx.set_stroke_style_str("#4a7cff");
+
+    for (hx, hy) in handles {
+        ctx.fill_rect(hx - hs, hy - hs, handle_size, handle_size);
+        ctx.stroke_rect(hx - hs, hy - hs, handle_size, handle_size);
+    }
+}
+
+fn draw_selection_pixels(ctx: &CanvasRenderingContext2d, rect: &crate::tools::select::SelectionRect, buffer: &SelectionBuffer) {
+    if buffer.width == 0 || buffer.height == 0 || rect.w <= 0 || rect.h <= 0 {
+        return;
+    }
+
+    let offscreen = create_offscreen_canvas(buffer.width, buffer.height);
+    let off_ctx = offscreen
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()
+        .unwrap();
+
+    let rgba = buffer_to_rgba(buffer);
+    let image_data = web_sys::ImageData::new_with_u8_clamped_array_and_sh(
+        wasm_bindgen::Clamped(&rgba),
+        buffer.width,
+        buffer.height,
+    )
+    .expect("Failed to create ImageData");
+
+    off_ctx.put_image_data(&image_data, 0.0, 0.0).expect("Failed to put ImageData");
+
+    let _ = ctx.draw_image_with_html_canvas_element_and_dw_and_dh(
+        &offscreen,
+        rect.x as f64,
+        rect.y as f64,
+        rect.w as f64,
+        rect.h as f64,
+    );
+}
+
+fn buffer_to_rgba(buffer: &SelectionBuffer) -> Vec<u8> {
+    let mut out = Vec::with_capacity((buffer.width * buffer.height * 4) as usize);
+    for c in &buffer.pixels {
+        out.push(c.r);
+        out.push(c.g);
+        out.push(c.b);
+        out.push((c.alpha * 255.0) as u8);
+    }
+    out
+}
+
+fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
+    let document = web_sys::window()
+        .and_then(|w| w.document())
+        .expect("document missing");
+    let canvas = document
+        .create_element("canvas")
+        .expect("Failed to create canvas element")
+        .dyn_into::<HtmlCanvasElement>()
+        .expect("Failed to cast element to HtmlCanvasElement");
+    canvas.set_width(width);
+    canvas.set_height(height);
+    canvas
 }
