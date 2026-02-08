@@ -10,9 +10,6 @@ pub struct ToolContext<'a> {
     pub project: &'a RwSignal<Project>,
     pub view_state: &'a ProjectViewState,
 
-    pub viewport_w: f32,
-    pub viewport_h: f32,
-
     pub zoom: f32,
 
     pub pan_x: f32,

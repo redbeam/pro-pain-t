@@ -73,10 +73,6 @@ impl PanState {
         self.last_pos = None;
     }
 
-    pub fn is_panning(&self) -> bool {
-        self.is_panning
-    }
-
     pub fn cursor(&self) -> &'static str {
         if self.is_panning { "grabbing" } else { "grab" }
     }

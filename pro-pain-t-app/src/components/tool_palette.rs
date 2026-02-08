@@ -13,34 +13,11 @@ pub fn ToolPalette() -> impl IntoView {
     let current_color = project.with_untracked(|p| p.current_color);
 
     view! {
-        <nav
-            style="
-                width:160px;
-                background:#262626;
-                color:#f5f5f5;
-                display:flex;
-                flex-direction:column;
-                padding:0.5rem;
-                gap:0.75rem;
-                box-sizing:border-box;
-                font-size:0.75rem;
-                font-family:system-ui, sans-serif;
-            "
-        >
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:repeat(4, 1fr);
-                    gap:0.25rem;
-                    cursor: pointer;
-                "
-            >
+        <nav class="tool-palette">
+            <div class="tool-palette-grid">
                 <div
-                    style=move || format!(
-                        "width:24px; height:24px; background:{}; font-size:1rem; display: flex; align-items: center; justify-content: center; border-radius: 2px; border: 1px solid {};",
-                        if workspace_state.current_tool.get().is_pan() { "#2f3e66" } else { "#3a3a3a" },
-                        if workspace_state.current_tool.get().is_pan() { "#4a7cff" } else { "transparent" }
-                    )
+                    class="tool-button"
+                    class=("tool-button--active", move || workspace_state.current_tool.get().is_pan())
                     on:click=move |_| {
                         use crate::tools::{pan::PanState, tools::Tool};
                         workspace_state.current_tool.set(Tool::Pan(PanState::default()));
@@ -50,11 +27,8 @@ pub fn ToolPalette() -> impl IntoView {
                 "🤚🏻"
                 </div>
                 <div
-                    style=move || format!(
-                        "width:24px; height:24px; background:{}; font-size:1rem; display: flex; align-items: center; justify-content: center; border-radius: 2px; border: 1px solid {};",
-                        if matches!(workspace_state.current_tool.get(), Tool::Pen(_)) { "#2f3e66" } else { "#3a3a3a" },
-                        if matches!(workspace_state.current_tool.get(), Tool::Pen(_)) { "#4a7cff" } else { "transparent" }
-                    )
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(workspace_state.current_tool.get(), Tool::Pen(_)))
                     on:click=move |_| {
                         workspace_state.current_tool.set(Tool::Pen(PenState::default()));
                     }
@@ -62,7 +36,7 @@ pub fn ToolPalette() -> impl IntoView {
                 >
                 "🖊️"
                 </div>
-                { (0..10).map(|_| view! { <div style="width:24px; height:24px; background:#3a3a3a; border-radius:2px;"></div> }).collect_view() }
+                { (0..10).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
             </div>
 
             <ColorPicker color=current_color />
