@@ -37,32 +37,10 @@ pub fn App() -> impl IntoView {
     canvas_size_listener(is_canvas_size_open);
 
     view! {
-        <div
-            style="
-                display:flex;
-                flex-direction:column;
-                height:100vh;
-                margin:0;
-                background:#111;
-            "
-        >
-            <div
-                style="
-                    flex:1;
-                    display:flex;
-                    min-height:0;
-                "
-            >
+        <div class="app-root">
+            <div class="app-main">
                 <ToolPalette />
-                <div
-                    style="
-                        flex:1;
-                        display:flex;
-                        justify-content:center;
-                        align-items:center;
-                        background:#3a3a3a;
-                    "
-                >
+                <div class="app-canvas-wrapper">
                     <CanvasArea />
                 </div>
                 <LayerPanel />

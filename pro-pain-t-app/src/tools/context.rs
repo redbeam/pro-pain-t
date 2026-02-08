@@ -12,9 +12,6 @@ pub struct ToolContext<'a> {
     pub view_state: &'a ProjectViewState,
     pub workspace_state: &'a WorkspaceState,
 
-    pub viewport_w: f32,
-    pub viewport_h: f32,
-
     pub zoom: f32,
 
     pub pan_x: f32,

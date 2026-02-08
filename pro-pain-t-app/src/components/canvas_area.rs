@@ -47,15 +47,11 @@ pub fn CanvasArea() -> impl IntoView {
         let pan_y = view_state.pan_y.get();
         let selected_layer = workspace_state_for_down.selected_layer_id.get();
 
-        let rect = canvas.get_bounding_client_rect();
-
         let ctx = ToolContext {
             canvas: &canvas,
             project: &project,
             view_state: &view_state,
             workspace_state: &workspace_state_for_down,
-            viewport_w: rect.width() as f32,
-            viewport_h: rect.height() as f32,
             zoom,
             pan_x,
             pan_y,
@@ -77,15 +73,11 @@ pub fn CanvasArea() -> impl IntoView {
         let pan_y = view_state.pan_y.get();
         let selected_layer = workspace_state_for_move.selected_layer_id.get();
 
-        let rect = canvas.get_bounding_client_rect();
-
         let ctx = ToolContext {
             canvas: &canvas,
             project: &project,
             view_state: &view_state,
             workspace_state: &workspace_state_for_move,
-            viewport_w: rect.width() as f32,
-            viewport_h: rect.height() as f32,
             zoom,
             pan_x,
             pan_y,
@@ -107,15 +99,11 @@ pub fn CanvasArea() -> impl IntoView {
         let pan_y = view_state.pan_y.get();
         let selected_layer = workspace_state_for_up.selected_layer_id.get();
 
-        let rect = canvas.get_bounding_client_rect();
-
         let ctx = ToolContext {
             canvas: &canvas,
             project: &project,
             view_state: &view_state,
             workspace_state: &workspace_state_for_up,
-            viewport_w: rect.width() as f32,
-            viewport_h: rect.height() as f32,
             zoom,
             pan_x,
             pan_y,
