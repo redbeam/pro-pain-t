@@ -8,7 +8,7 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
     let title = RwSignal::new(String::from("New layer"));
     let color = RwSignal::new(Color::default_white());
 
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
 
     let create_layer = move || {
         let layer_id = project.get().next_layer_id.get();

@@ -4,7 +4,7 @@ use leptos::prelude::*;
 
 #[component]
 pub fn StatusBar(is_open: RwSignal<bool>) -> impl IntoView {
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
 
     let zoom_out_disabled = Memo::new(move |_| {

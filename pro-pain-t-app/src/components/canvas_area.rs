@@ -14,7 +14,7 @@ use wasm_bindgen::prelude::*;
 pub fn CanvasArea() -> impl IntoView {
     let canvas_ref = NodeRef::new();
 
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
 
@@ -150,7 +150,6 @@ pub fn CanvasArea() -> impl IntoView {
             }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
             let _ = window.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
-            closure.forget();
         }
     });
 
@@ -204,7 +203,7 @@ pub fn CanvasArea() -> impl IntoView {
         let pan_y = view_state.pan_y.get();
         let _ = canvas_size_trigger.get();
 
-        let window = web_sys::window().expect("window missing");
+        let window = web_sys::window().expect("Failed to acquire window object");
         let device_pixel_ratio = window.device_pixel_ratio();
 
         let rect = canvas.get_bounding_client_rect();

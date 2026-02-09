@@ -8,7 +8,7 @@ use leptos::prelude::*;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
     let current_color = project.with_untracked(|p| p.current_color);
 
