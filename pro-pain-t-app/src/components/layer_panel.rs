@@ -54,6 +54,8 @@ pub fn LayerPanel() -> impl IntoView {
                     flex-direction:column;
                     gap:0.4rem;
                     font-size:0.8rem;
+                    min-height:0;
+                    overflow-y:auto;
                 ">
                 <For
                     each=move || project.get().layers.get().into_iter().rev()
