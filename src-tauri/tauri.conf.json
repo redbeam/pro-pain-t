@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "identifier": "cz.muni.fi.pro-pain-t",
   "build": {
-    "beforeBuildCommand": "cd pro-pain-t-app && trunk build --dist dist --features tauri",
-    "beforeDevCommand": "cd pro-pain-t-app && trunk serve --port 1420 --open --features tauri",
+    "beforeBuildCommand": "cd pro-pain-t-app && trunk build --dist dist",
+    "beforeDevCommand": "cd pro-pain-t-app && trunk serve --port 1420 --open",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../pro-pain-t-app/dist"
   },
