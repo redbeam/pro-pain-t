@@ -6,6 +6,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, PointerEvent, wasm_bi
 
 use crate::render::canvas_renderer::{ViewTransform, composite_layers, draw_project_viewport};
 use crate::tools::context::ToolContext;
+use wasm_bindgen::prelude::*;
 
 #[component]
 pub fn CanvasArea() -> impl IntoView {
@@ -86,8 +87,6 @@ pub fn CanvasArea() -> impl IntoView {
     };
 
     Effect::new(move || {
-        use wasm_bindgen::prelude::*;
-        
         if let Some(window) = web_sys::window() {
             let trigger = canvas_size_trigger;
             

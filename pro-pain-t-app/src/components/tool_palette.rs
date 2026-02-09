@@ -2,7 +2,7 @@ use crate::components::color_picker::ColorPicker;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{pen::PenState, tools::Tool},
+    tools::{pan::PanState, pen::PenState, tools::Tool},
 };
 use leptos::prelude::*;
 
@@ -19,7 +19,6 @@ pub fn ToolPalette() -> impl IntoView {
                     class="tool-button"
                     class=("tool-button--active", move || workspace_state.current_tool.get().is_pan())
                     on:click=move |_| {
-                        use crate::tools::{pan::PanState, tools::Tool};
                         workspace_state.current_tool.set(Tool::Pan(PanState::default()));
                     }
                     title="Pan tool"
