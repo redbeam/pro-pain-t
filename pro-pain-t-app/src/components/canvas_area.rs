@@ -131,8 +131,6 @@ pub fn CanvasArea() -> impl IntoView {
     });
 
     Effect::new(move || {
-        use wasm_bindgen::prelude::*;
-
         if let Some(window) = web_sys::window() {
             let ws = workspace_state.clone();
             let tool = current_tool;
