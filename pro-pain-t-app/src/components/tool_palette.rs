@@ -5,6 +5,7 @@ use crate::{
     tools::{pan::PanState, pen::PenState, tools::Tool},
 };
 use leptos::prelude::*;
+use crate::components::brush_size_slider::BrushSizeSlider;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {
@@ -38,7 +39,8 @@ pub fn ToolPalette() -> impl IntoView {
                 { (0..10).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
             </div>
 
-            <ColorPicker color=current_color />
+            <ColorPicker color = current_color />
+            <BrushSizeSlider brush_size = workspace_state.brush_size />
         </nav>
     }
 }
