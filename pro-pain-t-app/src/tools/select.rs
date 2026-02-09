@@ -1,7 +1,9 @@
+use crate::structs::history::{PixelDiff, StrokeDiff};
 use crate::structs::{color::Color, layer::Layer, project::Project};
 use crate::tools::context::ToolContext;
 use crate::tools::geometry::screen_to_canvas;
-use leptos::prelude::{Get, RwSignal, Set, Update, With};
+use crate::structs::pixel::Pixel;
+use leptos::prelude::{RwSignal, Set, Update, With};
 use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
 
@@ -60,6 +62,7 @@ pub struct SelectionState {
     pub layer_id: usize,
     pub rect: SelectionRect,
     pub buffer: Option<SelectionBuffer>,
+    pub original_pixels: Vec<PixelDiff>,
 }
 
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -145,10 +148,15 @@ impl SelectState {
             if handle.is_some() || rect.contains(x, y) {
                 self.pointer_id = Some(e.pointer_id());
                 if !existing_has_buffer {
-                    let buffer = cut_buffer(ctx, layer_id, rect);
+                    let (buffer, diffs) = cut_buffer(ctx, layer_id, rect);
                     ctx.workspace_state.selection.update(|sel| {
                         if let Some(sel) = sel.as_mut() {
                             sel.buffer = Some(buffer);
+
+                            if !diffs.is_empty() {
+                                sel.original_pixels.clear();
+                                sel.original_pixels = diffs;
+                            }
                         }
                     });
                 }
@@ -179,6 +187,7 @@ impl SelectState {
             layer_id,
             rect,
             buffer: None,
+            original_pixels: Vec::new(),
         }));
 
         self.pointer_id = Some(e.pointer_id());
@@ -390,22 +399,28 @@ fn cursor_for_handle(handle: ResizeHandle) -> &'static str {
     }
 }
 
-fn cut_buffer(ctx: &ToolContext, layer_id: usize, rect: SelectionRect) -> SelectionBuffer {
+fn cut_buffer(ctx: &ToolContext, layer_id: usize, rect: SelectionRect) -> (SelectionBuffer, Vec<PixelDiff>) {
     let mut buffer = SelectionBuffer {
         width: rect.w.max(1) as u32,
         height: rect.h.max(1) as u32,
         pixels: Vec::new(),
     };
 
-    ctx.project.get().layers.update(|layers| {
-        let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
-            return;
-        };
-        buffer = extract_buffer_from_layer(layer, rect);
-        clear_rect(layer, rect);
+    let mut diffs = Vec::new();
+
+    ctx.project.update(|project| {
+        project.layers.update(|layers| {
+            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
+                return;
+            };
+
+            buffer = extract_buffer_from_layer(layer, rect);
+
+            clear_rect(layer, rect, &mut diffs);
+        });
     });
 
-    buffer
+    (buffer, diffs)
 }
 
 fn extract_buffer_from_layer(layer: &mut Layer, rect: SelectionRect) -> SelectionBuffer {
@@ -439,55 +454,101 @@ fn extract_buffer_from_layer(layer: &mut Layer, rect: SelectionRect) -> Selectio
 }
 
 pub fn commit_selection(project: &RwSignal<Project>, selection: &SelectionState) {
-    let Some(buffer) = selection.buffer.as_ref() else {
-        return;
-    };
+    let Some(buffer) = selection.buffer.as_ref() else { return; };
     let rect = selection.rect;
     let layer_id = selection.layer_id;
-    project.get().layers.update(|layers| {
-        let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
-            return;
-        };
-        apply_buffer(layer, rect, buffer);
+    let sel = selection.clone();
+
+    project.update(|project| {
+        project.layers.update(|layers| {
+            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
+                return;
+            };
+
+            let mut diffs = Vec::new();
+
+            clear_rect(layer, rect, &mut diffs);
+
+            apply_buffer(layer, rect, buffer, &mut diffs);
+
+            diffs.extend(sel.original_pixels.clone());
+
+            if !diffs.is_empty() {
+                project.history.add(StrokeDiff {
+                    layer_id,
+                    pixels: diffs,
+                });
+            }
+        });
     });
 }
 
-fn clear_rect(layer: &mut Layer, rect: SelectionRect) {
+fn clear_rect(
+    layer: &mut Layer,
+    rect: SelectionRect,
+    diffs: &mut Vec<PixelDiff>,
+) {
     let width = rect.w.max(1) as u32;
     let height = rect.h.max(1) as u32;
+
     for y in 0..height {
         for x in 0..width {
             let px = rect.x + x as i32;
             let py = rect.y + y as i32;
-            if px < 0 || py < 0 {
-                continue;
-            }
-            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height {
-                continue;
-            }
-            let idx = (py as u32 * layer.canvas.width + px as u32) as usize;
-            layer.canvas.content[idx].color = transparent_color();
+            if px < 0 || py < 0 { continue; }
+            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height { continue; }
+
+            let ux = px as u32;
+            let uy = py as u32;
+            let idx = (uy * layer.canvas.width + ux) as usize;
+
+            let before = layer.canvas.content[idx].clone();
+            let after = Color { r:0,g:0,b:0, alpha:0.0 };
+
+            if before.color == after { continue; }
+
+            diffs.push(PixelDiff {
+                before: before.clone().into(),
+                after: Pixel::new(ux, uy, after),
+            });
+
+            layer.canvas.content[idx].color = after;
         }
     }
 }
 
-fn apply_buffer(layer: &mut Layer, rect: SelectionRect, buffer: &SelectionBuffer) {
+fn apply_buffer(
+    layer: &mut Layer,
+    rect: SelectionRect,
+    buffer: &SelectionBuffer,
+    diffs: &mut Vec<PixelDiff>,
+) {
     let width = rect.w.max(1) as u32;
     let height = rect.h.max(1) as u32;
+
     for y in 0..height {
         for x in 0..width {
             let px = rect.x + x as i32;
             let py = rect.y + y as i32;
-            if px < 0 || py < 0 {
-                continue;
-            }
-            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height {
-                continue;
-            }
-            let idx = (py as u32 * layer.canvas.width + px as u32) as usize;
+            if px < 0 || py < 0 { continue; }
+            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height { continue; }
+
+            let ux = px as u32;
+            let uy = py as u32;
+            let idx = (uy * layer.canvas.width + ux) as usize;
             let src_idx = (y * buffer.width + x) as usize;
-            let color = buffer.pixels.get(src_idx).copied().unwrap_or_else(transparent_color);
-            layer.canvas.content[idx].color = color;
+
+            let new_color = buffer.pixels.get(src_idx).copied().unwrap_or_else(transparent_color);
+            let before = layer.canvas.content[idx].clone();
+
+            if before.color == new_color { continue; }
+
+            diffs.push(PixelDiff {
+                before: before.clone().into(),
+                after: Pixel::new(ux, uy, new_color),
+            });
+
+            layer.canvas.content[idx].color = new_color;
         }
     }
 }

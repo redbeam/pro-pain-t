@@ -111,7 +111,6 @@ pub fn CanvasArea() -> impl IntoView {
             pan_y,
             selected_layer,
         };
-
         current_tool.update(|t| t.on_pointer_up(&ev, &ctx));
         ev.prevent_default();
     };

@@ -3,7 +3,7 @@ use web_sys::PointerEvent;
 
 use crate::tools::{context::ToolContext, pan::PanState, pen::PenState, select::SelectState};
 
-#[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Tool {
     Pen(PenState),
     Pan(PanState),
