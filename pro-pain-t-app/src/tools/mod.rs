@@ -4,3 +4,4 @@ pub mod pan;
 pub mod pen;
 pub mod select;
 pub mod tools;
+pub mod bucket;

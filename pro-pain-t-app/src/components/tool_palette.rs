@@ -2,7 +2,7 @@ use crate::components::color_picker::ColorPicker;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{pan::PanState, pen::PenState, select::SelectState, tools::Tool},
+    tools::{pan::PanState, pen::PenState, select::SelectState, tools::Tool, bucket::BucketState},
 };
 use leptos::prelude::*;
 use crate::components::brush_size_slider::BrushSizeSlider;
@@ -47,7 +47,17 @@ pub fn ToolPalette() -> impl IntoView {
                 >
                 "🖊️"
                 </div>
-                { (0..10).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Bucket(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Bucket(BucketState::default()), &project);
+                    }
+                    title="Bucket tool"
+                >
+                "🧺"
+                </div>
+                { (0..8).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
             </div>
 
             <ColorPicker color = current_color />
