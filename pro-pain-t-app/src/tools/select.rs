@@ -62,6 +62,7 @@ pub struct SelectionState {
     pub layer_id: usize,
     pub rect: SelectionRect,
     pub buffer: Option<SelectionBuffer>,
+    pub original_pixels: Vec<PixelDiff>,
 }
 
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -147,10 +148,15 @@ impl SelectState {
             if handle.is_some() || rect.contains(x, y) {
                 self.pointer_id = Some(e.pointer_id());
                 if !existing_has_buffer {
-                    let buffer = cut_buffer(ctx, layer_id, rect);
+                    let (buffer, diffs) = cut_buffer(ctx, layer_id, rect);
                     ctx.workspace_state.selection.update(|sel| {
                         if let Some(sel) = sel.as_mut() {
                             sel.buffer = Some(buffer);
+
+                            if !diffs.is_empty() {
+                                sel.original_pixels.clear();
+                                sel.original_pixels = diffs;
+                            }
                         }
                     });
                 }
@@ -181,6 +187,7 @@ impl SelectState {
             layer_id,
             rect,
             buffer: None,
+            original_pixels: Vec::new(),
         }));
 
         self.pointer_id = Some(e.pointer_id());
@@ -392,12 +399,14 @@ fn cursor_for_handle(handle: ResizeHandle) -> &'static str {
     }
 }
 
-fn cut_buffer(ctx: &ToolContext, layer_id: usize, rect: SelectionRect) -> SelectionBuffer {
+fn cut_buffer(ctx: &ToolContext, layer_id: usize, rect: SelectionRect) -> (SelectionBuffer, Vec<PixelDiff>) {
     let mut buffer = SelectionBuffer {
         width: rect.w.max(1) as u32,
         height: rect.h.max(1) as u32,
         pixels: Vec::new(),
     };
+
+    let mut diffs = Vec::new();
 
     ctx.project.update(|project| {
         project.layers.update(|layers| {
@@ -407,19 +416,11 @@ fn cut_buffer(ctx: &ToolContext, layer_id: usize, rect: SelectionRect) -> Select
 
             buffer = extract_buffer_from_layer(layer, rect);
 
-            let mut diffs = Vec::new();
             clear_rect(layer, rect, &mut diffs);
-
-            if !diffs.is_empty() {
-                project.history.add(StrokeDiff {
-                    layer_id,
-                    pixels: diffs,
-                });
-            }
         });
     });
 
-    buffer
+    (buffer, diffs)
 }
 
 fn extract_buffer_from_layer(layer: &mut Layer, rect: SelectionRect) -> SelectionBuffer {
@@ -456,6 +457,7 @@ pub fn commit_selection(project: &RwSignal<Project>, selection: &SelectionState)
     let Some(buffer) = selection.buffer.as_ref() else { return; };
     let rect = selection.rect;
     let layer_id = selection.layer_id;
+    let sel = selection.clone();
 
     project.update(|project| {
         project.layers.update(|layers| {
@@ -465,7 +467,11 @@ pub fn commit_selection(project: &RwSignal<Project>, selection: &SelectionState)
 
             let mut diffs = Vec::new();
 
+            clear_rect(layer, rect, &mut diffs);
+
             apply_buffer(layer, rect, buffer, &mut diffs);
+
+            diffs.extend(sel.original_pixels.clone());
 
             if !diffs.is_empty() {
                 project.history.add(StrokeDiff {
