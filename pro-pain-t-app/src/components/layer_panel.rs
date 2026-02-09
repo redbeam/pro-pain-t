@@ -8,7 +8,7 @@ use leptos::{html::Dialog, logging, prelude::*};
 
 #[component]
 pub fn LayerPanel() -> impl IntoView {
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
     let id_to_edit = RwSignal::new(None);
 
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
@@ -160,7 +160,7 @@ pub fn LayerPanel() -> impl IntoView {
                                         let current_project = project.get();
                                         let selected = workspace_state.selected_layer_id.get();
                                         let layers_original = current_project.layers.get();
-                                        let layer_index = layers_original.iter().position(|l| l.id == layer.id).unwrap();
+                                        let layer_index = layers_original.iter().position(|l| l.id == layer.id).expect("Layer with specified ID couldn't be found");
                                         let mut new_selected = selected;
 
                                         if selected.is_some() && selected.unwrap() == layer.id {
@@ -220,7 +220,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <LayerPreview layer=layer.clone() />
                                     <span style="font-size:0.8rem;">{move || {
                                         let binding = project.get().layers.get();
-                                        let l = binding.iter().find(|l| l.id == layer.id).unwrap();
+                                        let l = binding.iter().find(|l| l.id == layer.id).expect("Layer with specified ID couldn't be found");
                                         l.title.clone()
                                     }}</span>
                                 </div>

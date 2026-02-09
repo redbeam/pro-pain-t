@@ -3,3 +3,4 @@ pub mod project;
 pub mod path;
 pub mod save_object;
 pub mod export_object;
+pub mod error_message;
