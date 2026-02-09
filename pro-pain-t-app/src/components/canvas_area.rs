@@ -119,13 +119,13 @@ pub fn CanvasArea() -> impl IntoView {
     Effect::new(move || {
         if let Some(window) = web_sys::window() {
             let trigger = canvas_size_trigger;
-            
+
             let closure = Closure::wrap(Box::new(move |_: web_sys::Event| {
                 trigger.update(|v| *v = v.wrapping_add(1));
             }) as Box<dyn FnMut(web_sys::Event)>);
-            
+
             let _ = window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
-            
+
             closure.forget();
         }
     });
@@ -138,9 +138,11 @@ pub fn CanvasArea() -> impl IntoView {
 
             let closure = Closure::wrap(Box::new(move |ev: web_sys::KeyboardEvent| {
                 if ev.key() == "Escape" {
-                    if let Some(selection) = ws.selection.get() {
-                        commit_selection(&project, &selection);
-                    }
+                    ws.selection.with(|selection| {
+                        if let Some(selection) = selection {
+                            commit_selection(&project, selection);
+                        }
+                    });
                     ws.selection.set(None);
                     tool.update(|t| t.on_pointer_cancel());
                     ev.prevent_default();
@@ -265,21 +267,23 @@ pub fn CanvasArea() -> impl IntoView {
         });
 
         let active_layer = workspace_state_for_render.selected_layer_id.get();
-        if let Some(selection) = workspace_state_for_render.selection.get() {
-            if Some(selection.layer_id) != active_layer {
-                return;
+        workspace_state_for_render.selection.with(|selection| {
+            if let Some(selection) = selection {
+                if Some(selection.layer_id) != active_layer {
+                    return;
+                }
+                draw_selection_overlay(
+                    &ctx,
+                    selection,
+                    ViewTransform {
+                        zoom,
+                        pan_x,
+                        pan_y,
+                        device_pixel_ratio,
+                    },
+                );
             }
-            draw_selection_overlay(
-                &ctx,
-                &selection,
-                ViewTransform {
-                    zoom,
-                    pan_x,
-                    pan_y,
-                    device_pixel_ratio,
-                },
-            );
-        }
+        });
     });
 
     view! {

@@ -1,7 +1,7 @@
 use crate::structs::{color::Color, layer::Layer, project::Project};
 use crate::tools::context::ToolContext;
 use crate::tools::geometry::screen_to_canvas;
-use leptos::prelude::{Get, RwSignal, Set, Update};
+use leptos::prelude::{Get, RwSignal, Set, Update, With};
 use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
 
@@ -116,18 +116,35 @@ impl SelectState {
             ctx.pan_y,
         );
 
-        let mut selection = ctx.workspace_state.selection.get();
-        if selection.as_ref().map(|s| s.layer_id) != Some(layer_id) {
-            selection = None;
+        let mut clear_selection = false;
+        ctx.workspace_state.selection.with(|selection| {
+            if let Some(sel) = selection {
+                if sel.layer_id != layer_id {
+                    commit_selection(ctx.project, sel);
+                    clear_selection = true;
+                }
+            }
+        });
+        if clear_selection {
             ctx.workspace_state.selection.set(None);
         }
 
-        if let Some(sel) = selection.as_ref() {
-            let rect = sel.rect;
+        let mut existing_rect: Option<SelectionRect> = None;
+        let mut existing_has_buffer = false;
+        ctx.workspace_state.selection.with(|selection| {
+            if let Some(sel) = selection {
+                if sel.layer_id == layer_id {
+                    existing_rect = Some(sel.rect);
+                    existing_has_buffer = sel.buffer.is_some();
+                }
+            }
+        });
+
+        if let Some(rect) = existing_rect {
             let handle = handle_at(rect, x, y, ctx.zoom);
             if handle.is_some() || rect.contains(x, y) {
                 self.pointer_id = Some(e.pointer_id());
-                if sel.buffer.is_none() {
+                if !existing_has_buffer {
                     let buffer = cut_buffer(ctx, layer_id, rect);
                     ctx.workspace_state.selection.update(|sel| {
                         if let Some(sel) = sel.as_mut() {
@@ -150,9 +167,11 @@ impl SelectState {
                 return;
             }
 
-            if let Some(sel) = selection.as_ref() {
-                commit_selection(ctx.project, sel);
-            }
+            ctx.workspace_state.selection.with(|selection| {
+                if let Some(sel) = selection {
+                    commit_selection(ctx.project, sel);
+                }
+            });
         }
 
         let rect = SelectionRect::from_points((x, y), (x, y));
@@ -230,27 +249,36 @@ impl SelectState {
             return;
         }
 
-        let selection = ctx.workspace_state.selection.get();
-
         match self.mode {
             SelectMode::Creating { .. } => {
-                if let Some(sel) = selection.as_ref() {
-                    if sel.rect.is_empty() {
-                        ctx.workspace_state.selection.set(None);
+                let mut should_clear = false;
+                ctx.workspace_state.selection.with(|selection| {
+                    if let Some(sel) = selection {
+                        if sel.rect.is_empty() {
+                            should_clear = true;
+                        }
                     }
+                });
+                if should_clear {
+                    ctx.workspace_state.selection.set(None);
                 }
             }
             SelectMode::Moving { .. } => {}
             SelectMode::Resizing { .. } => {
-                if let Some(sel) = selection.as_ref() {
-                    if let Some(buffer) = sel.buffer.as_ref() {
-                        let scaled = scale_buffer(buffer, sel.rect.w as u32, sel.rect.h as u32);
-                        ctx.workspace_state.selection.update(|sel| {
-                            if let Some(sel) = sel.as_mut() {
-                                sel.buffer = Some(scaled);
-                            }
-                        });
+                let mut scaled: Option<SelectionBuffer> = None;
+                ctx.workspace_state.selection.with(|selection| {
+                    if let Some(sel) = selection {
+                        if let Some(buffer) = sel.buffer.as_ref() {
+                            scaled = Some(scale_buffer(buffer, sel.rect.w as u32, sel.rect.h as u32));
+                        }
                     }
+                });
+                if let Some(scaled) = scaled {
+                    ctx.workspace_state.selection.update(|sel| {
+                        if let Some(sel) = sel.as_mut() {
+                            sel.buffer = Some(scaled);
+                        }
+                    });
                 }
             }
             SelectMode::Idle => {}
@@ -282,24 +310,29 @@ impl SelectState {
     }
 
     fn update_hover(&mut self, ctx: &ToolContext, x: i32, y: i32) {
-        let selection = ctx.workspace_state.selection.get();
-        if let Some(sel) = selection.as_ref() {
-            self.hover_handle = handle_at(sel.rect, x, y, ctx.zoom);
-            self.hover_inside = sel.rect.contains(x, y);
-        } else {
-            self.hover_handle = None;
-            self.hover_inside = false;
-        }
+        let mut handle = None;
+        let mut inside = false;
+        ctx.workspace_state.selection.with(|selection| {
+            if let Some(sel) = selection {
+                handle = handle_at(sel.rect, x, y, ctx.zoom);
+                inside = sel.rect.contains(x, y);
+            }
+        });
+        self.hover_handle = handle;
+        self.hover_inside = inside;
     }
 }
 
 fn layer_is_editable(ctx: &ToolContext, layer_id: usize) -> bool {
-    let project = ctx.project.get();
-    let layers = project.layers.get();
-    let Some(layer) = layers.iter().find(|l| l.id == layer_id) else {
-        return false;
-    };
-    !layer.is_locked && layer.is_visible
+    let mut editable = false;
+    ctx.project.with(|project| {
+        project.layers.with(|layers| {
+            if let Some(layer) = layers.iter().find(|l| l.id == layer_id) {
+                editable = !layer.is_locked && layer.is_visible;
+            }
+        });
+    });
+    editable
 }
 
 fn handle_at(rect: SelectionRect, x: i32, y: i32, zoom: f32) -> Option<ResizeHandle> {
@@ -310,9 +343,9 @@ fn handle_at(rect: SelectionRect, x: i32, y: i32, zoom: f32) -> Option<ResizeHan
     let xf = x as f32;
     let yf = y as f32;
     let left = rect.x as f32;
-    let right = (rect.x + rect.w - 1) as f32;
+    let right = (rect.x + rect.w) as f32;
     let top = rect.y as f32;
-    let bottom = (rect.y + rect.h - 1) as f32;
+    let bottom = (rect.y + rect.h) as f32;
 
     let near_left = (xf - left).abs() <= tol;
     let near_right = (xf - right).abs() <= tol;
@@ -518,11 +551,11 @@ fn resize_rect(orig: SelectionRect, handle: ResizeHandle, dx: i32, dy: i32) -> S
         }
     }
 
-    if right <= left {
-        right = left + 1;
+    if right < left {
+        right = left;
     }
-    if bottom <= top {
-        bottom = top + 1;
+    if bottom < top {
+        bottom = top;
     }
 
     SelectionRect {
