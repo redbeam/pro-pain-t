@@ -82,7 +82,26 @@ pub fn CanvasArea() -> impl IntoView {
     };
 
     let on_pointer_up = move |ev: PointerEvent| {
-        current_tool.update(|t| t.on_pointer_up(&ev));
+        let canvas: HtmlCanvasElement = match canvas_ref.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        let zoom = view_state.zoom_factor.get();
+        let pan_x = view_state.pan_x.get();
+        let pan_y = view_state.pan_y.get();
+        let selected_layer = workspace_state.selected_layer_id.get();
+
+        let ctx = ToolContext {
+            canvas: &canvas,
+            project: &project,
+            view_state: &view_state,
+            zoom,
+            pan_x,
+            pan_y,
+            selected_layer,
+        };
+        current_tool.update(|t| t.on_pointer_up(&ev, &ctx));
         ev.prevent_default();
     };
 

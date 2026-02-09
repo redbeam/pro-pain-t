@@ -3,7 +3,7 @@ use web_sys::PointerEvent;
 
 use crate::tools::{context::ToolContext, pan::PanState, pen::PenState};
 
-#[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Tool {
     Pen(PenState),
     Pan(PanState),
@@ -28,9 +28,9 @@ impl Tool {
         }
     }
 
-    pub fn on_pointer_up(&mut self, e: &PointerEvent) {
+    pub fn on_pointer_up(&mut self, e: &PointerEvent, ctx: &ToolContext) {
         match self {
-            Tool::Pen(state) => state.on_pointer_up(e),
+            Tool::Pen(state) => state.on_pointer_up(e, ctx),
             Tool::Pan(state) => state.on_pointer_up(e),
         }
     }

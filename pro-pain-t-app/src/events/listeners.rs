@@ -1,8 +1,6 @@
-use crate::structs::history::StrokeDiff;
 use crate::structs::project::Project;
 use futures::StreamExt;
-use leptos::logging;
-use leptos::prelude::{GetUntracked, RwSignal};
+use leptos::prelude::{RwSignal};
 
 use crate::render::canvas_renderer::composite_layers;
 use crate::structs::color::Color;
@@ -114,11 +112,19 @@ pub fn canvas_size_listener(canvas_size_window_signal: RwSignal<bool>) {
 pub fn undo_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_UNDO).await.unwrap();
+
+        while let Some(_) = listener.next().await {
+            project.get().history.apply_undo(&project);
+        }
     });
 }
 
 pub fn redo_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_REDO).await.unwrap();
+
+        while let Some(_) = listener.next().await {
+            project.get().history.apply_redo(&project);
+        }
     });
 }
