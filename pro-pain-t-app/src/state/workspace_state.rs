@@ -6,6 +6,7 @@ use leptos::prelude::*;
 pub struct WorkspaceState {
     pub selected_layer_id: RwSignal<Option<usize>>,
     pub current_tool: RwSignal<Tool>,
+    pub brush_size: RwSignal<f32>,
     pub selection: RwSignal<Option<SelectionState>>,
 }
 
@@ -14,6 +15,7 @@ impl Default for WorkspaceState {
         Self {
             selected_layer_id: RwSignal::new(Some(0)),
             current_tool: RwSignal::new(Tool::Pen(PenState::default())),
+            brush_size: RwSignal::new(1.0),
             selection: RwSignal::new(None),
         }
     }
