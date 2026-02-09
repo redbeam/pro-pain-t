@@ -18,12 +18,13 @@ use pro_pain_t_shared::events::events::{
 };
 use tauri_sys::core::invoke;
 use tauri_sys::event::listen;
+use crate::events::error::show_error_dialog;
 
-pub fn create_new_project_listener(project_window_signal: RwSignal<bool>) {
+pub fn create_new_project_listener(new_project_window_signal: RwSignal<bool>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_NEW_PROJECT).await.unwrap();
         while let Some(_) = listener.next().await {
-            project_window_signal.set(true);
+            new_project_window_signal.set(true);
         }
     });
 }
@@ -65,11 +66,14 @@ pub fn import_as_layer_listener(project: RwSignal<Project>) {
                     data.payload.width,
                     data.payload.height,
                     data.payload.raw_data,
-                )
-                .expect("Unable to create image buffer");
+                );
+                if image.is_none() {
+                    show_error_dialog("Unable to create image buffer".to_string());
+                    return;
+                }
                 let layer_id = project.next_layer_id.get();
                 let new_layer =
-                    Layer::from_image(&image, layer_id, "Imported image", Color::default_black());
+                    Layer::from_image(&image.unwrap(), layer_id, "Imported image", Color::default_black());
                 project.add_new_layer(new_layer);
             });
         }

@@ -1,8 +1,8 @@
-use crate::events::handlers::{export_project_handler, import_as_layer_handler, open_file_handler, project_overwrite_confirmation, save_project_handler};
+use crate::events::handlers::{error_dialog, export_project_handler, import_as_layer_handler, open_file_handler, project_overwrite_confirmation, save_project_handler};
+use pro_pain_t_shared::events::events::{EVENT_MENU_CANVAS_SIZE, EVENT_MENU_NEW_PROJECT, EVENT_MENU_REDO, EVENT_MENU_UNDO};
 use tauri::menu::{MenuBuilder, SubmenuBuilder};
 use tauri::{App, AppHandle, Emitter};
 use tauri_plugin_dialog::DialogExt;
-use pro_pain_t_shared::events::events::{EVENT_MENU_CANVAS_SIZE, EVENT_MENU_NEW_PROJECT, EVENT_MENU_REDO, EVENT_MENU_UNDO};
 
 pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let dummy_menu = SubmenuBuilder::new(app, "Pro PainT").build()?;
@@ -40,8 +40,10 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 if !project_overwrite_confirmation(&app_handle) {
                     return;
                 }
-                app_handle.emit(EVENT_MENU_NEW_PROJECT, ())
-                    .expect("Failed to emit menu-new-project");
+                if app_handle.emit(EVENT_MENU_NEW_PROJECT, ()).is_err() {
+                    error_dialog(&app_handle, "Failed to emit menubar action");
+                    return;
+                }
                 println!("emitted new_project");
             }
 
@@ -82,20 +84,26 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
             // ===== Edit =====
             "undo" => {
-                app_handle.emit(EVENT_MENU_UNDO, ())
-                    .expect("Failed to emit menu-undo");
+                if app_handle.emit(EVENT_MENU_UNDO, ()).is_err() {
+                    error_dialog(&app_handle, "Failed to emit menubar action");
+                    return;
+                }
                 println!("emitted undo");
             }
 
             "redo" => {
-                app_handle.emit(EVENT_MENU_REDO, ())
-                    .expect("Failed to emit menu-redo");
+                if app_handle.emit(EVENT_MENU_REDO, ()).is_err() {
+                    error_dialog(&app_handle, "Failed to emit menubar action");
+                    return;
+                }
                 println!("emitted redo");
             }
 
             "canvas_size" => {
-                app_handle.emit(EVENT_MENU_CANVAS_SIZE, ())
-                    .expect("Failed to emit menu-canvas-size");
+                if app_handle.emit(EVENT_MENU_CANVAS_SIZE, ()).is_err() {
+                    error_dialog(&app_handle, "Failed to emit menubar action");
+                    return;
+                }
                 println!("emitted canvas_size");
             }
 

@@ -1,8 +1,9 @@
 use crate::components::color_picker::ColorPicker;
+use crate::events::error::show_error_dialog;
 use crate::structs::color::Color;
 use crate::structs::project::Project;
 use leptos::prelude::{NodeRef, RwSignal};
-use leptos::{IntoView, component, view};
+use leptos::{component, view, IntoView};
 use leptos::{html::Dialog, prelude::*};
 
 #[component]
@@ -12,14 +13,20 @@ pub fn NewProjectWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) ->
     let (dim_height, set_dim_height) = signal(String::from("Height"));
     let color = RwSignal::new(Color::default_white());
 
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
 
     let create_project = move || {
-        let width = u32::from_str_radix(dim_width.get().as_str(), 10).unwrap();
-        let height = u32::from_str_radix(dim_height.get().as_str(), 10).unwrap();
+        let width = u32::from_str_radix(dim_width.get().as_str(), 10);
+        let height = u32::from_str_radix(dim_height.get().as_str(), 10);
+        if width.is_err() || height.is_err() {
+            show_error_dialog("Couldn't parse width and/or height".to_string());
+            return;
+        }
         project.update(|project| {
-            project.replace_project_with_blank(title.get(), width, height, color.get());
+            project.replace_project_with_blank(title.get(), width.unwrap(), height.unwrap(), color.get());
         });
+        dialog_ref.get().unwrap().close();
+        is_open.set(false);
     };
 
     view! {
@@ -116,8 +123,6 @@ pub fn NewProjectWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) ->
                 </button>
                 <button
                     on:click = move |_| {
-                        is_open.set(false);
-                        dialog_ref.get().unwrap().close();
                         create_project();
                     }
                     id="confirm-add-layer-window"

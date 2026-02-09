@@ -51,7 +51,7 @@ impl PenState {
         self.current_stroke.clear();
     }
 
-    pub fn on_pointer_up(&mut self, _e: &PointerEvent, ctx: &ToolContext) {
+    pub fn on_pointer_up(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {
         self.is_drawing = false;
         self.last_pos = None;
 

@@ -1,6 +1,7 @@
 use crate::structs::{color::Color, history::History, layer::Layer};
 use leptos::prelude::{Get, RwSignal, Set, Update};
 use serde::{Deserialize, Serialize};
+use crate::events::error::show_error_dialog;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Project {
@@ -44,7 +45,12 @@ impl Project {
     }
 
     pub fn from_file_data(data: Vec<u8>) -> Self {
-        ron::de::from_bytes(&*data).expect("Failed to deserialize project")
+        let result = ron::de::from_bytes(&*data);
+        if result.is_err() {
+            show_error_dialog("Failed to deserialize project".to_string());
+            return Self::default();
+        }
+        result.unwrap()
     }
 
     pub fn replace_project_with_blank(

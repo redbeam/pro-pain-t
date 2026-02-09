@@ -16,39 +16,68 @@ pub fn project_overwrite_confirmation(app_handle: &AppHandle) -> bool {
         .blocking_show()
 }
 
+pub fn error_dialog(app_handle: &AppHandle, message: impl ToString) {
+    app_handle.dialog()
+        .message(message.to_string())
+        .title("Error")
+        .buttons(MessageDialogButtons::Ok)
+        .blocking_show();
+}
+
 pub fn open_file_handler(app_handle: &AppHandle, file_path: Option<FilePath>) {
     if let Some(path) = file_path {
-        let project_file_data = ProjectDto::new(fs::read(path.to_string()).expect("Failed to read file"));
-        app_handle.emit(EVENT_MENU_OPEN_PROJECT, project_file_data)
-            .expect("Failed to emit menu-open-project");
+        let project_file_data = fs::read(path.to_string());
+        if project_file_data.is_err() {
+            error_dialog(app_handle, "Failed to read file");
+            return;
+        }
+        let project_dto = ProjectDto::new(project_file_data.unwrap());
+        if app_handle.emit(EVENT_MENU_OPEN_PROJECT, project_dto).is_err() {
+            error_dialog(app_handle, "Failed to emit menubar action");
+            return;
+        }
         println!("emitted open_project");
     }
 }
 
 pub fn save_project_handler(app_handle: &AppHandle, file_path: Option<FilePath>) {
     if let Some(path) = file_path {
-        app_handle.emit(EVENT_MENU_SAVE_PROJECT, PathDto::new(path))
-            .expect("Failed to emit menu-save-project");
+        if app_handle.emit(EVENT_MENU_SAVE_PROJECT, PathDto::new(path)).is_err() {
+            error_dialog(app_handle, "Failed to emit menubar action");
+            return;
+        }
         println!("emitted save_project");
     }
 }
 
 pub fn import_as_layer_handler(app_handle: &AppHandle, file_path: Option<FilePath>) {
     if let Some(path) = file_path {
-        let image = ImageReader::open(path.to_string()).expect("Failed to read image file")
-            .decode().expect("Failed to decode image file")
-            .into_rgb8();
+        let image = ImageReader::open(path.to_string());
+        if image.is_err() {
+            error_dialog(app_handle, "Failed to read image file");
+            return;
+        }
+        let image = image.unwrap().decode();
+        if image.is_err() {
+            error_dialog(app_handle, "Failed to decode image file");
+            return;
+        }
+        let image = image.unwrap().into_rgb8();
         let payload = ImageDto::from_image(image);
-        app_handle.emit(EVENT_MENU_IMPORT_AS_LAYER, payload)
-            .expect("Failed to emit menu-import-as-layer");
+        if app_handle.emit(EVENT_MENU_IMPORT_AS_LAYER, payload).is_err() {
+            error_dialog(app_handle, "Failed to emit menubar action");
+            return;
+        }
         println!("emitted import_as_layer");
     }
 }
 
 pub fn export_project_handler(app_handle: &AppHandle, file_path: Option<FilePath>) {
     if let Some(path) = file_path {
-        app_handle.emit(EVENT_MENU_EXPORT_PROJECT, PathDto::new(path))
-            .expect("Failed to emit menu-export-project");
+        if app_handle.emit(EVENT_MENU_EXPORT_PROJECT, PathDto::new(path)).is_err() {
+            error_dialog(app_handle, "Failed to emit menubar action");
+            return;
+        }
         println!("emitted export_project");
     }
 }
