@@ -151,11 +151,11 @@ pub fn CanvasArea() -> impl IntoView {
         let _ = canvas_size_trigger.get();
 
         let window = web_sys::window().expect("window missing");
-        let dpr = window.device_pixel_ratio();
+        let device_pixel_ratio = window.device_pixel_ratio();
 
         let rect = canvas.get_bounding_client_rect();
-        let cw = (rect.width() * dpr).max(1.0).round() as u32;
-        let ch = (rect.height() * dpr).max(1.0).round() as u32;
+        let cw = (rect.width() * device_pixel_ratio).max(1.0).round() as u32;
+        let ch = (rect.height() * device_pixel_ratio).max(1.0).round() as u32;
         if canvas.width() != cw {
             canvas.set_width(cw);
         }
@@ -189,7 +189,7 @@ pub fn CanvasArea() -> impl IntoView {
                         zoom,
                         pan_x,
                         pan_y,
-                        dpr,
+                        device_pixel_ratio,
                     },
                 );
                 return;
@@ -207,7 +207,7 @@ pub fn CanvasArea() -> impl IntoView {
                     zoom,
                     pan_x,
                     pan_y,
-                    dpr,
+                    device_pixel_ratio,
                 },
             );
         });
