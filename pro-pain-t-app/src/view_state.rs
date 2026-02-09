@@ -3,6 +3,9 @@ use leptos::prelude::*;
 #[derive(Clone, Copy)]
 pub struct ProjectViewState {
     pub zoom_factor: RwSignal<f32>,
+    pub pan_x: RwSignal<f32>,
+    pub pan_y: RwSignal<f32>,
+    pub did_center_view: RwSignal<bool>,
 }
 
 impl ProjectViewState {
@@ -16,7 +19,39 @@ impl ProjectViewState {
     pub fn new() -> Self {
         Self {
             zoom_factor: RwSignal::new(1.0),
+            pan_x: RwSignal::new(0.0),
+            pan_y: RwSignal::new(0.0),
+            did_center_view: RwSignal::new(false),
         }
+    }
+
+    pub fn ensure_centered_once(
+        &self,
+        viewport_w_css: f32,
+        viewport_h_css: f32,
+        project_w: u32,
+        project_h: u32,
+        zoom: f32,
+    ) -> Option<(f32, f32)> {
+        if self.did_center_view.get_untracked() {
+            return None;
+        }
+
+        let target_pan_x = (viewport_w_css - (project_w as f32 * zoom)) / 2.0;
+        let target_pan_y = (viewport_h_css - (project_h as f32 * zoom)) / 2.0;
+
+        self.pan_x.set(target_pan_x);
+        self.pan_y.set(target_pan_y);
+        self.did_center_view.set(true);
+        Some((target_pan_x, target_pan_y))
+    }
+
+    pub fn pan_by(&self, dx: f32, dy: f32) {
+        if !dx.is_finite() || !dy.is_finite() {
+            return;
+        }
+        self.pan_x.update(|x| *x += dx);
+        self.pan_y.update(|y| *y += dy);
     }
 
     pub fn set_zoom_factor(&self, factor: f32) {

@@ -7,7 +7,7 @@ edition = "2021"
 image = "0.25.9"
 pro-pain-t-shared = { version = "0.1.0", path = "../shared" }
 tauri = { version = "2", features = [] }
-tauri-plugin-dialog = "2"
+tauri-plugin-dialog = "2.6.0"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

@@ -1,7 +1,7 @@
 use crate::components::color_picker::ColorPicker;
-use leptos::{html::Dialog, logging, prelude::*};
 use crate::structs::project::Project;
 use crate::structs::{color::Color, layer::Layer};
+use leptos::{html::Dialog, logging, prelude::*};
 
 #[component]
 pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> impl IntoView {
@@ -12,10 +12,23 @@ pub fn NewLayerWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) -> i
 
     let create_layer = move || {
         let layer_id = project.get().next_layer_id.get();
-        let layer = Layer::new(layer_id, title.get(), project.get().width.get(), project.get().height.get(), color.get());
+        let layer = Layer::new(
+            layer_id,
+            title.get(),
+            project.get().width.get(),
+            project.get().height.get(),
+            color.get(),
+        );
         project.get().add_new_layer(layer);
 
-        logging::log!("new_layer: {}, {}, {}, {}, count: {}", layer_id, project.get().width.get(), project.get().height.get(), title.get(), project.get().layer_count());
+        logging::log!(
+            "new_layer: {}, {}, {}, {}, count: {}",
+            layer_id,
+            project.get().width.get(),
+            project.get().height.get(),
+            title.get(),
+            project.get().layer_count()
+        );
     };
 
     let reset = move || {

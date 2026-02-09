@@ -1,6 +1,6 @@
+use crate::structs::color::Color;
 use image::Rgb;
 use serde::{Deserialize, Serialize};
-use crate::structs::color::Color;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct Pixel {

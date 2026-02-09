@@ -1,6 +1,6 @@
+use crate::structs::{canvas::Canvas, color::Color};
 use image::RgbImage;
 use serde::{Deserialize, Serialize};
-use crate::structs::{canvas::Canvas, color::Color};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Layer {
@@ -12,7 +12,13 @@ pub struct Layer {
 }
 
 impl Layer {
-    pub fn new(id: usize, title: impl Into<String>, width: u32, height: u32, background_color: Color) -> Self {
+    pub fn new(
+        id: usize,
+        title: impl Into<String>,
+        width: u32,
+        height: u32,
+        background_color: Color,
+    ) -> Self {
         Self {
             id,
             title: title.into(),
@@ -22,7 +28,12 @@ impl Layer {
         }
     }
 
-    pub fn from_image(image: &RgbImage, id: usize, title: impl Into<String>, background_color: Color) -> Self {
+    pub fn from_image(
+        image: &RgbImage,
+        id: usize,
+        title: impl Into<String>,
+        background_color: Color,
+    ) -> Self {
         Self {
             id,
             title: title.into(),
@@ -46,7 +57,7 @@ impl Layer {
         for pixel in &canvas.content {
             let i = ((pixel.y * width + pixel.x) * 4) as usize;
 
-            out[i]     = pixel.color.r;
+            out[i] = pixel.color.r;
             out[i + 1] = pixel.color.g;
             out[i + 2] = pixel.color.b;
             out[i + 3] = (pixel.color.alpha * 255.0) as u8;

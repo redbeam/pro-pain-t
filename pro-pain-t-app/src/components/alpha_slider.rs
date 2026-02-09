@@ -1,5 +1,5 @@
-use leptos::prelude::*;
 use crate::structs::color::Color;
+use leptos::prelude::*;
 
 #[component]
 pub fn AlphaSlider(color: RwSignal<Color>) -> impl IntoView {

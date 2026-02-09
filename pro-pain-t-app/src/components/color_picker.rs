@@ -1,11 +1,11 @@
+use crate::components::alpha_slider::AlphaSlider;
+use crate::components::rgb_slider::RGBSlider;
+use crate::structs::color::Color;
 use leptos::html::Canvas;
 use leptos::prelude::*;
 use leptos::wasm_bindgen::JsCast;
 use leptos::web_sys;
 use web_sys::CanvasRenderingContext2d;
-use crate::structs::color::Color;
-use crate::components::alpha_slider::AlphaSlider;
-use crate::components::rgb_slider::RGBSlider;
 
 fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (u8, u8, u8) {
     let c = v * s;

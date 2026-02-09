@@ -1,144 +1,15 @@
+use crate::view_state::ProjectViewState;
+use crate::{state::workspace_state::WorkspaceState, structs::project::Project};
 use leptos::prelude::*;
 use leptos::*;
-use crate::{state::workspace_state::WorkspaceState, structs::{color::Color, layer::Layer, project::Project}};
-use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, wasm_bindgen::{JsCast, JsValue}};
-use crate::view_state::ProjectViewState;
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, PointerEvent, wasm_bindgen::JsCast};
 
-pub fn draw_checkerboard(
-    ctx: &CanvasRenderingContext2d,
-    width: u32,
-    height: u32,
-    tile_size: u32,
-) {
-    let light = "#e0e0e0";
-    let dark = "#b0b0b0";
-
-    for y in (0..height).step_by(tile_size as usize) {
-        for x in (0..width).step_by(tile_size as usize) {
-            let is_dark = (x / tile_size + y / tile_size).is_multiple_of(2);
-            let color = if is_dark { dark } else { light };
-
-            #[allow(deprecated)]
-            ctx.set_fill_style(&JsValue::from_str(color));
-
-            ctx.fill_rect(
-                x as f64,
-                y as f64,
-                tile_size as f64,
-                tile_size as f64,
-            );
-        }
-    }
-}
-
-fn blend(dst: Color, src: Color) -> Color {
-    let sa = src.alpha.clamp(0.0, 1.0);
-    let da = dst.alpha.clamp(0.0, 1.0);
-
-    let out_a = sa + da * (1.0 - sa);
-
-    if out_a == 0.0 {
-        return Color { r: 0, g: 0, b: 0, alpha: 0.0 };
-    }
-
-    let sr = src.r as f32 / 255.0;
-    let sg = src.g as f32 / 255.0;
-    let sb = src.b as f32 / 255.0;
-
-    let dr = dst.r as f32 / 255.0;
-    let dg = dst.g as f32 / 255.0;
-    let db = dst.b as f32 / 255.0;
-
-    let r = (sr * sa + dr * da * (1.0 - sa)) / out_a;
-    let g = (sg * sa + dg * da * (1.0 - sa)) / out_a;
-    let b = (sb * sa + db * da * (1.0 - sa)) / out_a;
-
-    Color {
-        r: (r * 255.0) as u8,
-        g: (g * 255.0) as u8,
-        b: (b * 255.0) as u8,
-        alpha: out_a,
-    }
-}
-
-
-pub fn composite_layers(layers: &[Layer]) -> (Vec<u8>, u32, u32) {
-    let base_canvas = &layers[0].canvas;
-    let width = base_canvas.width;
-    let height = base_canvas.height;
-
-    let mut out = vec![
-        Color {
-            r: base_canvas.background_color.r,
-            g: base_canvas.background_color.g,
-            b: base_canvas.background_color.b,
-            alpha: base_canvas.background_color.alpha,
-        };
-        (width * height) as usize
-    ];
-
-    for layer in layers {
-        if !layer.is_visible {
-            continue;
-        }
-
-        for pixel in &layer.canvas.content {
-            let idx = (pixel.y * width + pixel.x) as usize;
-
-            let dst = out[idx];
-            let src = pixel.color;
-
-            out[idx] = blend(dst, src);
-        }
-    }
-
-    let mut bytes = Vec::with_capacity((width * height * 4) as usize);
-
-    for c in out {
-        bytes.push(c.r);
-        bytes.push(c.g);
-        bytes.push(c.b);
-        bytes.push((c.alpha * 255.0) as u8);
-    }
-
-    (bytes, width, height)
-}
-
-fn draw_to_canvas(
-    ctx: &CanvasRenderingContext2d,
-    pixels: &[u8],
-    width: u32,
-    height: u32,
-) {
-    ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
-    ctx.clear_rect(0.0, 0.0, f64::INFINITY, f64::INFINITY);
-
-    draw_checkerboard(ctx, width, height, 8);
-
-    for y in 0..height {
-        for x in 0..width {
-            let i = ((y * width + x) * 4) as usize;
-            let r = pixels[i];
-            let g = pixels[i + 1];
-            let b = pixels[i + 2];
-            let a = pixels[i + 3] as f64 / 255.0;
-
-            if a == 0.0 {
-                continue;
-            }
-
-            ctx.set_global_alpha(a);
-            ctx.set_fill_style_str(&format!("rgb({},{},{})", r, g, b));
-            ctx.fill_rect(x as f64, y as f64, 1.0, 1.0);
-        }
-    }
-
-    ctx.set_global_alpha(1.0);
-}
+use crate::render::canvas_renderer::{ViewTransform, composite_layers, draw_project_viewport};
+use crate::tools::context::ToolContext;
+use wasm_bindgen::prelude::*;
 
 #[component]
-pub fn CanvasArea(
-) -> impl IntoView {
+pub fn CanvasArea() -> impl IntoView {
     let canvas_ref = NodeRef::new();
 
     let project = use_context::<RwSignal<Project>>().unwrap();
@@ -147,6 +18,120 @@ pub fn CanvasArea(
 
     let current_tool = workspace_state.current_tool;
 
+    let canvas_size_trigger = RwSignal::new(0u32);
+
+    let on_pointer_down = move |ev: PointerEvent| {
+        if ev.button() != 0 {
+            return;
+        }
+
+        if let Some(target) = ev
+            .target()
+            .and_then(|t| t.dyn_into::<web_sys::Element>().ok())
+        {
+            let _ = target.set_pointer_capture(ev.pointer_id());
+        }
+
+        let canvas: HtmlCanvasElement = match canvas_ref.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        let zoom = view_state.zoom_factor.get();
+        let pan_x = view_state.pan_x.get();
+        let pan_y = view_state.pan_y.get();
+        let selected_layer = workspace_state.selected_layer_id.get();
+
+        let ctx = ToolContext {
+            canvas: &canvas,
+            project: &project,
+            view_state: &view_state,
+            zoom,
+            pan_x,
+            pan_y,
+            selected_layer,
+        };
+
+        current_tool.update(|t| t.on_pointer_down(&ev, &ctx));
+        ev.prevent_default();
+    };
+
+    let on_pointer_move = move |ev: PointerEvent| {
+        let canvas: HtmlCanvasElement = match canvas_ref.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        let zoom = view_state.zoom_factor.get();
+        let pan_x = view_state.pan_x.get();
+        let pan_y = view_state.pan_y.get();
+        let selected_layer = workspace_state.selected_layer_id.get();
+
+        let ctx = ToolContext {
+            canvas: &canvas,
+            project: &project,
+            view_state: &view_state,
+            zoom,
+            pan_x,
+            pan_y,
+            selected_layer,
+        };
+
+        current_tool.update(|t| t.on_pointer_move(&ev, &ctx));
+        ev.prevent_default();
+    };
+
+    let on_pointer_up = move |ev: PointerEvent| {
+        current_tool.update(|t| t.on_pointer_up(&ev));
+        ev.prevent_default();
+    };
+
+    Effect::new(move || {
+        if let Some(window) = web_sys::window() {
+            let trigger = canvas_size_trigger;
+            
+            let closure = Closure::wrap(Box::new(move |_: web_sys::Event| {
+                trigger.update(|v| *v = v.wrapping_add(1));
+            }) as Box<dyn FnMut(web_sys::Event)>);
+            
+            let _ = window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
+            
+            closure.forget();
+        }
+    });
+
+    Effect::new(move |_| {
+        let canvas: HtmlCanvasElement = match canvas_ref.get() {
+            Some(c) => c,
+            None => return,
+        };
+
+        if view_state.did_center_view.get_untracked() {
+            return;
+        }
+
+        let rect = canvas.get_bounding_client_rect();
+        let viewport_w_css = rect.width() as f32;
+        let viewport_h_css = rect.height() as f32;
+
+        project.with_untracked(|project| {
+            let layers = project.layers.get_untracked();
+            let proj_w = if layers.is_empty() {
+                project.width.get_untracked()
+            } else {
+                layers[0].canvas.width
+            };
+            let proj_h = if layers.is_empty() {
+                project.height.get_untracked()
+            } else {
+                layers[0].canvas.height
+            };
+
+            let zoom = view_state.zoom_factor.get_untracked();
+            view_state.ensure_centered_once(viewport_w_css, viewport_h_css, proj_w, proj_h, zoom);
+        });
+    });
+
     Effect::new(move |_| {
         let canvas: HtmlCanvasElement = match canvas_ref.get() {
             Some(c) => c,
@@ -154,63 +139,105 @@ pub fn CanvasArea(
         };
 
         let ctx = canvas
-            .get_context("2d").unwrap().unwrap()
-            .dyn_into::<CanvasRenderingContext2d>().unwrap();
+            .get_context("2d")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<CanvasRenderingContext2d>()
+            .unwrap();
 
-        let layers = project.get().layers.get();
-        if layers.is_empty() {
-            let width = project.get().width.get();
-            let height = project.get().height.get();
-            canvas.set_width(width);
-            canvas.set_height(height);
+        let zoom = view_state.zoom_factor.get();
+        let pan_x = view_state.pan_x.get();
+        let pan_y = view_state.pan_y.get();
+        let _ = canvas_size_trigger.get();
 
-            ctx.set_transform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0).unwrap();
-            ctx.clear_rect(0.0, 0.0, f64::INFINITY, f64::INFINITY);
-            draw_checkerboard(&ctx, width, height, 8);
-            return;
+        let window = web_sys::window().expect("window missing");
+        let device_pixel_ratio = window.device_pixel_ratio();
+
+        let rect = canvas.get_bounding_client_rect();
+        let cw = (rect.width() * device_pixel_ratio).max(1.0).round() as u32;
+        let ch = (rect.height() * device_pixel_ratio).max(1.0).round() as u32;
+        if canvas.width() != cw {
+            canvas.set_width(cw);
+        }
+        if canvas.height() != ch {
+            canvas.set_height(ch);
         }
 
-        let (pixels, width, height) = composite_layers(&layers);
+        project.with(|project| {
+            let layers = project.layers.get();
+            let proj_w = if layers.is_empty() {
+                project.width.get()
+            } else {
+                layers[0].canvas.width
+            };
+            let proj_h = if layers.is_empty() {
+                project.height.get()
+            } else {
+                layers[0].canvas.height
+            };
 
-        canvas.set_width(width);
-        canvas.set_height(height);
+            if layers.is_empty() {
+                let pixels = vec![0u8; (proj_w * proj_h * 4) as usize];
+                draw_project_viewport(
+                    &ctx,
+                    cw,
+                    ch,
+                    &pixels,
+                    proj_w,
+                    proj_h,
+                    ViewTransform {
+                        zoom,
+                        pan_x,
+                        pan_y,
+                        device_pixel_ratio,
+                    },
+                );
+                return;
+            }
 
-        draw_to_canvas(&ctx, &pixels, width, height);
+            let (pixels, proj_w, proj_h) = composite_layers(&layers);
+            draw_project_viewport(
+                &ctx,
+                cw,
+                ch,
+                &pixels,
+                proj_w,
+                proj_h,
+                ViewTransform {
+                    zoom,
+                    pan_x,
+                    pan_y,
+                    device_pixel_ratio,
+                },
+            );
+        });
     });
 
     view! {
         <canvas
             node_ref=canvas_ref
+            on:pointerdown=on_pointer_down
+            on:pointermove=on_pointer_move
+            on:pointerup=on_pointer_up
+            on:pointercancel=move |_| current_tool.update(|t| t.on_pointer_cancel())
             style=move || {
-                let zoom = view_state.zoom_factor.get();
+                let cursor = current_tool.get().cursor();
+                let _ = view_state.zoom_factor.get();
+                let _ = project.get_untracked();
                 format!(
                     "
-                    width:{}px;
-                    height:{}px;
+                    width:100%;
+                    height:100%;
+                    display:block;
                     image-rendering:pixelated;
                     background:#ccc;
+                    cursor:{};
+                    touch-action:none;
                     ",
-                    (project.get().width.get() as f32 * zoom),
-                    (project.get().height.get() as f32 * zoom),
+                    cursor,
                 )
             }
 
-            on:mousedown = move |_| { current_tool.update(|t| t.on_mouse_down()) }
-            on:mousemove = move |e| {
-                 let canvas = match canvas_ref.get() {
-                    Some(c) => c,
-                    None => return,
-                };
-
-                let zoom = view_state.zoom_factor.get();
-                let Some(layer_id) = workspace_state.selected_layer_id.get() else {
-                    return;
-                };
-                current_tool.update(|t| t.on_mouse_move(&e, &canvas, zoom, layer_id, &project)) 
-            }
-            on:mouseup = move |_| { current_tool.update(|t| t.on_mouse_up()) }
-            on:mouseleave = move |_| { current_tool.update(|t| t.on_mouse_up()) }     
-            
         />
     }
 }

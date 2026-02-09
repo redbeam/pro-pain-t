@@ -1,5 +1,5 @@
-use leptos::prelude::*;
 use crate::tools::{pen::PenState, tools::Tool};
+use leptos::prelude::*;
 
 #[derive(Clone)]
 pub struct WorkspaceState {
@@ -10,7 +10,7 @@ pub struct WorkspaceState {
 impl Default for WorkspaceState {
     fn default() -> Self {
         Self {
-            selected_layer_id: RwSignal::new(None),
+            selected_layer_id: RwSignal::new(Some(0)),
             current_tool: RwSignal::new(Tool::Pen(PenState::default())),
         }
     }

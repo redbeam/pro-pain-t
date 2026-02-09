@@ -1,6 +1,6 @@
+use crate::structs::{color::Color, pixel::Pixel};
 use image::RgbImage;
 use serde::{Deserialize, Serialize};
-use crate::structs::{color::Color, pixel::Pixel};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Canvas {
@@ -97,6 +97,8 @@ impl Canvas {
     }
 
     pub fn clear(&mut self) {
-        self.content.iter_mut().for_each(|p| p.color = self.background_color);
+        self.content
+            .iter_mut()
+            .for_each(|p| p.color = self.background_color);
     }
 }

@@ -4,12 +4,15 @@ use crate::components::layer_panel::LayerPanel;
 use crate::components::new_project_window::NewProjectWindow;
 use crate::components::status_bar::StatusBar;
 use crate::components::tool_palette::ToolPalette;
-use crate::events::listeners::{canvas_size_listener, create_new_project_listener, export_project_listener, import_as_layer_listener, open_project_listener, save_project_listener};
+use crate::events::listeners::{
+    canvas_size_listener, create_new_project_listener, export_project_listener,
+    import_as_layer_listener, open_project_listener, save_project_listener,
+};
+use crate::state::workspace_state::WorkspaceState;
 use crate::structs::project::Project;
 use crate::view_state::ProjectViewState;
 use leptos::html::Dialog;
 use leptos::prelude::*;
-use crate::state::workspace_state::WorkspaceState;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -20,7 +23,6 @@ pub fn App() -> impl IntoView {
     provide_context(project);
     provide_context(view_state);
     provide_context(workspace_state);
-    
 
     let new_project_window_ref: NodeRef<Dialog> = NodeRef::new();
     let is_new_project_window_open = RwSignal::new(false);
@@ -35,32 +37,10 @@ pub fn App() -> impl IntoView {
     canvas_size_listener(is_canvas_size_open);
 
     view! {
-        <div
-            style="
-                display:flex;
-                flex-direction:column;
-                height:100vh;
-                margin:0;
-                background:#111;
-            "
-        >
-            <div
-                style="
-                    flex:1;
-                    display:flex;
-                    min-height:0;
-                "
-            >
+        <div class="app-root">
+            <div class="app-main">
                 <ToolPalette />
-                <div
-                    style="
-                        flex:1;
-                        display:flex;
-                        justify-content:center;
-                        align-items:center;
-                        background:#3a3a3a;
-                    "
-                >
+                <div class="app-canvas-wrapper">
                     <CanvasArea />
                 </div>
                 <LayerPanel />
