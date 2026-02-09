@@ -150,6 +150,8 @@ pub fn CanvasArea() -> impl IntoView {
             }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
             let _ = window.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
+
+            closure.forget();
         }
     });
 
