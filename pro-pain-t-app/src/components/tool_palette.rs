@@ -2,7 +2,7 @@ use crate::components::color_picker::ColorPicker;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{pan::PanState, pen::PenState, tools::Tool},
+    tools::{pan::PanState, pen::PenState, select::SelectState, tools::Tool},
 };
 use leptos::prelude::*;
 use crate::components::brush_size_slider::BrushSizeSlider;
@@ -12,15 +12,16 @@ pub fn ToolPalette() -> impl IntoView {
     let project = use_context::<RwSignal<Project>>().expect("Project context missing");
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
     let current_color = project.with_untracked(|p| p.current_color);
+    let current_tool = workspace_state.current_tool;
 
     view! {
         <nav class="tool-palette">
             <div class="tool-palette-grid">
                 <div
                     class="tool-button"
-                    class=("tool-button--active", move || workspace_state.current_tool.get().is_pan())
+                    class=("tool-button--active", move || current_tool.get().is_pan())
                     on:click=move |_| {
-                        workspace_state.current_tool.set(Tool::Pan(PanState::default()));
+                        workspace_state.set_tool(Tool::Pan(PanState::default()), &project);
                     }
                     title="Pan tool"
                 >
@@ -28,9 +29,19 @@ pub fn ToolPalette() -> impl IntoView {
                 </div>
                 <div
                     class="tool-button"
-                    class=("tool-button--active", move || matches!(workspace_state.current_tool.get(), Tool::Pen(_)))
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Select(_)))
                     on:click=move |_| {
-                        workspace_state.current_tool.set(Tool::Pen(PenState::default()));
+                        workspace_state.set_tool(Tool::Select(SelectState::default()), &project);
+                    }
+                    title="Select tool"
+                >
+                "🔲"
+                </div>
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Pen(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Pen(PenState::default()), &project);
                     }
                     title="Pen tool"
                 >
