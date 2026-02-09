@@ -23,7 +23,7 @@ pub struct ViewTransform {
     pub zoom: f32,
     pub pan_x: f32,
     pub pan_y: f32,
-    pub dpr: f64,
+    pub device_pixel_ratio: f64,
 }
 
 pub fn draw_checkerboard(ctx: &CanvasRenderingContext2d, width: u32, height: u32, tile_size: u32) {
@@ -148,9 +148,9 @@ pub fn draw_project_viewport(
     ctx.set_fill_style_str("#ccc");
     ctx.fill_rect(0.0, 0.0, viewport_w as f64, viewport_h as f64);
 
-    let scale = (t.zoom as f64) * t.dpr;
-    let tx = (t.pan_x as f64) * t.dpr;
-    let ty = (t.pan_y as f64) * t.dpr;
+    let scale = (t.zoom as f64) * t.device_pixel_ratio;
+    let tx = (t.pan_x as f64) * t.device_pixel_ratio;
+    let ty = (t.pan_y as f64) * t.device_pixel_ratio;
     let _ = ctx.set_transform(scale, 0.0, 0.0, scale, tx, ty);
     ctx.set_image_smoothing_enabled(false);
 

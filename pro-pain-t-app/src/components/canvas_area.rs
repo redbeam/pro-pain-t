@@ -7,6 +7,8 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, PointerEvent, wasm_bi
 use crate::render::canvas_renderer::{ViewTransform, composite_layers, draw_project_viewport};
 use crate::tools::context::ToolContext;
 use crate::tools::select::{commit_selection, SelectionBuffer, SelectionState};
+use wasm_bindgen::prelude::*;
+
 
 #[component]
 pub fn CanvasArea() -> impl IntoView {
@@ -115,8 +117,6 @@ pub fn CanvasArea() -> impl IntoView {
     };
 
     Effect::new(move || {
-        use wasm_bindgen::prelude::*;
-        
         if let Some(window) = web_sys::window() {
             let trigger = canvas_size_trigger;
             
@@ -205,11 +205,11 @@ pub fn CanvasArea() -> impl IntoView {
         let _ = canvas_size_trigger.get();
 
         let window = web_sys::window().expect("window missing");
-        let dpr = window.device_pixel_ratio();
+        let device_pixel_ratio = window.device_pixel_ratio();
 
         let rect = canvas.get_bounding_client_rect();
-        let cw = (rect.width() * dpr).max(1.0).round() as u32;
-        let ch = (rect.height() * dpr).max(1.0).round() as u32;
+        let cw = (rect.width() * device_pixel_ratio).max(1.0).round() as u32;
+        let ch = (rect.height() * device_pixel_ratio).max(1.0).round() as u32;
         if canvas.width() != cw {
             canvas.set_width(cw);
         }
@@ -243,7 +243,7 @@ pub fn CanvasArea() -> impl IntoView {
                         zoom,
                         pan_x,
                         pan_y,
-                        dpr,
+                        device_pixel_ratio,
                     },
                 );
                 return;
@@ -261,7 +261,7 @@ pub fn CanvasArea() -> impl IntoView {
                     zoom,
                     pan_x,
                     pan_y,
-                    dpr,
+                    device_pixel_ratio,
                 },
             );
         });
@@ -278,7 +278,7 @@ pub fn CanvasArea() -> impl IntoView {
                     zoom,
                     pan_x,
                     pan_y,
-                    dpr,
+                    device_pixel_ratio,
                 },
             );
         }
@@ -314,9 +314,9 @@ pub fn CanvasArea() -> impl IntoView {
 }
 
 fn draw_selection_overlay(ctx: &CanvasRenderingContext2d, selection: &SelectionState, t: ViewTransform) {
-    let scale = (t.zoom as f64) * t.dpr;
-    let tx = (t.pan_x as f64) * t.dpr;
-    let ty = (t.pan_y as f64) * t.dpr;
+    let scale = (t.zoom as f64) * t.device_pixel_ratio;
+    let tx = (t.pan_x as f64) * t.device_pixel_ratio;
+    let ty = (t.pan_y as f64) * t.device_pixel_ratio;
 
     let _ = ctx.set_transform(scale, 0.0, 0.0, scale, tx, ty);
     ctx.set_image_smoothing_enabled(false);

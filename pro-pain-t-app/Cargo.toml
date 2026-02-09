@@ -3,10 +3,6 @@ name = "pro-pain-t-app"
 version = "0.1.0"
 edition = "2024"
 
-[features]
-default = []
-tauri = ["dep:tauri-sys", "dep:futures"]
-
 [dependencies]
 console_error_panic_hook = "0.1.7"
 image = "0.25.9"
@@ -15,6 +11,6 @@ web-sys = { version = "0.3", features = ["HtmlCanvasElement", "HtmlElement", "Ca
 serde = { version = "1.0.228", features = ["derive"] }
 ron = "0.12.0"
 pro-pain-t-shared = { version = "0.1.0", path = "../shared" }
-tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", branch = "v2", features = ["all"], optional = true }
-futures = { version = "0.3.31", optional = true }
+tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", branch = "v2", features = ["all"] }
+futures = "0.3.31"
 wasm-bindgen = "0.2.108"
