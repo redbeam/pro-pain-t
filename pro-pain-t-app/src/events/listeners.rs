@@ -1,6 +1,8 @@
+use crate::structs::history::StrokeDiff;
 use crate::structs::project::Project;
 use futures::StreamExt;
-use leptos::prelude::RwSignal;
+use leptos::logging;
+use leptos::prelude::{GetUntracked, RwSignal};
 
 use crate::render::canvas_renderer::composite_layers;
 use crate::structs::color::Color;
@@ -14,8 +16,7 @@ use pro_pain_t_shared::dtos::path::PathDto;
 use pro_pain_t_shared::dtos::project::ProjectDto;
 use pro_pain_t_shared::dtos::save_object::SaveObjectDto;
 use pro_pain_t_shared::events::events::{
-    EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER,
-    EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_SAVE_PROJECT,
+    EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER, EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_REDO, EVENT_MENU_SAVE_PROJECT, EVENT_MENU_UNDO
 };
 use tauri_sys::core::invoke;
 use tauri_sys::event::listen;
@@ -107,5 +108,17 @@ pub fn canvas_size_listener(canvas_size_window_signal: RwSignal<bool>) {
         while let Some(_) = listener.next().await {
             canvas_size_window_signal.set(true);
         }
+    });
+}
+
+pub fn undo_listener(project: RwSignal<Project>) {
+    spawn_local(async move {
+        let mut listener = listen::<()>(EVENT_MENU_UNDO).await.unwrap();
+    });
+}
+
+pub fn redo_listener(project: RwSignal<Project>) {
+    spawn_local(async move {
+        let mut listener = listen::<()>(EVENT_MENU_REDO).await.unwrap();
     });
 }
