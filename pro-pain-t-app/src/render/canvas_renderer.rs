@@ -5,7 +5,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
 fn create_offscreen_canvas(width: u32, height: u32) -> HtmlCanvasElement {
     let document = web_sys::window()
         .and_then(|w| w.document())
-        .expect("document missing");
+        .expect("Failed to acquire document object");
 
     let canvas = document
         .create_element("canvas")

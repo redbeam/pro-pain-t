@@ -12,7 +12,7 @@ use wasm_bindgen::prelude::*;
 pub fn CanvasArea() -> impl IntoView {
     let canvas_ref = NodeRef::new();
 
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
 
@@ -89,13 +89,13 @@ pub fn CanvasArea() -> impl IntoView {
     Effect::new(move || {
         if let Some(window) = web_sys::window() {
             let trigger = canvas_size_trigger;
-            
+
             let closure = Closure::wrap(Box::new(move |_: web_sys::Event| {
                 trigger.update(|v| *v = v.wrapping_add(1));
             }) as Box<dyn FnMut(web_sys::Event)>);
-            
+
             let _ = window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
-            
+
             closure.forget();
         }
     });
@@ -150,7 +150,7 @@ pub fn CanvasArea() -> impl IntoView {
         let pan_y = view_state.pan_y.get();
         let _ = canvas_size_trigger.get();
 
-        let window = web_sys::window().expect("window missing");
+        let window = web_sys::window().expect("Failed to acquire window object");
         let device_pixel_ratio = window.device_pixel_ratio();
 
         let rect = canvas.get_bounding_client_rect();

@@ -6,7 +6,7 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
     let width_input_ref: NodeRef<html::Input> = NodeRef::new();
     let ok_button_ref: NodeRef<html::Button> = NodeRef::new();
 
-    let project = use_context::<RwSignal<Project>>().unwrap();
+    let project = use_context::<RwSignal<Project>>().expect("Project context missing");
 
     let initial_width = project.with_untracked(|project| project.width.get_untracked());
     let initial_height = project.with_untracked(|project| project.height.get_untracked());
