@@ -7,3 +7,4 @@ pub mod tools;
 pub mod bucket;
 pub mod eyedropper;
 pub mod eraser;
+pub mod brush;
