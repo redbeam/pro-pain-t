@@ -1,4 +1,5 @@
 use crate::components::color_picker::ColorPicker;
+use crate::tools::eyedropper::EyedropperState;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
@@ -57,7 +58,17 @@ pub fn ToolPalette() -> impl IntoView {
                 >
                 "🧺"
                 </div>
-                { (0..8).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::EyeDropper(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::EyeDropper(EyedropperState::default()), &project);
+                    }
+                    title="EyeDropper tool"
+                >
+                "🩸"
+                </div>
+                { (0..7).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
             </div>
 
             <ColorPicker color = current_color />

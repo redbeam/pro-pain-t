@@ -5,3 +5,4 @@ pub mod pen;
 pub mod select;
 pub mod tools;
 pub mod bucket;
+pub mod eyedropper;

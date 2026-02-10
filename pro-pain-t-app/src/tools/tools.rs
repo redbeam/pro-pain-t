@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
 
-use crate::tools::{bucket::BucketState, context::ToolContext, pan::PanState, pen::PenState, select::SelectState};
+use crate::tools::{bucket::BucketState, context::ToolContext, eyedropper::EyedropperState, pan::PanState, pen::PenState, select::SelectState};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum Tool {
@@ -9,6 +9,7 @@ pub enum Tool {
     Pan(PanState),
     Select(SelectState),
     Bucket(BucketState),
+    EyeDropper(EyedropperState),
 }
 
 impl Tool {
@@ -22,6 +23,7 @@ impl Tool {
             Tool::Pan(state) => state.on_pointer_down(e, ctx),
             Tool::Select(state) => state.on_pointer_down(e, ctx),
             Tool::Bucket(state) => state.on_pointer_down(e, ctx),
+            Tool::EyeDropper(state) => state.on_pointer_down(e, ctx),
         }
     }
 
@@ -31,6 +33,7 @@ impl Tool {
             Tool::Pan(state) => state.on_pointer_move(e, ctx),
             Tool::Select(state) => state.on_pointer_move(e, ctx),
             Tool::Bucket(state) => state.on_pointer_move(e, ctx),
+            Tool::EyeDropper(state) => state.on_pointer_move(e, ctx),
         }
     }
 
@@ -40,6 +43,7 @@ impl Tool {
             Tool::Pan(state) => state.on_pointer_up(e, ctx),
             Tool::Select(state) => state.on_pointer_up(e, ctx),
             Tool::Bucket(state) => state.on_pointer_up(e, ctx),
+            Tool::EyeDropper(state) => state.on_pointer_up(e, ctx),
         }
     }
 
@@ -49,6 +53,7 @@ impl Tool {
             Tool::Pan(state) => state.cancel(),
             Tool::Select(state) => state.cancel(),
             Tool::Bucket(state) => state.cancel(),
+            Tool::EyeDropper(state) => state.cancel(),
         }
     }
 
@@ -58,6 +63,7 @@ impl Tool {
             Tool::Pan(state) => state.cursor(),
             Tool::Select(state) => state.cursor(),
             Tool::Bucket(state) => state.cursor(),
+            Tool::EyeDropper(state) => state.cursor(),
         }
     }
 }
