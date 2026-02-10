@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
 
-use crate::tools::{brush::BrushState, bucket::BucketState, context::ToolContext, eraser::EraserState, eyedropper::EyedropperState, pan::PanState, pen::PenState, select::SelectState};
+use crate::tools::{brush::BrushState, bucket::BucketState, context::ToolContext, eraser::EraserState, eyedropper::EyedropperState, line::LineState, pan::PanState, pen::PenState, select::SelectState};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum Tool {
@@ -12,6 +12,7 @@ pub enum Tool {
     EyeDropper(EyedropperState),
     Eraser(EraserState),
     Brush(BrushState),
+    Line(LineState),
 }
 
 impl Tool {
@@ -28,6 +29,7 @@ impl Tool {
             Tool::EyeDropper(state) => state.on_pointer_down(e, ctx),
             Tool::Eraser(state) => state.on_pointer_down(e, ctx),
             Tool::Brush(state) => state.on_pointer_down(e, ctx),
+            Tool::Line(state) => state.on_pointer_down(e, ctx),
         }
     }
 
@@ -40,6 +42,7 @@ impl Tool {
             Tool::EyeDropper(state) => state.on_pointer_move(e, ctx),
             Tool::Eraser(state) => state.on_pointer_move(e, ctx),
             Tool::Brush(state) => state.on_pointer_move(e, ctx),
+            Tool::Line(state) => state.on_pointer_move(e, ctx),
         }
     }
 
@@ -52,6 +55,7 @@ impl Tool {
             Tool::EyeDropper(state) => state.on_pointer_up(e, ctx),
             Tool::Eraser(state) => state.on_pointer_up(e, ctx),
             Tool::Brush(state) => state.on_pointer_up(e, ctx),
+            Tool::Line(state) => state.on_pointer_up(e, ctx),
         }
     }
 
@@ -64,6 +68,7 @@ impl Tool {
             Tool::EyeDropper(state) => state.cancel(),
             Tool::Eraser(state) => state.cancel(),
             Tool::Brush(state) => state.cancel(),
+            Tool::Line(state) => state.cancel(),
         }
     }
 
@@ -76,6 +81,7 @@ impl Tool {
             Tool::EyeDropper(state) => state.cursor(),
             Tool::Eraser(state) => state.cursor(),
             Tool::Brush(state) => state.cursor(),
+            Tool::Line(state) => state.cursor(),
         }
     }
 }

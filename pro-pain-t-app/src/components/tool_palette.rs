@@ -2,6 +2,7 @@ use crate::components::color_picker::ColorPicker;
 use crate::tools::brush::BrushState;
 use crate::tools::eraser::EraserState;
 use crate::tools::eyedropper::EyedropperState;
+use crate::tools::line::LineState;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
@@ -90,7 +91,17 @@ pub fn ToolPalette() -> impl IntoView {
                 >
                 "🖌"
                 </div>
-                { (0..5).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Line(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Line(LineState::default()), &project);
+                    }
+                    title="Line tool"
+                >
+                "📏"
+                </div>
+                { (0..4).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
             </div>
 
             <ColorPicker color = current_color />
