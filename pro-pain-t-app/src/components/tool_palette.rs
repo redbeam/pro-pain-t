@@ -1,8 +1,12 @@
 use crate::components::color_picker::ColorPicker;
+use crate::tools::brush::BrushState;
+use crate::tools::eraser::EraserState;
+use crate::tools::eyedropper::EyedropperState;
+use crate::tools::line::LineState;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{pan::PanState, pen::PenState, select::SelectState, tools::Tool},
+    tools::{pan::PanState, pen::PenState, select::SelectState, tools::Tool, bucket::BucketState},
 };
 use leptos::prelude::*;
 use crate::components::brush_size_slider::BrushSizeSlider;
@@ -19,13 +23,63 @@ pub fn ToolPalette() -> impl IntoView {
             <div class="tool-palette-grid">
                 <div
                     class="tool-button"
-                    class=("tool-button--active", move || current_tool.get().is_pan())
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Pen(_)))
                     on:click=move |_| {
-                        workspace_state.set_tool(Tool::Pan(PanState::default()), &project);
+                        workspace_state.set_tool(Tool::Pen(PenState::default()), &project);
                     }
-                    title="Pan tool"
+                    title="Pen tool"
                 >
-                "🤚🏻"
+                "🖊️"
+                </div>
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Brush(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Brush(BrushState::default()), &project);
+                    }
+                    title="Brush tool"
+                >
+                "🖌"
+                </div>
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Line(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Line(LineState::default()), &project);
+                    }
+                    title="Line tool"
+                >
+                "📏"
+                </div>
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Eraser(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Eraser(EraserState::default()), &project);
+                    }
+                    title="Eraser tool"
+                >
+                "🧽"
+                </div>
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Bucket(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::Bucket(BucketState::default()), &project);
+                    }
+                    title="Bucket tool"
+                >
+                "🧺"
+                </div>
+                <div
+                    class="tool-button"
+                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::EyeDropper(_)))
+                    on:click=move |_| {
+                        workspace_state.set_tool(Tool::EyeDropper(EyedropperState::default()), &project);
+                    }
+                    title="EyeDropper tool"
+                >
+                "🩸"
                 </div>
                 <div
                     class="tool-button"
@@ -39,15 +93,14 @@ pub fn ToolPalette() -> impl IntoView {
                 </div>
                 <div
                     class="tool-button"
-                    class=("tool-button--active", move || matches!(current_tool.get(), Tool::Pen(_)))
+                    class=("tool-button--active", move || current_tool.get().is_pan())
                     on:click=move |_| {
-                        workspace_state.set_tool(Tool::Pen(PenState::default()), &project);
+                        workspace_state.set_tool(Tool::Pan(PanState::default()), &project);
                     }
-                    title="Pen tool"
+                    title="Pan tool"
                 >
-                "🖊️"
-                </div>
-                { (0..10).map(|_| view! { <div class="tool-button tool-button--placeholder"></div> }).collect_view() }
+                "🤚🏻"
+                </div>         
             </div>
 
             <ColorPicker color = current_color />
