@@ -5,7 +5,9 @@ use crate::components::new_project_window::NewProjectWindow;
 use crate::components::status_bar::StatusBar;
 use crate::components::tool_palette::ToolPalette;
 use crate::events::listeners::{
-    canvas_size_listener, create_new_project_listener, export_project_listener, import_as_layer_listener, open_project_listener, redo_listener, save_project_listener, undo_listener
+    canvas_size_listener, create_new_project_listener, export_project_listener,
+    import_as_layer_listener, open_project_listener, redo_listener, save_project_listener,
+    undo_listener,
 };
 use crate::state::workspace_state::WorkspaceState;
 use crate::structs::project::Project;

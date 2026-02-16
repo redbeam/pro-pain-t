@@ -3,7 +3,7 @@ use crate::events::error::show_error_dialog;
 use crate::structs::color::Color;
 use crate::structs::project::Project;
 use leptos::prelude::{NodeRef, RwSignal};
-use leptos::{component, view, IntoView};
+use leptos::{IntoView, component, view};
 use leptos::{html::Dialog, prelude::*};
 
 #[component]
@@ -23,7 +23,12 @@ pub fn NewProjectWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) ->
             return;
         }
         project.update(|project| {
-            project.replace_project_with_blank(title.get(), width.unwrap(), height.unwrap(), color.get());
+            project.replace_project_with_blank(
+                title.get(),
+                width.unwrap(),
+                height.unwrap(),
+                color.get(),
+            );
         });
         dialog_ref.get().unwrap().close();
         is_open.set(false);

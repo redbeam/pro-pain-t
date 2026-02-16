@@ -1,8 +1,8 @@
 use leptos::prelude::RwSignal;
 use web_sys::HtmlCanvasElement;
 
-use crate::{structs::project::Project, view_state::ProjectViewState};
 use crate::state::workspace_state::WorkspaceState;
+use crate::{structs::project::Project, view_state::ProjectViewState};
 
 /// Shared context passed to tools on input events.
 /// keep CanvasArea as a thin glue layer and keep tool logic inside tool modules

@@ -8,11 +8,15 @@ pub fn EditLayerWindow(
     is_open: RwSignal<bool>,
     id: usize,
 ) -> impl IntoView {
-    let project = use_context::<RwSignal<Project>>().expect("Project context missing")
+    let project = use_context::<RwSignal<Project>>()
+        .expect("Project context missing")
         .get();
 
     let layers = project.layers.get();
-    let layer = layers.iter().find(|l| l.id == id).expect("Layer with specified ID couldn't be found");
+    let layer = layers
+        .iter()
+        .find(|l| l.id == id)
+        .expect("Layer with specified ID couldn't be found");
 
     let title = RwSignal::new(layer.title.clone());
     let color = RwSignal::new(layer.canvas.background_color);

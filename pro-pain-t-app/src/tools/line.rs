@@ -1,9 +1,9 @@
 use crate::structs::history::{PixelDiff, StrokeDiff};
 use crate::structs::pixel::Pixel;
-use leptos::prelude::{Get, Update};
-use serde::{Deserialize, Serialize};
 use crate::tools::context::ToolContext;
 use crate::tools::geometry::{draw_line, screen_to_canvas};
+use leptos::prelude::{Get, Update};
+use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
 
 #[derive(Default, Clone, Serialize, Deserialize)]
@@ -27,14 +27,20 @@ impl LineState {
             self.start_point = Some((x, y));
         } else {
             let (sx, sy) = self.start_point.unwrap();
-            let Some(layer_id) = ctx.selected_layer else { return; };
+            let Some(layer_id) = ctx.selected_layer else {
+                return;
+            };
             let size = ctx.workspace_state.brush_size.get().max(0.1);
             let color = ctx.project.get().current_color.get();
 
             ctx.project.update(|project| {
                 project.layers.update(|layers| {
-                    let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else { return; };
-                    if layer.is_locked || !layer.is_visible { return; }
+                    let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
+                        return;
+                    };
+                    if layer.is_locked || !layer.is_visible {
+                        return;
+                    }
 
                     let canvas = &mut layer.canvas;
                     let mut plot_pixel = |px: i32, py: i32| {
@@ -42,14 +48,22 @@ impl LineState {
                         for dy in -(radius as i32)..=(radius as i32) {
                             for dx in -(radius as i32)..=(radius as i32) {
                                 let dist = ((dx as f32).powi(2) + (dy as f32).powi(2)).sqrt();
-                                if dist > radius { continue; }
+                                if dist > radius {
+                                    continue;
+                                }
 
                                 let nx = px + dx;
                                 let ny = py + dy;
-                                if nx < 0 || ny < 0 { continue; }
+                                if nx < 0 || ny < 0 {
+                                    continue;
+                                }
                                 let ux = nx as u32;
                                 let uy = ny as u32;
-                                let old_pixel = canvas.get_pixel(ux, uy).unwrap_or(Pixel::new(ux, uy, canvas.background_color));
+                                let old_pixel = canvas.get_pixel(ux, uy).unwrap_or(Pixel::new(
+                                    ux,
+                                    uy,
+                                    canvas.background_color,
+                                ));
                                 if old_pixel.color != color {
                                     self.current_stroke.push(PixelDiff {
                                         before: old_pixel,
@@ -66,7 +80,9 @@ impl LineState {
             });
 
             if !self.current_stroke.is_empty() {
-                let Some(layer_id) = ctx.selected_layer else { return; };
+                let Some(layer_id) = ctx.selected_layer else {
+                    return;
+                };
                 ctx.project.update(|project| {
                     project.history.add(StrokeDiff {
                         layer_id,
@@ -79,8 +95,7 @@ impl LineState {
         }
     }
 
-    pub fn on_pointer_move(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {
-    }
+    pub fn on_pointer_move(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {}
 
     pub fn on_pointer_up(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {
         self.start_point = self.start_point.take();

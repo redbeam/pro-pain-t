@@ -1,7 +1,8 @@
 use crate::structs::project::Project;
 use futures::StreamExt;
-use leptos::prelude::{RwSignal};
+use leptos::prelude::RwSignal;
 
+use crate::events::error::show_error_dialog;
 use crate::render::canvas_renderer::composite_layers;
 use crate::structs::color::Color;
 use crate::structs::layer::Layer;
@@ -14,11 +15,12 @@ use pro_pain_t_shared::dtos::path::PathDto;
 use pro_pain_t_shared::dtos::project::ProjectDto;
 use pro_pain_t_shared::dtos::save_object::SaveObjectDto;
 use pro_pain_t_shared::events::events::{
-    EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER, EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_REDO, EVENT_MENU_SAVE_PROJECT, EVENT_MENU_UNDO
+    EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER,
+    EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_REDO, EVENT_MENU_SAVE_PROJECT,
+    EVENT_MENU_UNDO,
 };
 use tauri_sys::core::invoke;
 use tauri_sys::event::listen;
-use crate::events::error::show_error_dialog;
 
 pub fn create_new_project_listener(new_project_window_signal: RwSignal<bool>) {
     spawn_local(async move {
@@ -72,8 +74,12 @@ pub fn import_as_layer_listener(project: RwSignal<Project>) {
                     return;
                 }
                 let layer_id = project.next_layer_id.get();
-                let new_layer =
-                    Layer::from_image(&image.unwrap(), layer_id, "Imported image", Color::default_black());
+                let new_layer = Layer::from_image(
+                    &image.unwrap(),
+                    layer_id,
+                    "Imported image",
+                    Color::default_black(),
+                );
                 project.add_new_layer(new_layer);
             });
         }

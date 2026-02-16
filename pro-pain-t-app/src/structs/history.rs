@@ -52,7 +52,6 @@ impl History {
     }
 
     pub fn apply_undo(&mut self, project: &RwSignal<Project>) {
-
         let mut stroke_opt = None;
         project.update(|project| {
             stroke_opt = project.history.undo();
@@ -68,11 +67,9 @@ impl History {
                 }
             }
         });
-
     }
 
     pub fn apply_redo(&mut self, project: &RwSignal<Project>) {
-     
         let mut stroke_opt = None;
         project.update(|project| {
             stroke_opt = project.history.redo();
@@ -88,8 +85,5 @@ impl History {
                 }
             }
         });
-
     }
-
-
 }

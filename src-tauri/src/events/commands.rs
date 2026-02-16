@@ -1,8 +1,9 @@
-use std::fs;
-use image::RgbaImage;
-use tauri::AppHandle;
-use pro_pain_t_shared::dtos::image::ImageDto;
 use crate::events::handlers::error_dialog;
+use image::RgbaImage;
+use pro_pain_t_shared::dtos::image::ImageDto;
+use std::fs;
+use tauri::AppHandle;
+
 /*
 !!!
     DON'T FORGET TO ADD THE COMMANDS TO `invoke_handler` IN MAIN.RS

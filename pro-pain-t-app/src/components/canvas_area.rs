@@ -6,9 +6,8 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, PointerEvent, wasm_bi
 
 use crate::render::canvas_renderer::{ViewTransform, composite_layers, draw_project_viewport};
 use crate::tools::context::ToolContext;
-use crate::tools::select::{commit_selection, SelectionBuffer, SelectionState};
+use crate::tools::select::{SelectionBuffer, SelectionState, commit_selection};
 use wasm_bindgen::prelude::*;
-
 
 #[component]
 pub fn CanvasArea() -> impl IntoView {
@@ -123,7 +122,8 @@ pub fn CanvasArea() -> impl IntoView {
                 trigger.update(|v| *v = v.wrapping_add(1));
             }) as Box<dyn FnMut(web_sys::Event)>);
 
-            let _ = window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
+            let _ =
+                window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref());
 
             closure.forget();
         }
@@ -148,7 +148,8 @@ pub fn CanvasArea() -> impl IntoView {
                 }
             }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
-            let _ = window.add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
+            let _ = window
+                .add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
 
             closure.forget();
         }
@@ -315,7 +316,11 @@ pub fn CanvasArea() -> impl IntoView {
     }
 }
 
-fn draw_selection_overlay(ctx: &CanvasRenderingContext2d, selection: &SelectionState, t: ViewTransform) {
+fn draw_selection_overlay(
+    ctx: &CanvasRenderingContext2d,
+    selection: &SelectionState,
+    t: ViewTransform,
+) {
     let scale = (t.zoom as f64) * t.device_pixel_ratio;
     let tx = (t.pan_x as f64) * t.device_pixel_ratio;
     let ty = (t.pan_y as f64) * t.device_pixel_ratio;
@@ -366,7 +371,11 @@ fn draw_selection_overlay(ctx: &CanvasRenderingContext2d, selection: &SelectionS
     }
 }
 
-fn draw_selection_pixels(ctx: &CanvasRenderingContext2d, rect: &crate::tools::select::SelectionRect, buffer: &SelectionBuffer) {
+fn draw_selection_pixels(
+    ctx: &CanvasRenderingContext2d,
+    rect: &crate::tools::select::SelectionRect,
+    buffer: &SelectionBuffer,
+) {
     if buffer.width == 0 || buffer.height == 0 || rect.w <= 0 || rect.h <= 0 {
         return;
     }
@@ -387,7 +396,9 @@ fn draw_selection_pixels(ctx: &CanvasRenderingContext2d, rect: &crate::tools::se
     )
     .expect("Failed to create ImageData");
 
-    off_ctx.put_image_data(&image_data, 0.0, 0.0).expect("Failed to put ImageData");
+    off_ctx
+        .put_image_data(&image_data, 0.0, 0.0)
+        .expect("Failed to put ImageData");
 
     let _ = ctx.draw_image_with_html_canvas_element_and_dw_and_dh(
         &offscreen,

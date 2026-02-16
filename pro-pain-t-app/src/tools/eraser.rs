@@ -36,7 +36,9 @@ impl EraserState {
             return;
         }
 
-        let Some(layer_id) = ctx.selected_layer else { return; };
+        let Some(layer_id) = ctx.selected_layer else {
+            return;
+        };
 
         ctx.project.update(|project| {
             project.history.add(StrokeDiff {
@@ -47,7 +49,9 @@ impl EraserState {
     }
 
     fn apply_at(&mut self, e: &PointerEvent, ctx: &ToolContext) {
-        let Some(layer_id) = ctx.selected_layer else { return; };
+        let Some(layer_id) = ctx.selected_layer else {
+            return;
+        };
 
         let (x, y) = screen_to_canvas(
             ctx.canvas,
@@ -59,8 +63,12 @@ impl EraserState {
         );
 
         ctx.project.get().layers.update(|layers| {
-            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else { return; };
-            if layer.is_locked || !layer.is_visible { return; }
+            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
+                return;
+            };
+            if layer.is_locked || !layer.is_visible {
+                return;
+            }
 
             let brush_size = ctx.workspace_state.brush_size.get().max(0.1);
             let radius = (brush_size * 12.0).ceil() as i32;
@@ -71,10 +79,14 @@ impl EraserState {
             let mut draw_pixel = |px: i32, py: i32| {
                 for dy in -radius..=radius {
                     for dx in -radius..=radius {
-                        if dx*dx + dy*dy > (radius*radius) { continue; }
+                        if dx * dx + dy * dy > (radius * radius) {
+                            continue;
+                        }
                         let nx = px + dx;
                         let ny = py + dy;
-                        if nx < 0 || ny < 0 { continue; }
+                        if nx < 0 || ny < 0 {
+                            continue;
+                        }
                         let ux = nx as u32;
                         let uy = ny as u32;
                         if let Ok(old_pixel) = canvas.get_pixel(ux, uy) {

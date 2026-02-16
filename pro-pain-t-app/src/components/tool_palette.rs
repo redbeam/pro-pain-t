@@ -1,3 +1,4 @@
+use crate::components::brush_size_slider::BrushSizeSlider;
 use crate::components::color_picker::ColorPicker;
 use crate::tools::brush::BrushState;
 use crate::tools::eraser::EraserState;
@@ -6,10 +7,9 @@ use crate::tools::line::LineState;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{pan::PanState, pen::PenState, select::SelectState, tools::Tool, bucket::BucketState},
+    tools::{bucket::BucketState, pan::PanState, pen::PenState, select::SelectState, tools::Tool},
 };
 use leptos::prelude::*;
-use crate::components::brush_size_slider::BrushSizeSlider;
 
 #[component]
 pub fn ToolPalette() -> impl IntoView {
@@ -100,7 +100,7 @@ pub fn ToolPalette() -> impl IntoView {
                     title="Pan tool"
                 >
                 "🤚🏻"
-                </div>         
+                </div>
             </div>
 
             <ColorPicker color = current_color />

@@ -1,4 +1,5 @@
 pub mod alpha_slider;
+pub mod brush_size_slider;
 pub mod canvas_area;
 pub mod canvas_size_window;
 pub mod color_picker;
@@ -10,4 +11,3 @@ pub mod new_project_window;
 pub mod rgb_slider;
 pub mod status_bar;
 pub mod tool_palette;
-pub mod brush_size_slider;

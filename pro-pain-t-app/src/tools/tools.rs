@@ -1,7 +1,11 @@
 use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
 
-use crate::tools::{brush::BrushState, bucket::BucketState, context::ToolContext, eraser::EraserState, eyedropper::EyedropperState, line::LineState, pan::PanState, pen::PenState, select::SelectState};
+use crate::tools::{
+    brush::BrushState, bucket::BucketState, context::ToolContext, eraser::EraserState,
+    eyedropper::EyedropperState, line::LineState, pan::PanState, pen::PenState,
+    select::SelectState,
+};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum Tool {

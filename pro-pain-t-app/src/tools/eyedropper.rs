@@ -18,12 +18,18 @@ impl EyedropperState {
             ctx.pan_y,
         );
 
-        let Some(layer_id) = ctx.selected_layer else { return; };
+        let Some(layer_id) = ctx.selected_layer else {
+            return;
+        };
 
         ctx.project.get().layers.update(|layers| {
-            let Some(layer) = layers.iter().find(|l| l.id == layer_id) else { return; };
+            let Some(layer) = layers.iter().find(|l| l.id == layer_id) else {
+                return;
+            };
 
-            if layer.is_locked || !layer.is_visible { return; }
+            if layer.is_locked || !layer.is_visible {
+                return;
+            }
 
             if x >= 0 && y >= 0 {
                 let ux = x as u32;
@@ -38,14 +44,11 @@ impl EyedropperState {
         });
     }
 
-    pub fn on_pointer_move(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {
-    }
+    pub fn on_pointer_move(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {}
 
-    pub fn on_pointer_up(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {
-    }
+    pub fn on_pointer_up(&mut self, _e: &PointerEvent, _ctx: &ToolContext) {}
 
-    pub fn cancel(&mut self) {
-    }
+    pub fn cancel(&mut self) {}
 
     pub fn cursor(&self) -> &'static str {
         "copy"

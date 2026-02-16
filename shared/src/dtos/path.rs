@@ -7,6 +7,8 @@ pub struct PathDto {
 
 impl PathDto {
     pub fn new(path: impl ToString) -> Self {
-        Self { path: path.to_string() }
+        Self {
+            path: path.to_string(),
+        }
     }
 }

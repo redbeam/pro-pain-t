@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::tools::context::ToolContext;
 use crate::tools::geometry::screen_to_canvas;
-use web_sys::PointerEvent;
 use std::collections::VecDeque;
+use web_sys::PointerEvent;
 
 #[derive(Default, Clone, Serialize, Deserialize)]
 pub struct BucketState {
@@ -23,7 +23,9 @@ impl BucketState {
     }
 
     pub fn on_pointer_up(&mut self, e: &PointerEvent, ctx: &ToolContext) {
-        let Some(layer_id) = ctx.selected_layer else { return; };
+        let Some(layer_id) = ctx.selected_layer else {
+            return;
+        };
 
         let (x, y) = screen_to_canvas(
             ctx.canvas,
@@ -45,7 +47,9 @@ impl BucketState {
         let fill_color = ctx.project.get().current_color.get();
 
         ctx.project.get().layers.update(|layers| {
-            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else { return; };
+            let Some(layer) = layers.iter_mut().find(|l| l.id == layer_id) else {
+                return;
+            };
 
             if layer.is_locked || !layer.is_visible {
                 return;
@@ -56,10 +60,11 @@ impl BucketState {
             let ux = x as u32;
             let uy = y as u32;
 
-            let start_pixel = canvas
-                .get_pixel(ux, uy)
-                .ok()
-                .unwrap_or(Pixel::new(ux, uy, canvas.background_color));
+            let start_pixel = canvas.get_pixel(ux, uy).ok().unwrap_or(Pixel::new(
+                ux,
+                uy,
+                canvas.background_color,
+            ));
 
             let target_color = start_pixel.color;
 
@@ -81,10 +86,11 @@ impl BucketState {
                 let ux = cx as u32;
                 let uy = cy as u32;
 
-                let old_pixel = canvas
-                    .get_pixel(ux, uy)
-                    .ok()
-                    .unwrap_or(Pixel::new(ux, uy, canvas.background_color));
+                let old_pixel = canvas.get_pixel(ux, uy).ok().unwrap_or(Pixel::new(
+                    ux,
+                    uy,
+                    canvas.background_color,
+                ));
 
                 if old_pixel.color != target_color {
                     continue;

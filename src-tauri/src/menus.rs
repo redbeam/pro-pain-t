@@ -1,5 +1,10 @@
-use crate::events::handlers::{error_dialog, export_project_handler, import_as_layer_handler, open_file_handler, project_overwrite_confirmation, save_project_handler};
-use pro_pain_t_shared::events::events::{EVENT_MENU_CANVAS_SIZE, EVENT_MENU_NEW_PROJECT, EVENT_MENU_REDO, EVENT_MENU_UNDO};
+use crate::events::handlers::{
+    error_dialog, export_project_handler, import_as_layer_handler, open_file_handler,
+    project_overwrite_confirmation, save_project_handler,
+};
+use pro_pain_t_shared::events::events::{
+    EVENT_MENU_CANVAS_SIZE, EVENT_MENU_NEW_PROJECT, EVENT_MENU_REDO, EVENT_MENU_UNDO,
+};
 use tauri::menu::{MenuBuilder, SubmenuBuilder};
 use tauri::{App, AppHandle, Emitter};
 use tauri_plugin_dialog::DialogExt;
@@ -51,13 +56,17 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                 if !project_overwrite_confirmation(&app_handle) {
                     return;
                 }
-                app_handle.dialog().file()
+                app_handle
+                    .dialog()
+                    .file()
                     .add_filter("ProPainTProject", &["ppp"])
                     .pick_file(move |file_path| open_file_handler(&app_handle, file_path));
             }
 
             "save_project" => {
-                app_handle.dialog().file()
+                app_handle
+                    .dialog()
+                    .file()
                     .add_filter("ProPainTProject", &["ppp"])
                     .set_file_name("unnamed.ppp")
                     .set_can_create_directories(true)
@@ -65,13 +74,17 @@ pub fn setup_menus(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
             }
 
             "import_as_layer" => {
-                app_handle.dialog().file()
+                app_handle
+                    .dialog()
+                    .file()
                     .add_filter("PNG or JPG images", &["png", "jpg", "jpeg"])
                     .pick_file(move |file_path| import_as_layer_handler(&app_handle, file_path));
             }
 
             "export_project" => {
-                app_handle.dialog().file()
+                app_handle
+                    .dialog()
+                    .file()
                     .add_filter("PNG or JPG images", &["png", "jpg", "jpeg"])
                     .set_file_name("unnamed_export")
                     .set_can_create_directories(true)

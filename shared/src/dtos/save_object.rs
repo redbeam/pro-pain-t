@@ -8,6 +8,9 @@ pub struct SaveObjectDto {
 
 impl SaveObjectDto {
     pub fn new(path: String, project_serialized: String) -> Self {
-        Self { path, project_serialized }
+        Self {
+            path,
+            project_serialized,
+        }
     }
 }

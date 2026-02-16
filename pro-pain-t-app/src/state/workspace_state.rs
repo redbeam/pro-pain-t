@@ -1,5 +1,9 @@
 use crate::structs::project::Project;
-use crate::tools::{pen::PenState, select::{commit_selection, SelectionState}, tools::Tool};
+use crate::tools::{
+    pen::PenState,
+    select::{SelectionState, commit_selection},
+    tools::Tool,
+};
 use leptos::prelude::*;
 
 #[derive(Clone, Copy)]

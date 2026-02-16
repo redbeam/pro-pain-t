@@ -1,7 +1,7 @@
+use crate::events::error::show_error_dialog;
 use crate::structs::{color::Color, history::History, layer::Layer};
 use leptos::prelude::{Get, RwSignal, Set, Update};
 use serde::{Deserialize, Serialize};
-use crate::events::error::show_error_dialog;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Project {

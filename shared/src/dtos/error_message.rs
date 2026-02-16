@@ -7,6 +7,8 @@ pub struct ErrorMessage {
 
 impl ErrorMessage {
     pub fn new(message: impl ToString) -> Self {
-        Self { message: message.to_string() }
+        Self {
+            message: message.to_string(),
+        }
     }
 }

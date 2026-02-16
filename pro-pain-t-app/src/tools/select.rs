@@ -1,8 +1,8 @@
 use crate::structs::history::{PixelDiff, StrokeDiff};
+use crate::structs::pixel::Pixel;
 use crate::structs::{color::Color, layer::Layer, project::Project};
 use crate::tools::context::ToolContext;
 use crate::tools::geometry::screen_to_canvas;
-use crate::structs::pixel::Pixel;
 use leptos::prelude::{RwSignal, Set, Update, With};
 use serde::{Deserialize, Serialize};
 use web_sys::PointerEvent;
@@ -68,8 +68,13 @@ pub struct SelectionState {
 #[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
 enum SelectMode {
     Idle,
-    Creating { start: (i32, i32) },
-    Moving { start: (i32, i32), orig: SelectionRect },
+    Creating {
+        start: (i32, i32),
+    },
+    Moving {
+        start: (i32, i32),
+        orig: SelectionRect,
+    },
     Resizing {
         start: (i32, i32),
         orig: SelectionRect,
@@ -234,7 +239,11 @@ impl SelectState {
                     }
                 });
             }
-            SelectMode::Resizing { start, orig, handle } => {
+            SelectMode::Resizing {
+                start,
+                orig,
+                handle,
+            } => {
                 if self.pointer_id != Some(e.pointer_id()) {
                     return;
                 }
@@ -278,7 +287,8 @@ impl SelectState {
                 ctx.workspace_state.selection.with(|selection| {
                     if let Some(sel) = selection {
                         if let Some(buffer) = sel.buffer.as_ref() {
-                            scaled = Some(scale_buffer(buffer, sel.rect.w as u32, sel.rect.h as u32));
+                            scaled =
+                                Some(scale_buffer(buffer, sel.rect.w as u32, sel.rect.h as u32));
                         }
                     }
                 });
@@ -399,7 +409,11 @@ fn cursor_for_handle(handle: ResizeHandle) -> &'static str {
     }
 }
 
-fn cut_buffer(ctx: &ToolContext, layer_id: usize, rect: SelectionRect) -> (SelectionBuffer, Vec<PixelDiff>) {
+fn cut_buffer(
+    ctx: &ToolContext,
+    layer_id: usize,
+    rect: SelectionRect,
+) -> (SelectionBuffer, Vec<PixelDiff>) {
     let mut buffer = SelectionBuffer {
         width: rect.w.max(1) as u32,
         height: rect.h.max(1) as u32,
@@ -454,7 +468,9 @@ fn extract_buffer_from_layer(layer: &mut Layer, rect: SelectionRect) -> Selectio
 }
 
 pub fn commit_selection(project: &RwSignal<Project>, selection: &SelectionState) {
-    let Some(buffer) = selection.buffer.as_ref() else { return; };
+    let Some(buffer) = selection.buffer.as_ref() else {
+        return;
+    };
     let rect = selection.rect;
     let layer_id = selection.layer_id;
     let sel = selection.clone();
@@ -483,11 +499,7 @@ pub fn commit_selection(project: &RwSignal<Project>, selection: &SelectionState)
     });
 }
 
-fn clear_rect(
-    layer: &mut Layer,
-    rect: SelectionRect,
-    diffs: &mut Vec<PixelDiff>,
-) {
+fn clear_rect(layer: &mut Layer, rect: SelectionRect, diffs: &mut Vec<PixelDiff>) {
     let width = rect.w.max(1) as u32;
     let height = rect.h.max(1) as u32;
 
@@ -495,17 +507,28 @@ fn clear_rect(
         for x in 0..width {
             let px = rect.x + x as i32;
             let py = rect.y + y as i32;
-            if px < 0 || py < 0 { continue; }
-            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height { continue; }
+            if px < 0 || py < 0 {
+                continue;
+            }
+            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height {
+                continue;
+            }
 
             let ux = px as u32;
             let uy = py as u32;
             let idx = (uy * layer.canvas.width + ux) as usize;
 
             let before = layer.canvas.content[idx].clone();
-            let after = Color { r:0,g:0,b:0, alpha:0.0 };
+            let after = Color {
+                r: 0,
+                g: 0,
+                b: 0,
+                alpha: 0.0,
+            };
 
-            if before.color == after { continue; }
+            if before.color == after {
+                continue;
+            }
 
             diffs.push(PixelDiff {
                 before: before.clone().into(),
@@ -530,18 +553,28 @@ fn apply_buffer(
         for x in 0..width {
             let px = rect.x + x as i32;
             let py = rect.y + y as i32;
-            if px < 0 || py < 0 { continue; }
-            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height { continue; }
+            if px < 0 || py < 0 {
+                continue;
+            }
+            if px as u32 >= layer.canvas.width || py as u32 >= layer.canvas.height {
+                continue;
+            }
 
             let ux = px as u32;
             let uy = py as u32;
             let idx = (uy * layer.canvas.width + ux) as usize;
             let src_idx = (y * buffer.width + x) as usize;
 
-            let new_color = buffer.pixels.get(src_idx).copied().unwrap_or_else(transparent_color);
+            let new_color = buffer
+                .pixels
+                .get(src_idx)
+                .copied()
+                .unwrap_or_else(transparent_color);
             let before = layer.canvas.content[idx].clone();
 
-            if before.color == new_color { continue; }
+            if before.color == new_color {
+                continue;
+            }
 
             diffs.push(PixelDiff {
                 before: before.clone().into(),
@@ -563,7 +596,11 @@ fn scale_buffer(buffer: &SelectionBuffer, new_w: u32, new_h: u32) -> SelectionBu
             let src_x = (x as u64 * buffer.width as u64) / new_w as u64;
             let src_y = (y as u64 * buffer.height as u64) / new_h as u64;
             let src_idx = (src_y as u32 * buffer.width + src_x as u32) as usize;
-            let color = buffer.pixels.get(src_idx).copied().unwrap_or_else(transparent_color);
+            let color = buffer
+                .pixels
+                .get(src_idx)
+                .copied()
+                .unwrap_or_else(transparent_color);
             pixels.push(color);
         }
     }

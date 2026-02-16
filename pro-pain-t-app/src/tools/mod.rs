@@ -1,11 +1,11 @@
+pub mod brush;
+pub mod bucket;
 pub mod context;
+pub mod eraser;
+pub mod eyedropper;
 pub mod geometry;
+pub mod line;
 pub mod pan;
 pub mod pen;
 pub mod select;
 pub mod tools;
-pub mod bucket;
-pub mod eyedropper;
-pub mod eraser;
-pub mod brush;
-pub mod line;
