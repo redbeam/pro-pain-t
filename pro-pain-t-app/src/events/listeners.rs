@@ -14,7 +14,7 @@ use pro_pain_t_shared::dtos::image::ImageDto;
 use pro_pain_t_shared::dtos::path::PathDto;
 use pro_pain_t_shared::dtos::project::ProjectDto;
 use pro_pain_t_shared::dtos::save_object::SaveObjectDto;
-use pro_pain_t_shared::events::events::{
+use pro_pain_t_shared::events::event::{
     EVENT_MENU_CANVAS_SIZE, EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER,
     EVENT_MENU_NEW_PROJECT, EVENT_MENU_OPEN_PROJECT, EVENT_MENU_REDO, EVENT_MENU_SAVE_PROJECT,
     EVENT_MENU_UNDO,
@@ -25,7 +25,7 @@ use tauri_sys::event::listen;
 pub fn create_new_project_listener(new_project_window_signal: RwSignal<bool>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_NEW_PROJECT).await.unwrap();
-        while let Some(_) = listener.next().await {
+        while listener.next().await.is_some() {
             new_project_window_signal.set(true);
         }
     });
@@ -113,7 +113,7 @@ pub fn export_project_listener(project: RwSignal<Project>) {
 pub fn canvas_size_listener(canvas_size_window_signal: RwSignal<bool>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_CANVAS_SIZE).await.unwrap();
-        while let Some(_) = listener.next().await {
+        while listener.next().await.is_some() {
             canvas_size_window_signal.set(true);
         }
     });
@@ -123,7 +123,7 @@ pub fn undo_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_UNDO).await.unwrap();
 
-        while let Some(_) = listener.next().await {
+        while listener.next().await.is_some() {
             project.get().history.apply_undo(&project);
         }
     });
@@ -133,7 +133,7 @@ pub fn redo_listener(project: RwSignal<Project>) {
     spawn_local(async move {
         let mut listener = listen::<()>(EVENT_MENU_REDO).await.unwrap();
 
-        while let Some(_) = listener.next().await {
+        while listener.next().await.is_some() {
             project.get().history.apply_redo(&project);
         }
     });

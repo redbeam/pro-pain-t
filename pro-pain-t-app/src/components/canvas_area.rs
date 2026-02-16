@@ -17,10 +17,10 @@ pub fn CanvasArea() -> impl IntoView {
     let view_state = use_context::<ProjectViewState>().expect("ProjectViewState context missing");
     let workspace_state = use_context::<WorkspaceState>().expect("WorkspaceState context missing");
 
-    let workspace_state_for_down = workspace_state.clone();
-    let workspace_state_for_move = workspace_state.clone();
-    let workspace_state_for_up = workspace_state.clone();
-    let workspace_state_for_render = workspace_state.clone();
+    let workspace_state_for_down = workspace_state;
+    let workspace_state_for_move = workspace_state;
+    let workspace_state_for_up = workspace_state;
+    let workspace_state_for_render = workspace_state;
 
     let current_tool = workspace_state.current_tool;
 
@@ -131,7 +131,7 @@ pub fn CanvasArea() -> impl IntoView {
 
     Effect::new(move || {
         if let Some(window) = web_sys::window() {
-            let ws = workspace_state.clone();
+            let ws = workspace_state;
             let tool = current_tool;
             let project = project;
 

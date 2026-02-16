@@ -16,8 +16,8 @@ pub fn NewProjectWindow(dialog_ref: NodeRef<Dialog>, is_open: RwSignal<bool>) ->
     let project = use_context::<RwSignal<Project>>().expect("Project context missing");
 
     let create_project = move || {
-        let width = u32::from_str_radix(dim_width.get().as_str(), 10);
-        let height = u32::from_str_radix(dim_height.get().as_str(), 10);
+        let width = dim_width.get().as_str().parse::<u32>();
+        let height = dim_height.get().as_str().parse::<u32>();
         if width.is_err() || height.is_err() {
             show_error_dialog("Couldn't parse width and/or height".to_string());
             return;

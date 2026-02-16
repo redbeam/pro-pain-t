@@ -7,7 +7,7 @@ use crate::tools::line::LineState;
 use crate::{
     state::workspace_state::WorkspaceState,
     structs::project::Project,
-    tools::{bucket::BucketState, pan::PanState, pen::PenState, select::SelectState, tools::Tool},
+    tools::{bucket::BucketState, pan::PanState, pen::PenState, select::SelectState, tool::Tool},
 };
 use leptos::prelude::*;
 
@@ -75,7 +75,7 @@ pub fn ToolPalette() -> impl IntoView {
                     class="tool-button"
                     class=("tool-button--active", move || matches!(current_tool.get(), Tool::EyeDropper(_)))
                     on:click=move |_| {
-                        workspace_state.set_tool(Tool::EyeDropper(EyedropperState::default()), &project);
+                        workspace_state.set_tool(Tool::EyeDropper(EyedropperState), &project);
                     }
                     title="EyeDropper tool"
                 >

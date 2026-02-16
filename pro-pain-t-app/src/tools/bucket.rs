@@ -99,8 +99,8 @@ impl BucketState {
                 let new_pixel = Pixel::new(ux, uy, fill_color);
 
                 self.current_stroke.push(PixelDiff {
-                    before: old_pixel.clone(),
-                    after: new_pixel.clone(),
+                    before: old_pixel,
+                    after: new_pixel,
                 });
 
                 let _ = canvas.set_pixel(new_pixel);

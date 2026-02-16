@@ -45,7 +45,7 @@ impl Project {
     }
 
     pub fn from_file_data(data: Vec<u8>) -> Self {
-        let result = ron::de::from_bytes(&*data);
+        let result = ron::de::from_bytes(&data);
         if result.is_err() {
             show_error_dialog("Failed to deserialize project".to_string());
             return Self::default();

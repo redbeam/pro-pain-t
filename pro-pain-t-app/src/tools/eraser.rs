@@ -89,15 +89,15 @@ impl EraserState {
                         }
                         let ux = nx as u32;
                         let uy = ny as u32;
-                        if let Ok(old_pixel) = canvas.get_pixel(ux, uy) {
-                            if old_pixel.color != bg_color {
-                                let new_pixel = Pixel::new(ux, uy, bg_color);
-                                self.current_stroke.push(PixelDiff {
-                                    before: old_pixel,
-                                    after: new_pixel,
-                                });
-                                let _ = canvas.set_pixel(new_pixel);
-                            }
+                        if let Ok(old_pixel) = canvas.get_pixel(ux, uy)
+                            && old_pixel.color != bg_color
+                        {
+                            let new_pixel = Pixel::new(ux, uy, bg_color);
+                            self.current_stroke.push(PixelDiff {
+                                before: old_pixel,
+                                after: new_pixel,
+                            });
+                            let _ = canvas.set_pixel(new_pixel);
                         }
                     }
                 }

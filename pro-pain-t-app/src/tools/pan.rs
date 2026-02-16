@@ -4,21 +4,11 @@ use serde::{Deserialize, Serialize};
 use crate::tools::context::ToolContext;
 use web_sys::PointerEvent;
 
-#[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 pub struct PanState {
     is_panning: bool,
     pointer_id: Option<i32>,
     last_pos: Option<(f32, f32)>,
-}
-
-impl Default for PanState {
-    fn default() -> Self {
-        Self {
-            is_panning: false,
-            pointer_id: None,
-            last_pos: None,
-        }
-    }
 }
 
 impl PanState {

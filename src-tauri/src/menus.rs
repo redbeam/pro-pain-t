@@ -2,7 +2,7 @@ use crate::events::handlers::{
     error_dialog, export_project_handler, import_as_layer_handler, open_file_handler,
     project_overwrite_confirmation, save_project_handler,
 };
-use pro_pain_t_shared::events::events::{
+use pro_pain_t_shared::events::event::{
     EVENT_MENU_CANVAS_SIZE, EVENT_MENU_NEW_PROJECT, EVENT_MENU_REDO, EVENT_MENU_UNDO,
 };
 use tauri::menu::{MenuBuilder, SubmenuBuilder};

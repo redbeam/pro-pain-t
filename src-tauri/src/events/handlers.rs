@@ -2,7 +2,7 @@ use image::ImageReader;
 use pro_pain_t_shared::dtos::image::ImageDto;
 use pro_pain_t_shared::dtos::path::PathDto;
 use pro_pain_t_shared::dtos::project::ProjectDto;
-use pro_pain_t_shared::events::events::{
+use pro_pain_t_shared::events::event::{
     EVENT_MENU_EXPORT_PROJECT, EVENT_MENU_IMPORT_AS_LAYER, EVENT_MENU_OPEN_PROJECT,
     EVENT_MENU_SAVE_PROJECT,
 };

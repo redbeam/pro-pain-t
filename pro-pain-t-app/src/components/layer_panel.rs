@@ -236,7 +236,7 @@ pub fn LayerPanel() -> impl IntoView {
                                     <button
                                     disabled = move || {
                                         if let Some(index) = project.get().layers.get().iter().position(|l| l.id == layer.id) {
-                                            index >= project.get().layers.get().iter().count() - 1
+                                            index >= project.get().layers.get().len() - 1
                                         }
                                         else {
                                             true

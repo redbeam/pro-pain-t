@@ -15,7 +15,6 @@ pub fn CanvasSizeWindow(is_open: RwSignal<bool>) -> impl IntoView {
     let (local_height, set_local_height) = signal(initial_height);
 
     {
-        let width_input_ref = width_input_ref.clone();
         Effect::new(move |_| {
             if is_open.get() {
                 project.with(|project| {

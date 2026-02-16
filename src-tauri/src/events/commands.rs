@@ -14,7 +14,6 @@ use tauri::AppHandle;
 pub fn save_project_command(app_handle: AppHandle, path: String, project_serialized: String) {
     if fs::write(path, project_serialized).is_err() {
         error_dialog(&app_handle, "Failed to write project to file");
-        return;
     }
 }
 
@@ -27,7 +26,6 @@ pub fn export_project_command(app_handle: AppHandle, path: String, image: ImageD
     }
     if image.unwrap().save(path).is_err() {
         error_dialog(&app_handle, "Failed to save image");
-        return;
     }
 }
 

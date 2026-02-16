@@ -126,11 +126,11 @@ impl SelectState {
 
         let mut clear_selection = false;
         ctx.workspace_state.selection.with(|selection| {
-            if let Some(sel) = selection {
-                if sel.layer_id != layer_id {
-                    commit_selection(ctx.project, sel);
-                    clear_selection = true;
-                }
+            if let Some(sel) = selection
+                && sel.layer_id != layer_id
+            {
+                commit_selection(ctx.project, sel);
+                clear_selection = true;
             }
         });
         if clear_selection {
@@ -140,11 +140,11 @@ impl SelectState {
         let mut existing_rect: Option<SelectionRect> = None;
         let mut existing_has_buffer = false;
         ctx.workspace_state.selection.with(|selection| {
-            if let Some(sel) = selection {
-                if sel.layer_id == layer_id {
-                    existing_rect = Some(sel.rect);
-                    existing_has_buffer = sel.buffer.is_some();
-                }
+            if let Some(sel) = selection
+                && sel.layer_id == layer_id
+            {
+                existing_rect = Some(sel.rect);
+                existing_has_buffer = sel.buffer.is_some();
             }
         });
 
@@ -271,10 +271,10 @@ impl SelectState {
             SelectMode::Creating { .. } => {
                 let mut should_clear = false;
                 ctx.workspace_state.selection.with(|selection| {
-                    if let Some(sel) = selection {
-                        if sel.rect.is_empty() {
-                            should_clear = true;
-                        }
+                    if let Some(sel) = selection
+                        && sel.rect.is_empty()
+                    {
+                        should_clear = true;
                     }
                 });
                 if should_clear {
@@ -285,11 +285,10 @@ impl SelectState {
             SelectMode::Resizing { .. } => {
                 let mut scaled: Option<SelectionBuffer> = None;
                 ctx.workspace_state.selection.with(|selection| {
-                    if let Some(sel) = selection {
-                        if let Some(buffer) = sel.buffer.as_ref() {
-                            scaled =
-                                Some(scale_buffer(buffer, sel.rect.w as u32, sel.rect.h as u32));
-                        }
+                    if let Some(sel) = selection
+                        && let Some(buffer) = sel.buffer.as_ref()
+                    {
+                        scaled = Some(scale_buffer(buffer, sel.rect.w as u32, sel.rect.h as u32));
                     }
                 });
                 if let Some(scaled) = scaled {
@@ -358,7 +357,7 @@ fn handle_at(rect: SelectionRect, x: i32, y: i32, zoom: f32) -> Option<ResizeHan
     if rect.is_empty() {
         return None;
     }
-    let tol = (6.0 / zoom.max(0.01)) as f32;
+    let tol = 6.0 / zoom.max(0.01);
     let xf = x as f32;
     let yf = y as f32;
     let left = rect.x as f32;
@@ -518,7 +517,7 @@ fn clear_rect(layer: &mut Layer, rect: SelectionRect, diffs: &mut Vec<PixelDiff>
             let uy = py as u32;
             let idx = (uy * layer.canvas.width + ux) as usize;
 
-            let before = layer.canvas.content[idx].clone();
+            let before = layer.canvas.content[idx];
             let after = Color {
                 r: 0,
                 g: 0,
@@ -531,7 +530,7 @@ fn clear_rect(layer: &mut Layer, rect: SelectionRect, diffs: &mut Vec<PixelDiff>
             }
 
             diffs.push(PixelDiff {
-                before: before.clone().into(),
+                before,
                 after: Pixel::new(ux, uy, after),
             });
 
@@ -570,14 +569,14 @@ fn apply_buffer(
                 .get(src_idx)
                 .copied()
                 .unwrap_or_else(transparent_color);
-            let before = layer.canvas.content[idx].clone();
+            let before = layer.canvas.content[idx];
 
             if before.color == new_color {
                 continue;
             }
 
             diffs.push(PixelDiff {
-                before: before.clone().into(),
+                before,
                 after: Pixel::new(ux, uy, new_color),
             });
 

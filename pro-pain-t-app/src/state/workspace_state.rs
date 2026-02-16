@@ -2,7 +2,7 @@ use crate::structs::project::Project;
 use crate::tools::{
     pen::PenState,
     select::{SelectionState, commit_selection},
-    tools::Tool,
+    tool::Tool,
 };
 use leptos::prelude::*;
 
